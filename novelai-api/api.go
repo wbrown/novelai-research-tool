@@ -46,6 +46,7 @@ type NaiGenerateResp struct {
 
 type NaiGenerateParams struct {
 	Model                  string     `json:"model"`
+	Prefix                 string     `json:"prefix"`
 	Temperature            float64    `json:"temperature"`
 	MaxLength              uint       `json:"max_length"`
 	MinLength              uint       `json:"min_length"`
@@ -63,9 +64,10 @@ type NaiGenerateParams struct {
 
 func NewGenerateParams() NaiGenerateParams {
 	return NaiGenerateParams{
-		Model: "gpt-6b",
+		Model: "6B",
+		Prefix: "vanilla",
 		Temperature: 0.55,
-		MaxLength: 60,
+		MaxLength: 40,
 		MinLength: 40,
 		TopK: 140,
 		TopP: 0.9,

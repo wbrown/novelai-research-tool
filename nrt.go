@@ -108,9 +108,11 @@ func LoadTestFromFile(path string) (test ContentTest) {
 		os.Exit(1)
 	}
 	test.OutputPath = filepath.Join(test.WorkingDir,
-		strings.Replace(
-		test.OutputPrefix + "-" + time.Now().Format("2006-01-02T150405Z0700") + ".json",
-		":","", -1))
+		strings.Join([]string{
+		test.OutputPrefix,
+		test.Parameters.Model,
+		test.Parameters.Prefix,
+		time.Now().Format("2006-01-02T150405Z0700") + ".json"}, "-"))
 	return test
 }
 

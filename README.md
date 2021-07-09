@@ -35,6 +35,7 @@ password.  They are:
   * `NAI_PASSWORD`
 
 **Windows:**
+
 On Windows, type the following in at the command prompt:
 ```
 setx NAI_USERNAME username@email.com
@@ -79,5 +80,32 @@ will highlight some specific ones:
   * `parameters` - contains NovelAI configuration parameters according to the
     API's specifications.
 
-The sample `tests/need_help.json` can be used as a template, along with a `tests/need_help.txt` prompt file.
-There is also an example `tests/need_help_output_sample.json` file that contains an example of output.
+The sample `tests/need_help.json` can be used as a template, along with a
+`tests/need_help.txt` prompt file. There is also an example
+`tests/need_help_output_6B-vanilla.json` file that contains an example of what
+output `nrt` produces.
+
+Configuration Notes
+-------------------
+As of the writing of this section:
+
+The `prefix` takes the following values and requires the `model` attribute to
+have the `6B-v3` value:
+* `vanilla`
+* `theme_naval`
+* `theme_egypt`
+* `theme_dragons`
+* `theme_mars`
+* `theme_libraries`
+* `style_hplovecraft`
+* `style_edgarallanpoe`
+* `style_epic_fantasy`
+* `style_slice_of_life`
+* `style_romantic`
+* `style_lighthearted_fantasy`
+* `style_mmo`
+
+The `model` parameter takes the following values:
+* `2.7B`
+* `6B`
+* `6B-v3`
