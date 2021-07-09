@@ -87,7 +87,16 @@ func LoadTestFromFile(path string) (test ContentTest) {
 }
 
 func main() {
-	test := LoadTestFromFile(os.Args[1])
+	if len(os.Args) != 2 {
+		fmt.Printf("(NovelAI Research Tool) %s dir/test.json\n", os.Args[0])
+		os.Exit(1)
+	}
+	inputPath := os.Args[1]
+	if _, err := os.Stat(inputPath); os.IsNotExist(err) {
+		fmt.Printf("`%v` does not exist!\n", inputPath)
+		os.Exit(1)
+	}
+	test := LoadTestFromFile(inputPath)
 	test.API = novelai_api.NewNovelAiAPI()
 	test.Perform()
 }
