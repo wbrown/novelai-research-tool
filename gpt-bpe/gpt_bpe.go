@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"embed"
 	"encoding/json"
-	"fmt"
 	"log"
 	"math"
 	"regexp"
@@ -138,7 +137,6 @@ func (encoder GPTEncoder) rankPairs(pairs []GPTPair) BGERanks {
 		rankedPairs = append(rankedPairs, BGERank{bpe, pairs[idx]} )
 	}
 	sort.Sort(rankedPairs)
-	fmt.Printf("PAIRS: %v\n", rankedPairs)
 	return rankedPairs
 }
 
