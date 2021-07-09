@@ -12,8 +12,8 @@ import (
 )
 
 type NovelAiAPI struct {
-	keys NaiKeys
-	client *http.Client
+	keys    NaiKeys
+	client  *http.Client
 	encoder gpt_bpe.GPTEncoder
 }
 
@@ -38,10 +38,10 @@ func fromBin(bin []byte) (tokens []uint16) {
 }
 
 type NaiGenerateResp struct {
-	Output string `json:"output"`
-	Error string `json:"error"`
-	StatusCode int `json:"statusCode"`
-	Message string `json:"message"`
+	Output     string `json:"output"`
+	Error      string `json:"error"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
 }
 
 type NaiGenerateParams struct {
@@ -64,15 +64,15 @@ type NaiGenerateParams struct {
 
 func NewGenerateParams() NaiGenerateParams {
 	return NaiGenerateParams{
-		Model: "6B-v3",
-		Prefix: "vanilla",
-		Temperature: 0.55,
-		MaxLength: 40,
-		MinLength: 40,
-		TopK: 140,
-		TopP: 0.9,
-		TailFreeSampling: 1,
-		RepetitionPenalty: 1.1875,
+		Model:                  "6B-v3",
+		Prefix:                 "vanilla",
+		Temperature:            0.55,
+		MaxLength:              40,
+		MinLength:              40,
+		TopK:                   140,
+		TopP:                   0.9,
+		TailFreeSampling:       1,
+		RepetitionPenalty:      3.5,
 		RepetitionPenaltyRange: 1024,
 		RepetitionPenaltySlope: 6.57,
 		BadWordsIds: [][]uint16{{58}, {60}, {90}, {92}, {685}, {1391}, {1782},
@@ -97,8 +97,8 @@ func NewGenerateParams() NaiGenerateParams {
 			{48874}, {48999}, {49074}, {49082}, {49146}, {49946}, {10221},
 			{4841}, {1427}, {2602, 834}, {29343}, {37405}, {35780}, {2602},
 			{17202}, {8162}},
-		UseCache: false,
-		UseString: false,
+		UseCache:       false,
+		UseString:      false,
 		ReturnFullText: false,
 	}
 }
@@ -112,20 +112,26 @@ type NaiGenerateMsg struct {
 func NewGenerateMsg(input string) NaiGenerateMsg {
 	params := NewGenerateParams()
 	return NaiGenerateMsg{
-		Input: input,
-		Model: params.Model,
+		Input:      input,
+		Model:      params.Model,
 		Parameters: params,
 	}
 }
 
 func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerateResp) {
 	params.Model = params.Parameters.Model
+	const oldRange = 1 - 8.0
+	const newRange = 1 - 1.525
+	if params.Model != "2.7B" {
+		params.Parameters.RepetitionPenalty =
+			((params.Parameters.RepetitionPenalty-1)*newRange)/oldRange + 1
+	}
 	cl := http.DefaultClient
 	encoded, _ := json.Marshal(params)
 	req, _ := http.NewRequest("POST", "https://api.novelai.net/ai/generate",
 		bytes.NewBuffer(encoded))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+ keys.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+keys.AccessToken)
 	resp, err := cl.Do(req)
 	if err != nil {
 		log.Fatal(err)
@@ -144,8 +150,8 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 
 func NewNovelAiAPI() NovelAiAPI {
 	return NovelAiAPI{
-		keys: AuthEnv(),
-		client: http.DefaultClient,
+		keys:    AuthEnv(),
+		client:  http.DefaultClient,
 		encoder: gpt_bpe.NewEncoder(),
 	}
 }
