@@ -2,15 +2,21 @@ package gpt_bpe
 
 import (
 	"bufio"
+	"bytes"
+	"embed"
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
 	"log"
 	"math"
-	"os"
 	"regexp"
 	"sort"
 	"strings"
 )
+
+//go:embed encoder.json
+//go:embed vocab.bpe
+
+var f embed.FS
 
 type GPTEncoder struct {
 	encoder map[string]uint16
@@ -47,18 +53,17 @@ func (bs BGERanks) Less(i, j int) bool {
 
 func NewEncoder() GPTEncoder {
 	// Read encoder mappings and also generate reverse mappings.
-	encoderFile, _ := os.Open("gpt-bpe/encoder.json")
-	encoderBytes, _ := ioutil.ReadAll(encoderFile)
+	encoderFile, _ := f.ReadFile("encoder.json")
 	encoderTokens := make(map[string]uint16)
-	json.Unmarshal(encoderBytes, &encoderTokens)
+	json.Unmarshal(encoderFile, &encoderTokens)
 	tokensEncoder := make(map[uint16]string)
 	for text, token := range encoderTokens {
 		tokensEncoder[token] = text
 	}
 	// Read vocabulary into bpe_ranks
 	bpeRanks := make(map[GPTPair]float64)
-	bpeMergesFile, _ := os.Open("gpt-bpe/vocab.bpe")
-	scanner := bufio.NewScanner(bpeMergesFile)
+	bpeMergesFile, _ := f.ReadFile("vocab.bpe")
+	scanner := bufio.NewScanner(bytes.NewBuffer(bpeMergesFile))
 	idx := uint16(0)
 	firstLine := true
 	for scanner.Scan() {
@@ -70,7 +75,7 @@ func NewEncoder() GPTEncoder {
 		bpeRanks[GPTPair{left_right[0], left_right[1]}] = float64(idx)
 		idx += 1
 	}
-	pat, err := regexp.Compile("'s|'t|'re|'ve|'m|'l l|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+^\\S|\\s+")
+	pat, err := regexp.Compile("(?i)'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(\\S){0}|\\s+")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -133,6 +138,7 @@ func (encoder GPTEncoder) rankPairs(pairs []GPTPair) BGERanks {
 		rankedPairs = append(rankedPairs, BGERank{bpe, pairs[idx]} )
 	}
 	sort.Sort(rankedPairs)
+	fmt.Printf("PAIRS: %v\n", rankedPairs)
 	return rankedPairs
 }
 
@@ -213,10 +219,18 @@ func (encoder GPTEncoder) toBPE(text string) []string {
 	return word
 }
 
-func (encoder GPTEncoder) Encode(text string) (encoded []uint16) {
+func (encoder GPTEncoder) SplitWords(text string) (words []string) {
 	idxes := encoder.pattern.FindAllStringIndex(text, -1)
 	for idx := range idxes {
-		fragment := encoder.toUnicode(text[idxes[idx][0]:idxes[idx][1]])
+		words = append(words, text[idxes[idx][0]:idxes[idx][1]])
+	}
+	return words
+}
+
+func (encoder GPTEncoder) Encode(text string) (encoded []uint16) {
+	words := encoder.SplitWords(text)
+	for idx := range words {
+		fragment := encoder.toUnicode(words[idx])
 		token := encoder.toBPE(fragment)
 		encoded = append(encoded, encoder.encodeTokens(token)...)
 	}
