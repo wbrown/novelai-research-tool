@@ -64,7 +64,7 @@ type NaiGenerateParams struct {
 
 func NewGenerateParams() NaiGenerateParams {
 	return NaiGenerateParams{
-		Model: "6B",
+		Model: "6B-v3",
 		Prefix: "vanilla",
 		Temperature: 0.55,
 		MaxLength: 40,
