@@ -37,13 +37,15 @@ func (ct ContentTest) performGenerations(generations int, input string) (respons
 	genResMarker := color.New(color.FgWhite, color.BgGreen).SprintFunc()
 	newLineToken := genResMarker("\\n")+"\n"
 	context := input
+	throttle := time.NewTimer(1100 * time.Millisecond)
 	for generation := 0; generation < generations; generation++ {
 		resp := ct.API.GenerateWithParams(context, ct.Parameters)
 		responses = append(responses, resp)
 		fmt.Printf("%v%v\n", genResMarker("=>"),
 			strings.Replace(resp,"\n", newLineToken, -1))
 		context = context + resp
-		time.Sleep(1 * time.Second)
+		<-throttle.C
+		throttle = time.NewTimer(1100 * time.Millisecond)
 	}
 	return responses
 }
