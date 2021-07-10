@@ -26,28 +26,41 @@ type ContentTest struct {
 	API novelai_api.NovelAiAPI
 }
 
+type EncodedIterationResult struct {
+	Prompt string `json:"prompt""`
+	Responses []string `json:"responses""`
+}
+
 type IterationResult struct {
 	Parameters novelai_api.NaiGenerateParams `json:"settings"`
 	Prompt string `json:"prompt"`
 	Result string `json:"result"`
 	Responses []string `json:"responses"`
+	Encoded EncodedIterationResult `json:"encoded"`
 }
 
-func (ct ContentTest) performGenerations(generations int, input string) (responses []string) {
+func (ct ContentTest) performGenerations(generations int, input string) (results IterationResult) {
 	genResMarker := color.New(color.FgWhite, color.BgGreen).SprintFunc()
 	newLineToken := genResMarker("\\n")+"\n"
 	context := input
+	results.Prompt = input
+	results.Parameters = ct.Parameters
 	throttle := time.NewTimer(1100 * time.Millisecond)
 	for generation := 0; generation < generations; generation++ {
 		resp := ct.API.GenerateWithParams(context, ct.Parameters)
-		responses = append(responses, resp)
+		if generation == 0 {
+			results.Encoded.Prompt = resp.EncodedRequest
+		}
+		results.Responses = append(results.Responses, resp.Response)
+		results.Encoded.Responses = append(results.Encoded.Responses, resp.EncodedResponse)
 		fmt.Printf("%v%v\n", genResMarker("=>"),
-			strings.Replace(resp,"\n", newLineToken, -1))
-		context = context + resp
+			strings.Replace(resp.Response,"\n", newLineToken, -1))
+		context = context + resp.Response
 		<-throttle.C
 		throttle = time.NewTimer(1100 * time.Millisecond)
 	}
-	return responses
+	results.Result = strings.Join(results.Responses, "")
+	return results
 }
 
 func handleWrite(f *os.File, s string) {
@@ -79,12 +92,7 @@ func (ct ContentTest) Perform() {
 		fmt.Printf("%v%v\n", promptMarker("<="),
 			strings.Replace(ct.Prompt, "\n", newLineToken, -1))
 		responses := ct.performGenerations(ct.Generations, ct.Prompt)
-		serialized, err := json.MarshalIndent(IterationResult{
-			ct.Parameters,
-			ct.Prompt,
-			strings.Join(responses, ""),
-			responses,
-		}, " ", "  ")
+		serialized, err := json.MarshalIndent(responses, " ", "  ")
 		if err != nil {
 			log.Fatal(err)
 		}

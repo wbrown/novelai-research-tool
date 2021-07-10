@@ -37,7 +37,7 @@ func fromBin(bin []byte) (tokens []uint16) {
 	return tokens
 }
 
-type NaiGenerateResp struct {
+type NaiGenerateHTTPResp struct {
 	Output     string `json:"output"`
 	Error      string `json:"error"`
 	StatusCode int    `json:"statusCode"`
@@ -61,6 +61,13 @@ type NaiGenerateParams struct {
 	UseCache               bool       `json:"use_cache"`
 	UseString              bool       `json:"use_string"`
 	ReturnFullText         bool       `json:"return_full_text"`
+}
+
+type NaiGenerateResp struct {
+	EncodedRequest string `json:"encoded_request"`
+	EncodedResponse string `json:"encoded_response"`
+	Response string `json:"response"`
+	Error error `json:"error"`
 }
 
 func BannedBrackets() [][]uint16 {
@@ -124,7 +131,7 @@ func NewGenerateMsg(input string) NaiGenerateMsg {
 	}
 }
 
-func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerateResp) {
+func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerateHTTPResp) {
 	params.Model = params.Parameters.Model
 	const oldRange = 1 - 8.0
 	const newRange = 1 - 1.525
@@ -166,22 +173,25 @@ func NewNovelAiAPI() NovelAiAPI {
 	}
 }
 
-func (api NovelAiAPI) GenerateWithParams(content string, params NaiGenerateParams) (decoded string) {
+func (api NovelAiAPI) GenerateWithParams(content string, params NaiGenerateParams) (resp NaiGenerateResp) {
 	encoded := api.encoder.Encode(content)
 	encodedBytes := toBin(encoded)
 	encodedBytes64 := base64.StdEncoding.EncodeToString(encodedBytes)
+	resp.EncodedRequest = encodedBytes64
 	msg := NewGenerateMsg(encodedBytes64)
 	msg.Parameters = params
-	resp := naiApiGenerate(api.keys, msg)
-	if binTokens, err := base64.StdEncoding.DecodeString(resp.Output); err != nil {
-		log.Fatal(err)
+	apiResp := naiApiGenerate(api.keys, msg)
+	if binTokens, err := base64.StdEncoding.DecodeString(apiResp.Output); err != nil {
+		log.Println("ERROR:", err)
+		resp.Error = err
 	} else {
-		decoded = api.encoder.Decode(fromBin(binTokens))
+		resp.EncodedResponse = apiResp.Output
+		resp.Response = api.encoder.Decode(fromBin(binTokens))
 	}
-	return decoded
+	return resp
 }
 
 func (api NovelAiAPI) Generate(content string) (decoded string) {
 	defaultParams := NewGenerateParams()
-	return api.GenerateWithParams(content, defaultParams)
+	return api.GenerateWithParams(content, defaultParams).Response
 }
