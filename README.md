@@ -62,8 +62,8 @@ There is a test file in `tests/need_help.json` that you can run, by invoking:
 * Windows: `nrt tests/need_help.json`
 * MacOS/Linux:  `./nrt tests/need_help.json`
 
-This will complete an output file in `tests` after about 2 minutes containing
-10 iterations of 10 generations each.
+This will generate multiple output files in `tests` after about 30 minutes,
+each containing 10 iterations of 10 generations each.
 
 Details of `test.json`
 ----------------------
@@ -84,6 +84,38 @@ The sample `tests/need_help.json` can be used as a template, along with a
 `tests/need_help.txt` prompt file. There is also an example
 `tests/need_help_output_6B-vanilla.json` file that contains an example of what
 output `nrt` produces.
+
+Permutation
+-----------
+There is a special field of the `.json` file, `permutations`. Most of the
+fields under `parameters` have a list counterpart under `permutations`.
+
+For example, `model` might look like:
+```json
+{ "permutations": { "model": [ "2.7B", "6B-v3" ] } }
+```
+This will cause the `nrt` tool to perform iterations acrosa both models.
+
+If we add another field to permute on, such as `prefix`, it becomes a
+combinatorial exercise -- the below `permutations` example will generate
+`28` combinations tests to perform:
+```json
+{ "permutations": {
+    "model": [ "2.7B", "6B-v3" ],
+    "prefix": [ "vanilla", "theme_naval", "theme_egypt", "theme_dragons",
+                "theme_mars", "theme_dragons", "theme_libraries",
+                "style_hplovecraft", "style_edgarallanpoe",
+                "style_epic_fantasy", "style_slice_of_life",
+                "style_romantic", "style_lighthearted_fantasy",
+                "style_mmo" ] } }
+```
+
+Another example is if we wanted to permute on the `temperature` value:
+```json
+{ "permutations": {
+  "temperature": [ 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 ]
+}}
+```
 
 Configuration Notes
 -------------------

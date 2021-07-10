@@ -20,5 +20,14 @@
     "use_cache": false,
     "use_string": false,
     "return_full_text": false
+  },
+  "permutations": {
+    "model": [ "2.7B", "6B-v3" ],
+    "prefix": [ "vanilla", "theme_naval", "theme_egypt", "theme_dragons",
+                "theme_mars", "theme_dragons", "theme_libraries",
+                "style_hplovecraft", "style_edgarallanpoe",
+                "style_epic_fantasy", "style_slice_of_life",
+                "style_romantic", "style_lighthearted_fantasy",
+                "style_mmo" ]
   }
 }

@@ -9,9 +9,24 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"time"
 )
+
+type PermutationsSpec struct {
+	Model                  []string     `json:"model"`
+	Prefix                 []string     `json:"prefix"`
+	Temperature            []float64    `json:"temperature"`
+	MaxLength              []uint       `json:"max_length"`
+	MinLength              []uint       `json:"min_length"`
+	TopK                   []uint       `json:"top_k"`
+	TopP                   []float64    `json:"top_p"`
+	TailFreeSampling       []float64    `json:"tail_free_sampling"`
+	RepetitionPenalty      []float64    `json:"repetition_penalty"`
+	RepetitionPenaltyRange []uint       `json:"repetition_penalty_range"`
+	RepetitionPenaltySlope []float64    `json:"repetition_penalty_slope"`
+}
 
 type ContentTest struct {
 	OutputPrefix string `json:"output_prefix"`
@@ -19,6 +34,7 @@ type ContentTest struct {
 	Iterations int `json:"iterations"`
 	Generations int `json:"generations"`
 	Parameters novelai_api.NaiGenerateParams `json:"parameters"`
+	Permutations PermutationsSpec `json:"permutations"`
 	Prompt string
 	WorkingDir string
 	OutputPath string
@@ -70,6 +86,41 @@ func handleWrite(f *os.File, s string) {
 	}
 }
 
+func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
+	permutations := []novelai_api.NaiGenerateParams{ct.Parameters}
+	// Loop over the fields in `Permutations` type.
+	fields := reflect.TypeOf(ct.Permutations)
+	for field := 0; field < fields.NumField(); field++ {
+		// For each field, check the field contents and determine if there's any
+		// values in there.
+		fieldName := fields.FieldByIndex([]int{field}).Name
+		fieldValues := reflect.ValueOf(ct.Permutations).Field(field)
+		if fieldValues.Len() > 1 {
+			// Loop over the values in the field to permute on.
+			newPermutations := make([]novelai_api.NaiGenerateParams, 0)
+			// Loop over each permutation we already have existing.
+			for permutationTargetIdx := range permutations {
+				// Create a new permutation for each value in the field.
+				for valIdx := 0; valIdx < fieldValues.Len(); valIdx++ {
+					value := fieldValues.Index(valIdx)
+					permutation := permutations[permutationTargetIdx]
+					targetField, _ := reflect.TypeOf(permutation).FieldByName(fieldName)
+					reflect.ValueOf(&permutation).Elem().Field(targetField.Index[0]).Set(
+						value)
+					newPermutations = append(newPermutations, permutation)
+				}
+			}
+			permutations = newPermutations
+		}
+	}
+	for permutationIdx := range permutations {
+		newTest := ct
+		newTest.Parameters = permutations[permutationIdx]
+		tests = append(tests, newTest)
+	}
+	return tests
+}
+
 func (ct ContentTest) Perform() {
 	promptMarker := color.New(color.FgWhite, color.BgBlue).SprintFunc()
 	newLineToken := promptMarker("\\n")+"\n"
@@ -77,6 +128,12 @@ func (ct ContentTest) Perform() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	ct.OutputPath = filepath.Join(ct.WorkingDir,
+		strings.Join([]string{
+			ct.OutputPrefix,
+			ct.Parameters.Model,
+			ct.Parameters.Prefix,
+			time.Now().Format("2006-01-02T150405Z0700") + ".json"}, "-"))
 	ct.Prompt = string(promptBytes)
 	f, err := os.OpenFile(ct.OutputPath,
 		os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
@@ -85,14 +142,18 @@ func (ct ContentTest) Perform() {
 	}
 	defer f.Close()
 	handleWrite(f, "[")
+	paramReport, _ := json.MarshalIndent(ct.Parameters, "             ", " ")
+	fmt.Printf("%v %v\n", promptMarker("Parameters:"), string(paramReport))
 	for iteration := 0; iteration < ct.Iterations; iteration++ {
+		fmt.Printf("%v %v / %v\n", promptMarker("Iteration:"),
+			iteration+1, ct.Iterations)
 		if iteration != 0 {
 			handleWrite(f, ",\n")
 		}
 		fmt.Printf("%v%v\n", promptMarker("<="),
 			strings.Replace(ct.Prompt, "\n", newLineToken, -1))
 		responses := ct.performGenerations(ct.Generations, ct.Prompt)
-		serialized, err := json.MarshalIndent(responses, " ", "  ")
+		serialized, err := json.MarshalIndent(responses, "", "  ")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -102,11 +163,13 @@ func (ct ContentTest) Perform() {
 	handleWrite(f, "]")
 }
 
-func LoadTestFromFile(path string) (test ContentTest) {
+func GenerateTestsFromFile(path string) (tests []ContentTest) {
 	configBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
 	}
+	var test ContentTest
+	test.API = novelai_api.NewNovelAiAPI()
 	err = json.Unmarshal(configBytes, &test)
 	if err != nil {
 		log.Fatal(err)
@@ -117,13 +180,7 @@ func LoadTestFromFile(path string) (test ContentTest) {
 		fmt.Printf("`%v` does not exist!\n", test.PromptPath)
 		os.Exit(1)
 	}
-	test.OutputPath = filepath.Join(test.WorkingDir,
-		strings.Join([]string{
-		test.OutputPrefix,
-		test.Parameters.Model,
-		test.Parameters.Prefix,
-		time.Now().Format("2006-01-02T150405Z0700") + ".json"}, "-"))
-	return test
+	return test.GeneratePermutations()
 }
 
 func main() {
@@ -138,7 +195,10 @@ func main() {
 		fmt.Printf("%v: `%v` does not exist!\n", binName, inputPath)
 		os.Exit(1)
 	}
-	test := LoadTestFromFile(inputPath)
-	test.API = novelai_api.NewNovelAiAPI()
-	test.Perform()
+	tests := GenerateTestsFromFile(inputPath)
+	fmt.Printf("== %v tests generated from %v ==\n", len(tests), inputPath)
+	for testIdx := range tests {
+		fmt.Printf("== Performing test %v / %v ==\n", testIdx+1, len(tests))
+		tests[testIdx].Perform()
+	}
 }
