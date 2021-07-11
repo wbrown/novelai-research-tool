@@ -74,7 +74,7 @@ func NewEncoder() GPTEncoder {
 		bpeRanks[GPTPair{left_right[0], left_right[1]}] = float64(idx)
 		idx += 1
 	}
-	pat, err := regexp.Compile("(?i)'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(\\S){0}|\\s+")
+	pat, err := regexp.Compile("'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(\\S){0}|\\s+")
 	if err != nil {
 		log.Fatal(err)
 	}

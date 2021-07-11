@@ -32,7 +32,7 @@ func TestGPTEncoder_Split(t *testing.T) {
 		[]string{"Capitalized", " Words", " Are", " Cool"})
 	AssertEqual(t,
 		encoder.SplitWords("we'LL test irregular cApitalizatioN."),
-		[]string{"we", "'LL", " test", " irregular", " cApitalizatioN", "."})
+		[]string{"we", "'", "LL", " test", " irregular", " cApitalizatioN", "."})
 	AssertEqual(t,
 		encoder.SplitWords(`multilines
 are awesome`),
