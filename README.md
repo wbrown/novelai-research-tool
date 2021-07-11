@@ -19,9 +19,12 @@ You will need the `golang` language tools on your machine.
 
 Get a copy of the source code either by:
 * Downloading the ZIP file: https://github.com/wbrown/novelai-research-tool/archive/refs/heads/main.zip
-* Or `git clone https://github.com/wbrown/novelai-research-tool.git`
+* Or `git clone https://github.com/wbrown/novelai-research-tool.git` -- if you
+  want to keep up to date, it's strongly recommended that you install
+  [git](https://git-scm.com/downloads) and use that.  If you do, you can just type
+  `git pull` to get the latest source code updates.
 
-Once you have the source code, in the source directory, do:
+Once you have the source code extracted, go into the the source directory, and do the following from the command line:
   * `go get -u`
   * `go build nrt.go`
 
@@ -41,6 +44,8 @@ On Windows, type the following in at the command prompt:
 setx NAI_USERNAME username@email.com
 setx NAI_PASSWORD password
 ```
+
+You will need to restart the command shell to load these settings.
 
 **MacOS/Linux:**
 * On MacOS, edit the `.zshrc` file in your home directory..
@@ -64,6 +69,49 @@ There is a test file in `tests/need_help.json` that you can run, by invoking:
 
 This will generate multiple output files in `tests` after about 30 minutes,
 each containing 10 iterations of 10 generations each.
+
+Output Processing Tip
+---------------------
+You can use an utility called [jq](https://stedolan.github.io/jq/) to massage
+the output JSON into something that is readable. An example usage is:
+
+`jq --raw-output ".[]|\"\n*********************************\nOUTPUT \(.settings.prefix)\n\(.result)\"" nrt_outputfile.json`
+
+For example:
+```
+$ jq --raw-output ".[]|\"\n*********************************
+  \nOUTPUT \(.settings.prefix)\n\(.result)\"" 
+  white_samurai_output-6B-v3-style_hplovecraft-2021-07-10T153527-0400.json
+*********************************
+OUTPUT style_hplovecraft
+There is silence for several seconds before anyone answers. Then I hear footsteps
+approaching the door, and then the sound of sliding bolts being drawn back. In moments,
+a young man opens the door, wearing only his yukata, or loose-fitting white robe. He has
+black hair tied into a ponytail, and he appears nervous. "Can I help you?" he asks,
+speaking English.
+"Yes," I say, "I was wondering if you knew what kind of establishment this is."
+...
+```
+
+You can also add things to the output, for the variables you are interested
+in, such as `temperature` or `top_k`.
+
+`jq --raw-output ".[]|\"\n*********************************\nOUTPUT \(.settings.prefix) TEMP: \(.settings.temperature) TOP_K: \(.settings.top_k)\n\(.result)\"" nrt_outputfile.json`
+
+For example:
+```
+$ jq --raw-output ".[]|\"\n*********************************\nOUTPUT \(.settings.prefix)
+  TEMP: \(.settings.temperature) TOP_K: \(.settings.top_k)\n\(.result)\""
+  white_samurai_output-6B-v3-style_hplovecraft-2021-07-10T153527-0400.json
+*********************************
+OUTPUT style_epic_fantasy TEMP: 0.55 TOP_K: 100
+The sound of footsteps approaches quickly from behind me, and then stops abruptly
+ My eyes widen as I turn around slowly. Standing before me, holding his sword pointed
+ toward me, is a man wearing black hakama pants and a white jacket over them. He has a
+ mask covering his face, except for his mouth, nose and eye holes. His hands are empty,
+ though he carries a small leather pouch containing something wrapped in cloth.
+ ...
+```
 
 Details of `test.json`
 ----------------------

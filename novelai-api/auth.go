@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"github.com/kelseyhightower/envconfig"
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/blake2b"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -91,6 +93,11 @@ func AuthEnv() NaiKeys {
 	err := envconfig.Process("", &authCfg)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if len(authCfg.Username) == 0 || len(authCfg.Password) == 0 {
+		fmt.Fprintf(os.Stderr, "ERROR: %s\n",
+			"Please ensure that NAI_USERNAME and NAI_PASSWORD are set in your environment.")
+		os.Exit(1)
 	}
 	return Auth(authCfg.Username, authCfg.Password)
 }
