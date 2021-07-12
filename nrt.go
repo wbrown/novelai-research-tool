@@ -107,6 +107,15 @@ func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
 					targetField, _ := reflect.TypeOf(permutation).FieldByName(fieldName)
 					reflect.ValueOf(&permutation).Elem().Field(targetField.Index[0]).Set(
 						value)
+					// The only model that has `prefix`es is `6B-v3`, and we
+					// don't want to do unnecessary work, so:
+					//   If we are trying to create a permutation that has a
+					//   `prefix` that is *not* `vanilla`, and we're permuting
+					//   for a `model` with a value *other* than `6B-v3`, drop.
+					if fieldName == "Prefix" && value.String() != "vanilla" &&
+						permutation.Model != "6B-v3" {
+						continue
+					}
 					newPermutations = append(newPermutations, permutation)
 				}
 			}
