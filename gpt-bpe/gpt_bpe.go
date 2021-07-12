@@ -19,7 +19,7 @@ var f embed.FS
 
 type GPTEncoder struct {
 	encoder map[string]uint16
-	decoder map[uint16]string
+	decoder map[uint16][]byte
 	bpe_ranks map[GPTPair]float64
 	pattern *regexp.Regexp
 	byteToUnicode map[byte]rune
@@ -55,9 +55,9 @@ func NewEncoder() GPTEncoder {
 	encoderFile, _ := f.ReadFile("encoder.json")
 	encoderTokens := make(map[string]uint16)
 	json.Unmarshal(encoderFile, &encoderTokens)
-	tokensEncoder := make(map[uint16]string)
+	tokensEncoder := make(map[uint16][]byte)
 	for text, token := range encoderTokens {
-		tokensEncoder[token] = text
+		tokensEncoder[token] = []byte(text)
 	}
 	// Read vocabulary into bpe_ranks
 	bpeRanks := make(map[GPTPair]float64)
@@ -236,12 +236,17 @@ func (encoder GPTEncoder) Encode(text string) (encoded []uint16) {
 }
 
 func (encoder GPTEncoder) Decode(encoded []uint16) (text string) {
+	bs := make([]byte, 0)
 	for idx := range encoded {
 		if v, ok := encoder.decoder[encoded[idx]]; ok {
-			text = text + strings.Replace(
-				strings.Replace(v, "\u0120", " ", -1),
-				"Ċ","\n", -1)
+			for bIdx := range v {
+				bs = append(bs, v[bIdx])
+			}
+			// bs = append(bs, v...)
 		}
 	}
+	text = text + strings.Replace(
+		strings.Replace(string(bs), "\u0120", " ", -1),
+		"Ċ","\n", -1)
 	return text
 }
