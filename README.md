@@ -207,3 +207,20 @@ The `model` parameter takes the following values, but `6B` is not available as o
 * `2.7B`
 * `6B`
 * `6B-v3`
+
+Adventure Game
+--------------
+As a reward for reaching the very end of the document, there's a special treat.  An Adventure
+module that replicates the classic _Zork_ experience.
+
+To build it, go into the `adventure` subdirectory and type `go build adventure.go`.  This will
+produce a binary `adventure` or `adventure.exe`.
+
+Run it by invoking `./adventure` or `adventure.exe`, and you will be brought to a prompt:
+```text
+You are in a maze of twisty passages, all alike. There are exits to the north, east, south, and west.
+> 
+```
+
+Enjoy!
+

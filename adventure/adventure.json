@@ -1,0 +1,18 @@
+{
+  "model": "6B-v3",
+  "prefix": "text_adventure",
+  "temperature": 0.55,
+  "max_length": 60,
+  "min_length": 20,
+  "top_k": 140,
+  "top_p": 0.9,
+  "tail_free_sampling": 1,
+  "repetition_penalty": 3.5,
+  "repetition_penalty_range": 1024,
+  "repetition_penalty_slope": 6.57,
+  "bad_words_ids": [],
+  "ban_brackets": true,
+  "use_cache": false,
+  "use_string": false,
+  "return_full_text": false
+}
