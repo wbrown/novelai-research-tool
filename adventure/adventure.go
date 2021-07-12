@@ -66,12 +66,15 @@ func (adventure Adventure) start() {
 				break
 			}
 		}
-		output = adventure.API.Generate(adventure.Context)
+		resp := adventure.API.GenerateWithParams(adventure.Context,
+			adventure.Parameters)
+		output = resp.Response
 		doc, err := prose.NewDocument(output)
 		if err != nil {
 			log.Fatal(err)
 		}
 		processed := make([]string, 0)
+
 		for _, sent := range doc.Sentences() {
 			lastChar := sent.Text[len(sent.Text)-1:]
 			lastCharRune := []rune(lastChar)
