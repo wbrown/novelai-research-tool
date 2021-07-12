@@ -1,4 +1,5 @@
-{ "prompt_filename": "white_samurai.txt",
+{
+  "prompt_filename": "white_samurai.txt",
   "output_prefix": "white_samurai_output",
   "iterations": 10,
   "generations": 10,
@@ -18,9 +19,46 @@
     "ban_brackets": true,
     "use_cache": false,
     "use_string": false,
-    "return_full_text": false },
+    "return_full_text": false
+  },
   "permutations": {
-    "top_k": [ 100, 120, 140 ],
-    "prefix": [ "vanilla", "style_hplovecraft", "theme_libraries",
-      "style_epic_fantasy", "style_mmo"]
-  } }
+    "top_k": [
+      100,
+      120,
+      140
+    ],
+    "prefix": [
+      "vanilla",
+      "style_arthurconandoyle",
+      "style_edgarallanpoe",
+      "style_hplovecraft",
+      "style_shridanlefanu",
+      "style_julesverne",
+      "theme_19thcenturyromance",
+      "theme_actionarcheology",
+      "theme_airships",
+      "theme_ai",
+      "theme_darkfantasy",
+      "theme_dragons",
+      "theme_egypt",
+      "theme_generalfantasy",
+      "theme_huntergatherer",
+      "theme_magicacademy",
+      "theme_libraries",
+      "theme_mars",
+      "theme_medieval",
+      "theme_militaryscifi",
+      "theme_naval",
+      "theme_pirates",
+      "theme_postapocalyptic",
+      "theme_rats",
+      "theme_romanceofthreekingdoms",
+      "theme_superheroes",
+      "inspiration_crabsnailandmonkey",
+      "inspiration_mercantilewolfgirlromance",
+      "inspiration_nervegear",
+      "inspiration_thronewars",
+      "inspiration_witchatlevelcap"
+    ]
+  }
+}

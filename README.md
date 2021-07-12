@@ -172,20 +172,38 @@ As of the writing of this section:
 The `prefix` takes the following values and requires the `model` attribute to
 have the `6B-v3` value:
 * `vanilla`
-* `theme_naval`
-* `theme_egypt`
-* `theme_dragons`
-* `theme_mars`
-* `theme_libraries`
-* `style_hplovecraft`
+* `style_arthurconandoyle`
 * `style_edgarallanpoe`
-* `style_epic_fantasy`
-* `style_slice_of_life`
-* `style_romantic`
-* `style_lighthearted_fantasy`
-* `style_mmo`
+* `style_hplovecraft`
+* `style_shridanlefanu`
+* `style_julesverne`
+* `theme_19thcenturyromance`
+* `theme_actionarcheology`
+* `theme_airships`
+* `theme_ai`
+* `theme_darkfantasy`
+* `theme_dragons`
+* `theme_egypt`
+* `theme_generalfantasy`
+* `theme_huntergatherer`
+* `theme_magicacademy`
+* `theme_libraries`
+* `theme_mars`
+* `theme_medieval`
+* `theme_militaryscifi`
+* `theme_naval`
+* `theme_pirates`
+* `theme_postapocalyptic`
+* `theme_rats`
+* `theme_romanceofthreekingdoms`
+* `theme_superheroes`
+* `inspiration_crabsnailandmonkey`
+* `inspiration_mercantilewolfgirlromance`
+* `inspiration_nervegear`
+* `inspiration_thronewars`
+* `inspiration_witchatlevelcap`
 
-The `model` parameter takes the following values:
+The `model` parameter takes the following values, but `6B` is not available as of this commit:
 * `2.7B`
 * `6B`
 * `6B-v3`
