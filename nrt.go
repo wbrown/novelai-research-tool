@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/fatih/color"
+	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
 	"io/ioutil"
 	"log"
@@ -195,10 +196,15 @@ func main() {
 		fmt.Printf("%v: `%v` does not exist!\n", binName, inputPath)
 		os.Exit(1)
 	}
+	encoder := gpt_bpe.NewEncoder()
+	scenario := ScenarioFromFile(&encoder, inputPath)
+	scenario.GenerateContext(scenario.Prompt)
+	//fmt.Printf("%v", ScenarioFromFile(inputPath))
+	/*
 	tests := GenerateTestsFromFile(inputPath)
 	fmt.Printf("== %v tests generated from %v ==\n", len(tests), inputPath)
 	for testIdx := range tests {
 		fmt.Printf("== Performing test %v / %v ==\n", testIdx+1, len(tests))
 		tests[testIdx].Perform()
-	}
+	}*/
 }
