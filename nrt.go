@@ -14,43 +14,43 @@ import (
 )
 
 type PermutationsSpec struct {
-	Model                  []string     `json:"model"`
-	Prefix                 []string     `json:"prefix"`
-	Temperature            []float64    `json:"temperature"`
-	MaxLength              []uint       `json:"max_length"`
-	MinLength              []uint       `json:"min_length"`
-	TopK                   []uint       `json:"top_k"`
-	TopP                   []float64    `json:"top_p"`
-	TailFreeSampling       []float64    `json:"tail_free_sampling"`
-	RepetitionPenalty      []float64    `json:"repetition_penalty"`
-	RepetitionPenaltyRange []uint       `json:"repetition_penalty_range"`
-	RepetitionPenaltySlope []float64    `json:"repetition_penalty_slope"`
+	Model                  []string  `json:"model"`
+	Prefix                 []string  `json:"prefix"`
+	Temperature            []float64 `json:"temperature"`
+	MaxLength              []uint    `json:"max_length"`
+	MinLength              []uint    `json:"min_length"`
+	TopK                   []uint    `json:"top_k"`
+	TopP                   []float64 `json:"top_p"`
+	TailFreeSampling       []float64 `json:"tail_free_sampling"`
+	RepetitionPenalty      []float64 `json:"repetition_penalty"`
+	RepetitionPenaltyRange []uint    `json:"repetition_penalty_range"`
+	RepetitionPenaltySlope []float64 `json:"repetition_penalty_slope"`
 }
 
 type ContentTest struct {
-	OutputPrefix string `json:"output_prefix"`
-	PromptFilename string `json:"prompt_filename"`
-	Iterations int `json:"iterations"`
-	Generations int `json:"generations"`
-	Parameters novelai_api.NaiGenerateParams `json:"parameters"`
-	Permutations PermutationsSpec `json:"permutations"`
-	Prompt string
-	WorkingDir string
-	PromptPath string
-	API novelai_api.NovelAiAPI
+	OutputPrefix   string                        `json:"output_prefix"`
+	PromptFilename string                        `json:"prompt_filename"`
+	Iterations     int                           `json:"iterations"`
+	Generations    int                           `json:"generations"`
+	Parameters     novelai_api.NaiGenerateParams `json:"parameters"`
+	Permutations   PermutationsSpec              `json:"permutations"`
+	Prompt         string
+	WorkingDir     string
+	PromptPath     string
+	API            novelai_api.NovelAiAPI
 }
 
 type EncodedIterationResult struct {
-	Prompt string `json:"prompt""`
+	Prompt    string   `json:"prompt""`
 	Responses []string `json:"responses""`
 }
 
 type IterationResult struct {
 	Parameters novelai_api.NaiGenerateParams `json:"settings"`
-	Prompt string `json:"prompt"`
-	Result string `json:"result"`
-	Responses []string `json:"responses"`
-	Encoded EncodedIterationResult `json:"encoded"`
+	Prompt     string                        `json:"prompt"`
+	Result     string                        `json:"result"`
+	Responses  []string                      `json:"responses"`
+	Encoded    EncodedIterationResult        `json:"encoded"`
 }
 
 func (ct *ContentTest) performGenerations(generations int, input string,

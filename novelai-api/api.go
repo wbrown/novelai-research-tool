@@ -64,10 +64,10 @@ type NaiGenerateParams struct {
 }
 
 type NaiGenerateResp struct {
-	EncodedRequest string `json:"encoded_request"`
+	EncodedRequest  string `json:"encoded_request"`
 	EncodedResponse string `json:"encoded_response"`
-	Response string `json:"response"`
-	Error error `json:"error"`
+	Response        string `json:"response"`
+	Error           error  `json:"error"`
 }
 
 func BannedBrackets() [][]uint16 {

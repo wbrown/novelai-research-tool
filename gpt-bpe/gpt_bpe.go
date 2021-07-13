@@ -18,22 +18,22 @@ import (
 var f embed.FS
 
 type GPTEncoder struct {
-	encoder map[string]uint16
-	decoder map[uint16][]byte
-	bpe_ranks map[GPTPair]float64
-	pattern *regexp.Regexp
+	encoder    map[string]uint16
+	decoder    map[uint16][]byte
+	bpe_ranks  map[GPTPair]float64
+	pattern    *regexp.Regexp
 	byteToRune map[byte]rune
 	runeToByte map[rune]byte
-	cache map[string][]string
+	cache      map[string][]string
 }
 
 type GPTPair struct {
-	left string
+	left  string
 	right string
 }
 
 type BGERank struct {
-	rank float64
+	rank   float64
 	bigram GPTPair
 }
 
@@ -84,24 +84,24 @@ func NewEncoder() GPTEncoder {
 	bytesUnicode := make(map[byte]rune)
 	unicodeBytes := make(map[rune]byte)
 	for b := uint8('!'); b < uint8('~')+1; b++ {
-		bs = append(bs,b)
+		bs = append(bs, b)
 		bytesUnicode[b] = rune(b)
 		unicodeBytes[rune(b)] = b
 	}
 	for b := uint8('¡'); b < uint8('¬')+1; b++ {
-		bs = append(bs,b)
+		bs = append(bs, b)
 		bytesUnicode[b] = rune(b)
 		unicodeBytes[rune(b)] = b
 	}
 	for b := uint16('®'); b < uint16('ÿ')+1; b++ {
-		bs = append(bs,byte(b))
+		bs = append(bs, byte(b))
 		bytesUnicode[byte(b)] = rune(b)
 		unicodeBytes[rune(b)] = byte(b)
 	}
 	uct := 0
 	for b := uint16(0); b < 256; b++ {
 		if _, ok := bytesUnicode[uint8(b)]; !ok {
-			bytesUnicode[uint8(b)] = rune(256+uct)
+			bytesUnicode[uint8(b)] = rune(256 + uct)
 			unicodeBytes[rune(256+uct)] = uint8(b)
 			uct += 1
 		}
@@ -113,13 +113,13 @@ func NewEncoder() GPTEncoder {
 		pat,
 		bytesUnicode,
 		unicodeBytes,
-		make(map[string][]string,0),
+		make(map[string][]string, 0),
 	}
 }
 
 func getPairs(word []string) []GPTPair {
 	pairsSet := make(map[GPTPair]bool, 0)
-	pairs := make([]GPTPair,0)
+	pairs := make([]GPTPair, 0)
 	begin := 1
 	prev := word[0]
 	for idx := begin; idx < len(word); idx++ {
@@ -141,7 +141,7 @@ func (encoder GPTEncoder) rankPairs(pairs []GPTPair) BGERanks {
 		if !ok {
 			bpe = math.Inf(1)
 		}
-		rankedPairs = append(rankedPairs, BGERank{bpe, pairs[idx]} )
+		rankedPairs = append(rankedPairs, BGERank{bpe, pairs[idx]})
 	}
 	sort.Sort(rankedPairs)
 	return rankedPairs
@@ -158,7 +158,7 @@ func (encoder GPTEncoder) minPair(pairs []GPTPair) (retPair GPTPair) {
 func (encoder GPTEncoder) toUnicode(text string) string {
 	outArr := make([]rune, 0)
 	textBytes := []byte(text)
-	for idx := range(textBytes) {
+	for idx := range textBytes {
 		outArr = append(outArr, encoder.byteToRune[textBytes[idx]])
 	}
 	return string(outArr)
@@ -167,7 +167,7 @@ func (encoder GPTEncoder) toUnicode(text string) string {
 func pos(word []string, seek string, i int) int {
 	for j, v := range word[i:] {
 		if seek == v {
-			return j+i
+			return j + i
 		}
 	}
 	return -1
@@ -196,7 +196,7 @@ func (encoder GPTEncoder) toBPE(text string) []string {
 		}
 		first := bigram.left
 		second := bigram.right
-		newWord := make([]string,0)
+		newWord := make([]string, 0)
 		for i := 0; i < len(word); {
 			j := pos(word, first, i)
 			if j == -1 {
@@ -204,9 +204,9 @@ func (encoder GPTEncoder) toBPE(text string) []string {
 				break
 			}
 			newWord = append(newWord, word[i:j]...)
-			i=j
-			if word[i] == first && i < len(word)-1 && word[i + 1] == second {
-				newWord = append(newWord, first + second)
+			i = j
+			if word[i] == first && i < len(word)-1 && word[i+1] == second {
+				newWord = append(newWord, first+second)
 				i += 2
 			} else {
 				newWord = append(newWord, word[i])

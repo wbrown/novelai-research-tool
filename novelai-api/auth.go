@@ -22,8 +22,8 @@ type AuthConfig struct {
 
 type NaiKeys struct {
 	EncryptionKey []byte
-	AccessKey string
-	AccessToken string
+	AccessKey     string
+	AccessToken   string
 }
 
 func getAccessToken(access_key string) string {
@@ -51,12 +51,12 @@ func getAccessToken(access_key string) string {
 
 func naiHashArgon(size int, plaintext string, secret string, domain string) []byte {
 	encoder, _ := blake2b.New(16, nil)
-	encoder.Write([]byte(secret+domain))
+	encoder.Write([]byte(secret + domain))
 	salt := encoder.Sum(nil)
 	argon_key := argon2.IDKey([]byte(plaintext),
 		salt,
 		2,
-		2000000 / 1024,
+		2000000/1024,
 		1,
 		uint32(size))
 	return argon_key

@@ -20,10 +20,10 @@ var f embed.FS
 
 type Adventure struct {
 	Parameters novelai_api.NaiGenerateParams
-	Context string
-	API novelai_api.NovelAiAPI
-	Encoder gpt_bpe.GPTEncoder
-	MaxTokens uint
+	Context    string
+	API        novelai_api.NovelAiAPI
+	Encoder    gpt_bpe.GPTEncoder
+	MaxTokens  uint
 }
 
 func NewAdventure() (adventure Adventure) {
@@ -58,7 +58,7 @@ func (adventure Adventure) start() {
 		}
 		adventure.Context = adventure.Context + "\n> " + line + "\n"
 		for {
-			tokens :=  adventure.Encoder.Encode(adventure.Context)
+			tokens := adventure.Encoder.Encode(adventure.Context)
 			if uint(len(tokens)) > adventure.MaxTokens {
 				adventure.Context = strings.Join(
 					strings.Split(adventure.Context, "\n")[1:], "\n")
@@ -92,4 +92,3 @@ func main() {
 	adventure := NewAdventure()
 	adventure.start()
 }
-

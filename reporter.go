@@ -22,19 +22,19 @@ func handleWrite(f *os.File, s string) {
 //
 
 type ConsoleReporter struct {
-	blue func(a ...interface{}) string
-	green func(a ...interface{}) string
-	blueNewline string
+	blue         func(a ...interface{}) string
+	green        func(a ...interface{}) string
+	blueNewline  string
 	greenNewline string
-	ct *ContentTest
+	ct           *ContentTest
 }
 
-func (ct ContentTest) CreateConsoleReporter() (ur ConsoleReporter) {
-	ur.ct = &ct
+func (ct *ContentTest) CreateConsoleReporter() (ur ConsoleReporter) {
+	ur.ct = ct
 	ur.blue = color.New(color.FgWhite, color.BgBlue).SprintFunc()
-	ur.blueNewline = ur.blue("\\n")+"\n"
+	ur.blueNewline = ur.blue("\\n") + "\n"
 	ur.green = color.New(color.FgWhite, color.BgGreen).SprintFunc()
-	ur.greenNewline = ur.green("\\n")+"\n"
+	ur.greenNewline = ur.green("\\n") + "\n"
 	paramReport, _ := json.MarshalIndent(ct.Parameters, "             ", " ")
 	fmt.Printf("%v %v\n", ur.blue("Parameters:"), string(paramReport))
 	return ur
@@ -59,7 +59,7 @@ func (cr *ConsoleReporter) ReportGeneration(resp string) {
 
 type JSONReporter struct {
 	fileHandle *os.File
-	iteration int
+	iteration  int
 }
 
 func CreateJSONReporter(path string) (reportWriter JSONReporter) {
@@ -104,8 +104,8 @@ func (reportWriter JSONReporter) close() {
 
 type TextReporter struct {
 	fileHandle *os.File
-	ct *ContentTest
-	iteration int
+	ct         *ContentTest
+	iteration  int
 }
 
 func (ct ContentTest) CreateTextReporter(path string) (textReporter TextReporter) {
@@ -129,10 +129,10 @@ func (ct ContentTest) CreateTextReporter(path string) (textReporter TextReporter
 		"}", "",
 		",", "",
 		"\"", "",
-		)
+	)
 	paramsReport := replacer.Replace(string(paramsReportBytes))
 	handleWrite(textReporter.fileHandle, "=== Parameters ====================================\n")
-	handleWrite(textReporter.fileHandle, paramsReport + "\n")
+	handleWrite(textReporter.fileHandle, paramsReport+"\n")
 	handleWrite(textReporter.fileHandle, "=== Prompt ========================================\n")
 	handleWrite(textReporter.fileHandle, ct.Prompt)
 	return textReporter
@@ -149,4 +149,3 @@ func (tr *TextReporter) write(resp string) {
 func (tr *TextReporter) close() {
 	tr.fileHandle.Close()
 }
-
