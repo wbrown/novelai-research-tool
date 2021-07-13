@@ -1,4 +1,4 @@
-package main
+package nrt
 
 import (
 	"encoding/json"

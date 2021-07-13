@@ -26,7 +26,7 @@ Get a copy of the source code either by:
 
 Once you have the source code extracted, go into the the source directory, and do the following from the command line:
   * `go get -u`
-  * `go build nrt.go`
+  * `go build nrt-cli/nrt.go`
 
 This will produce a binary `nrt` file.
 
