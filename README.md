@@ -146,16 +146,22 @@ This will cause the `nrt` tool to perform iterations acrosa both models.
 
 If we add another field to permute on, such as `prefix`, it becomes a
 combinatorial exercise -- the below `permutations` example will generate
-`28` combinations tests to perform:
+`31` combinations tests to perform:
 ```json
 { "permutations": {
     "model": [ "2.7B", "6B-v3" ],
-    "prefix": [ "vanilla", "theme_naval", "theme_egypt", "theme_dragons",
-                "theme_mars", "theme_dragons", "theme_libraries",
-                "style_hplovecraft", "style_edgarallanpoe",
-                "style_epic_fantasy", "style_slice_of_life",
-                "style_romantic", "style_lighthearted_fantasy",
-                "style_mmo" ] } }
+    "prefix": [ "vanilla", "style_arthurconandoyle", "style_edgarallanpoe",
+      "style_hplovecraft", "style_shridanlefanu", "style_julesverne",
+      "theme_19thcenturyromance", "theme_actionarcheology",
+      "theme_airships", "theme_ai", "theme_darkfantasy",
+      "theme_dragons", "theme_egypt", "theme_generalfantasy",
+      "theme_huntergatherer", "theme_magicacademy", "theme_libraries",
+      "theme_mars", "theme_medieval", "theme_militaryscifi",
+      "theme_naval", "theme_pirates", "theme_postapocalyptic",
+      "theme_rats", "theme_romanceofthreekingdoms",
+      "theme_superheroes", "inspiration_crabsnailandmonkey",
+      "inspiration_mercantilewolfgirlromance", "inspiration_nervegear",
+      "inspiration_thronewars", "inspiration_witchatlevelcap" ] } }
 ```
 
 Another example is if we wanted to permute on the `temperature` value:
