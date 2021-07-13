@@ -65,7 +65,7 @@ type JSONReporter struct {
 func CreateJSONReporter(path string) (reportWriter JSONReporter) {
 	var err error
 	dir := filepath.Dir(path)
-	err = os.MkdirAll(dir, 755)
+	err = os.MkdirAll(dir, 0755)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,7 +111,7 @@ type TextReporter struct {
 func (ct ContentTest) CreateTextReporter(path string) (textReporter TextReporter) {
 	var err error
 	dir := filepath.Dir(path)
-	err = os.MkdirAll(dir, 755)
+	err = os.MkdirAll(dir, 0755)
 	if err != nil {
 		log.Fatal(err)
 	}
