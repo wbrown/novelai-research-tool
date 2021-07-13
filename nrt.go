@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/fatih/color"
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
 	"io/ioutil"
 	"log"
@@ -37,7 +36,6 @@ type ContentTest struct {
 	Permutations PermutationsSpec `json:"permutations"`
 	Prompt string
 	WorkingDir string
-	OutputPath string
 	PromptPath string
 	API novelai_api.NovelAiAPI
 }
@@ -55,9 +53,8 @@ type IterationResult struct {
 	Encoded EncodedIterationResult `json:"encoded"`
 }
 
-func (ct ContentTest) performGenerations(generations int, input string) (results IterationResult) {
-	genResMarker := color.New(color.FgWhite, color.BgGreen).SprintFunc()
-	newLineToken := genResMarker("\\n")+"\n"
+func (ct *ContentTest) performGenerations(generations int, input string,
+	report *ConsoleReporter) (results IterationResult) {
 	context := input
 	results.Prompt = input
 	results.Parameters = ct.Parameters
@@ -69,21 +66,13 @@ func (ct ContentTest) performGenerations(generations int, input string) (results
 		}
 		results.Responses = append(results.Responses, resp.Response)
 		results.Encoded.Responses = append(results.Encoded.Responses, resp.EncodedResponse)
-		fmt.Printf("%v%v\n", genResMarker("=>"),
-			strings.Replace(resp.Response,"\n", newLineToken, -1))
+		report.ReportGeneration(resp.Response)
 		context = context + resp.Response
 		<-throttle.C
 		throttle = time.NewTimer(1100 * time.Millisecond)
 	}
 	results.Result = strings.Join(results.Responses, "")
 	return results
-}
-
-func handleWrite(f *os.File, s string) {
-	_, err := f.WriteString(s)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
@@ -130,46 +119,38 @@ func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
 	return tests
 }
 
-func (ct ContentTest) Perform() {
-	promptMarker := color.New(color.FgWhite, color.BgBlue).SprintFunc()
-	newLineToken := promptMarker("\\n")+"\n"
-	promptBytes, err := ioutil.ReadFile(ct.PromptPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	ct.OutputPath = filepath.Join(ct.WorkingDir,
+func (ct *ContentTest) generateOutputPath() string {
+	return filepath.Join(ct.WorkingDir,
 		strings.Join([]string{
 			ct.OutputPrefix,
-			ct.Parameters.Model,
+			strings.Replace(
+				strings.Replace(ct.Parameters.Model, "-", "_", -1),
+				".", "_", -1),
 			ct.Parameters.Prefix,
-			time.Now().Format("2006-01-02T150405Z0700") + ".json"}, "-"))
-	ct.Prompt = string(promptBytes)
-	f, err := os.OpenFile(ct.OutputPath,
-		os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+			time.Now().Format("2006-01-02T150405Z0700")}, "-"))
+}
+
+func (ct *ContentTest) loadPrompt(path string) {
+	promptBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer f.Close()
-	handleWrite(f, "[")
-	paramReport, _ := json.MarshalIndent(ct.Parameters, "             ", " ")
-	fmt.Printf("%v %v\n", promptMarker("Parameters:"), string(paramReport))
+	ct.Prompt = string(promptBytes)
+}
+
+func (ct ContentTest) Perform() {
+	ct.loadPrompt(ct.PromptPath)
+	consoleReport := ct.CreateConsoleReporter()
+	textReport := ct.CreateTextReporter(ct.generateOutputPath() + ".txt")
+	defer textReport.close()
+	jsonReport := CreateJSONReporter(ct.generateOutputPath() + ".json")
+	defer jsonReport.close()
 	for iteration := 0; iteration < ct.Iterations; iteration++ {
-		fmt.Printf("%v %v / %v\n", promptMarker("Iteration:"),
-			iteration+1, ct.Iterations)
-		if iteration != 0 {
-			handleWrite(f, ",\n")
-		}
-		fmt.Printf("%v%v\n", promptMarker("<="),
-			strings.Replace(ct.Prompt, "\n", newLineToken, -1))
-		responses := ct.performGenerations(ct.Generations, ct.Prompt)
-		serialized, err := json.MarshalIndent(responses, "", "  ")
-		if err != nil {
-			log.Fatal(err)
-		}
-		handleWrite(f, string(serialized))
-		f.Sync()
+		consoleReport.ReportIteration(iteration)
+		responses := ct.performGenerations(ct.Generations, ct.Prompt, &consoleReport)
+		textReport.write(responses.Result)
+		jsonReport.write(&responses)
 	}
-	handleWrite(f, "]")
 }
 
 func GenerateTestsFromFile(path string) (tests []ContentTest) {
