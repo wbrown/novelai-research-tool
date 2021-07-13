@@ -22,7 +22,8 @@ type GPTEncoder struct {
 	decoder map[uint16][]byte
 	bpe_ranks map[GPTPair]float64
 	pattern *regexp.Regexp
-	byteToUnicode map[byte]rune
+	byteToRune map[byte]rune
+	runeToByte map[rune]byte
 	cache map[string][]string
 }
 
@@ -81,22 +82,27 @@ func NewEncoder() GPTEncoder {
 	// Build the bytes to unicode tables.
 	bs := make([]uint8, 0)
 	bytesUnicode := make(map[byte]rune)
+	unicodeBytes := make(map[rune]byte)
 	for b := uint8('!'); b < uint8('~')+1; b++ {
 		bs = append(bs,b)
 		bytesUnicode[b] = rune(b)
+		unicodeBytes[rune(b)] = b
 	}
 	for b := uint8('¡'); b < uint8('¬')+1; b++ {
 		bs = append(bs,b)
 		bytesUnicode[b] = rune(b)
+		unicodeBytes[rune(b)] = b
 	}
 	for b := uint16('®'); b < uint16('ÿ')+1; b++ {
 		bs = append(bs,byte(b))
 		bytesUnicode[byte(b)] = rune(b)
+		unicodeBytes[rune(b)] = byte(b)
 	}
 	uct := 0
 	for b := uint16(0); b < 256; b++ {
 		if _, ok := bytesUnicode[uint8(b)]; !ok {
 			bytesUnicode[uint8(b)] = rune(256+uct)
+			unicodeBytes[rune(256+uct)] = uint8(b)
 			uct += 1
 		}
 	}
@@ -106,6 +112,7 @@ func NewEncoder() GPTEncoder {
 		bpeRanks,
 		pat,
 		bytesUnicode,
+		unicodeBytes,
 		make(map[string][]string,0),
 	}
 }
@@ -152,7 +159,7 @@ func (encoder GPTEncoder) toUnicode(text string) string {
 	outArr := make([]rune, 0)
 	textBytes := []byte(text)
 	for idx := range(textBytes) {
-		outArr = append(outArr, encoder.byteToUnicode[textBytes[idx]])
+		outArr = append(outArr, encoder.byteToRune[textBytes[idx]])
 	}
 	return string(outArr)
 }
@@ -236,17 +243,24 @@ func (encoder GPTEncoder) Encode(text string) (encoded []uint16) {
 }
 
 func (encoder GPTEncoder) Decode(encoded []uint16) (text string) {
+	// First convert our `uint16` tokens into an 8-bit byte array.
 	bs := make([]byte, 0)
 	for idx := range encoded {
 		if v, ok := encoder.decoder[encoded[idx]]; ok {
 			for bIdx := range v {
 				bs = append(bs, v[bIdx])
 			}
-			// bs = append(bs, v...)
 		}
 	}
-	text = text + strings.Replace(
-		strings.Replace(string(bs), "\u0120", " ", -1),
-		"Ċ","\n", -1)
+	// Convert our bytearray to string, interpreting as UTF-8 and then to
+	// 32-bit runes.
+	runes := []rune(string(bs))
+	decoded := make([]byte, 0)
+	// Convert our runes into 8-bit bytes using a 256-slot lookup table.
+	for runeIdx := range runes {
+		decoded = append(decoded, encoder.runeToByte[runes[runeIdx]])
+	}
+	// Decode our final representation into an Unicode string.
+	text = string(decoded)
 	return text
 }
