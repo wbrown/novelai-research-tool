@@ -9,6 +9,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"runtime"
+	"time"
 )
 
 type NovelAiAPI struct {
@@ -47,6 +49,7 @@ type NaiGenerateHTTPResp struct {
 type NaiGenerateParams struct {
 	Model                  string     `json:"model"`
 	Prefix                 string     `json:"prefix"`
+	PromptFilename         string     `json:"prompt_filename"`
 	Temperature            float64    `json:"temperature"`
 	MaxLength              uint       `json:"max_length"`
 	MinLength              uint       `json:"min_length"`
@@ -147,20 +150,29 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 	encoded, _ := json.Marshal(params)
 	req, _ := http.NewRequest("POST", "https://api.novelai.net/ai/generate",
 		bytes.NewBuffer(encoded))
+	req.Header.Set("User-Agent",
+		"nrt/0.1 (" + runtime.GOOS + "; " + runtime.GOARCH +")")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+keys.AccessToken)
-	resp, err := cl.Do(req)
+
+	// Retry up to 3 times.
+	var resp *http.Response
+	for tries := 0; tries < 3; tries++ {
+		var err error
+		resp, err = cl.Do(req)
+		if err == nil {
+			break
+		}
+		log.Println(err)
+		time.Sleep(3)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
-	} else {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-		err = json.Unmarshal(body, &respDecoded)
-		if err != nil {
-			log.Fatal(err)
-		}
+	}
+	err = json.Unmarshal(body, &respDecoded)
+	if err != nil {
+		log.Fatal(err)
 	}
 	return respDecoded
 }
