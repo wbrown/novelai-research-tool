@@ -79,7 +79,7 @@ func CreateJSONReporter(path string) (reportWriter JSONReporter) {
 	return reportWriter
 }
 
-func (reportWriter JSONReporter) write(result *IterationResult) {
+func (reportWriter *JSONReporter) write(result *IterationResult) {
 	if reportWriter.iteration != 0 {
 		handleWrite(reportWriter.fileHandle, ",\n")
 	}
@@ -92,7 +92,7 @@ func (reportWriter JSONReporter) write(result *IterationResult) {
 	reportWriter.fileHandle.Sync()
 }
 
-func (reportWriter JSONReporter) close() {
+func (reportWriter *JSONReporter) close() {
 	handleWrite(reportWriter.fileHandle, "]")
 	reportWriter.fileHandle.Close()
 }
