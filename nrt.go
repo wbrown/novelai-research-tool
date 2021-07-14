@@ -76,7 +76,6 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	return results
 }
 
-
 func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) (tests []ContentTest) {
 	permutations := []novelai_api.NaiGenerateParams{ct.Parameters}
 	// Loop over the fields in `Permutations` type.
@@ -98,6 +97,14 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) (tests
 					targetField, _ := reflect.TypeOf(permutation).FieldByName(fieldName)
 					reflect.ValueOf(&permutation).Elem().Field(targetField.Index[0]).Set(
 						value)
+					if len(permutation.Label) != 0 {
+						permutation.Label += ","
+					}
+					permutation.Label += fieldName + "=" + strings.Replace(
+						strings.Replace(
+							filepath.Base(fmt.Sprintf("%v",
+								value)), "-", "_", -1),
+						".", "_", -1)
 					// The only model that has `prefix`es is `6B-v3`, and we
 					// don't want to do unnecessary work, so:
 					//   If we are trying to create a permutation that has a
@@ -144,11 +151,9 @@ func (ct *ContentTest) generateOutputPath() string {
 	return filepath.Join(ct.WorkingDir,
 		strings.Join([]string{
 			ct.OutputPrefix,
-			strings.Replace(
-				strings.Replace(ct.Parameters.Model, "-", "_", -1),
-				".", "_", -1),
-			ct.Parameters.Prefix,
-			time.Now().Format("2006-01-02T150405Z0700")}, "-"))
+			ct.Parameters.Label + ",TS=" +
+				time.Now().Format("2006-01-02T1504")},
+				"-"))
 }
 
 func (ct *ContentTest) loadPrompt(path string) {
@@ -194,4 +199,3 @@ func GenerateTestsFromFile(path string) (tests []ContentTest) {
 	test.loadPrompt(test.PromptPath)
 	return test.GeneratePermutations()
 }
-

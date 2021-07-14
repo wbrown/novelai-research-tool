@@ -47,6 +47,7 @@ type NaiGenerateHTTPResp struct {
 }
 
 type NaiGenerateParams struct {
+	Label                  string     `json:"label"`
 	Model                  string     `json:"model"`
 	Prefix                 string     `json:"prefix"`
 	PromptFilename         string     `json:"prompt_filename"`
