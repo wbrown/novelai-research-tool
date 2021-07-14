@@ -16,6 +16,7 @@ import (
 type PermutationsSpec struct {
 	Model                  []string  `json:"model"`
 	Prefix                 []string  `json:"prefix"`
+	PromptFilename         []string  `json:"prompt_filename"`
 	Temperature            []float64 `json:"temperature"`
 	MaxLength              []uint    `json:"max_length"`
 	MinLength              []uint    `json:"min_length"`
@@ -33,7 +34,7 @@ type ContentTest struct {
 	Iterations     int                           `json:"iterations"`
 	Generations    int                           `json:"generations"`
 	Parameters     novelai_api.NaiGenerateParams `json:"parameters"`
-	Permutations   PermutationsSpec              `json:"permutations"`
+	Permutations   []PermutationsSpec            `json:"permutations"`
 	Prompt         string
 	WorkingDir     string
 	PromptPath     string
@@ -75,15 +76,16 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	return results
 }
 
-func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
+
+func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) (tests []ContentTest) {
 	permutations := []novelai_api.NaiGenerateParams{ct.Parameters}
 	// Loop over the fields in `Permutations` type.
-	fields := reflect.TypeOf(ct.Permutations)
+	fields := reflect.TypeOf(spec)
 	for field := 0; field < fields.NumField(); field++ {
 		// For each field, check the field contents and determine if there's any
 		// values in there.
 		fieldName := fields.FieldByIndex([]int{field}).Name
-		fieldValues := reflect.ValueOf(ct.Permutations).Field(field)
+		fieldValues := reflect.ValueOf(spec).Field(field)
 		if fieldValues.Len() > 1 {
 			// Loop over the values in the field to permute on.
 			newPermutations := make([]novelai_api.NaiGenerateParams, 0)
@@ -114,7 +116,26 @@ func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
 	for permutationIdx := range permutations {
 		newTest := ct
 		newTest.Parameters = permutations[permutationIdx]
+		// Pull up any `PromptFilename` values from the Parameters,
+		// to the test and do setup.
+		if len(newTest.Parameters.PromptFilename) > 0 {
+			newTest.PromptFilename = newTest.Parameters.PromptFilename
+			newTest.PromptPath = filepath.Join(newTest.WorkingDir, newTest.PromptFilename)
+			if _, err := os.Stat(ct.PromptPath); os.IsNotExist(err) {
+				fmt.Printf("`%v` does not exist!\n", ct.PromptPath)
+				os.Exit(1)
+			}
+			newTest.loadPrompt(newTest.PromptPath)
+		}
 		tests = append(tests, newTest)
+	}
+	return tests
+}
+
+func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
+	for specIdx := 0; specIdx < len(ct.Permutations); specIdx++ {
+		tests = append(tests,
+			ct.GeneratePermutationsFromSpec(ct.Permutations[specIdx])...)
 	}
 	return tests
 }
@@ -170,6 +191,7 @@ func GenerateTestsFromFile(path string) (tests []ContentTest) {
 		fmt.Printf("`%v` does not exist!\n", test.PromptPath)
 		os.Exit(1)
 	}
+	test.loadPrompt(test.PromptPath)
 	return test.GeneratePermutations()
 }
 

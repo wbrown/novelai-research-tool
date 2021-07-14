@@ -1,13 +1,13 @@
 {
   "prompt_filename": "white_samurai.txt",
-  "output_prefix": "white_samurai_output",
+  "output_prefix": "white_samurai/white_samruai",
   "iterations": 10,
-  "generations": 10,
+  "generations": 25,
   "parameters": {
     "model": "6B-v3",
     "prefix": "vanilla",
     "temperature": 0.55,
-    "max_length": 40,
+    "max_length": 60,
     "min_length": 40,
     "top_k": 140,
     "top_p": 0.9,
@@ -21,44 +21,46 @@
     "use_string": false,
     "return_full_text": false
   },
-  "permutations": {
-    "top_k": [
-      100,
-      120,
-      140
-    ],
-    "prefix": [
-      "vanilla",
-      "style_arthurconandoyle",
-      "style_edgarallanpoe",
-      "style_hplovecraft",
-      "style_shridanlefanu",
-      "style_julesverne",
-      "theme_19thcenturyromance",
-      "theme_actionarcheology",
-      "theme_airships",
-      "theme_ai",
-      "theme_darkfantasy",
-      "theme_dragons",
-      "theme_egypt",
-      "theme_generalfantasy",
-      "theme_huntergatherer",
-      "theme_magicacademy",
-      "theme_libraries",
-      "theme_mars",
-      "theme_medieval",
-      "theme_militaryscifi",
-      "theme_naval",
-      "theme_pirates",
-      "theme_postapocalyptic",
-      "theme_rats",
-      "theme_romanceofthreekingdoms",
-      "theme_superheroes",
-      "inspiration_crabsnailandmonkey",
-      "inspiration_mercantilewolfgirlromance",
-      "inspiration_nervegear",
-      "inspiration_thronewars",
-      "inspiration_witchatlevelcap"
-    ]
-  }
+  "permutations": [
+    {
+      "top_k": [
+        100,
+        120,
+        140
+      ],
+      "prefix": [
+        "vanilla",
+        "style_arthurconandoyle",
+        "style_edgarallanpoe",
+        "style_hplovecraft",
+        "style_shridanlefanu",
+        "style_julesverne",
+        "theme_19thcenturyromance",
+        "theme_actionarcheology",
+        "theme_airships",
+        "theme_ai",
+        "theme_darkfantasy",
+        "theme_dragons",
+        "theme_egypt",
+        "theme_generalfantasy",
+        "theme_huntergatherer",
+        "theme_magicacademy",
+        "theme_libraries",
+        "theme_mars",
+        "theme_medieval",
+        "theme_militaryscifi",
+        "theme_naval",
+        "theme_pirates",
+        "theme_postapocalyptic",
+        "theme_rats",
+        "theme_romanceofthreekingdoms",
+        "theme_superheroes",
+        "inspiration_crabsnailandmonkey",
+        "inspiration_mercantilewolfgirlromance",
+        "inspiration_nervegear",
+        "inspiration_thronewars",
+        "inspiration_witchatlevelcap"
+      ]
+    }
+  ]
 }
