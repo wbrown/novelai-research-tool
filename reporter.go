@@ -13,7 +13,8 @@ import (
 func handleWrite(f *os.File, s string) {
 	_, err := f.WriteString(s)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("reporter: Error writing string: `%s`: %s", err)
+		os.Exit(1)
 	}
 }
 
@@ -67,12 +68,14 @@ func CreateJSONReporter(path string) (reportWriter JSONReporter) {
 	dir := filepath.Dir(path)
 	err = os.MkdirAll(dir, 0755)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("reporter: Cannot create path: `%s`: %s", dir, err)
+		os.Exit(1)
 	}
 	reportWriter.fileHandle, err = os.OpenFile(path,
 		os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("reporter: Cannot open file for writing: `%s`: %s", path, err)
+		os.Exit(1)
 	}
 	reportWriter.iteration = 0
 	handleWrite(reportWriter.fileHandle, "[")
@@ -86,7 +89,8 @@ func (reportWriter *JSONReporter) write(result *IterationResult) {
 	reportWriter.iteration += 1
 	serialized, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("reporter: Cannot marshal JSON: %v, %v", result, err)
+		os.Exit(1)
 	}
 	handleWrite(reportWriter.fileHandle, string(serialized))
 	reportWriter.fileHandle.Sync()
@@ -113,16 +117,19 @@ func (ct ContentTest) CreateTextReporter(path string) (textReporter TextReporter
 	dir := filepath.Dir(path)
 	err = os.MkdirAll(dir, 0755)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("reporter: Cannot create path: `%s`: %s", dir, err)
+		os.Exit(1)
 	}
 	textReporter.fileHandle, err = os.OpenFile(path,
 		os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("reporter: Cannot open file for writing: `%s`: %s", path, err)
+		os.Exit(1)
 	}
 	paramsReportBytes, err := json.MarshalIndent(ct.Parameters, "", "")
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("reporter: Cannot marshal JSON: %v, %v", ct.Parameters, err)
+		os.Exit(1)
 	}
 	replacer := strings.NewReplacer(
 		"{\n", "",

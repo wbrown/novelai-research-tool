@@ -26,7 +26,7 @@ type NaiKeys struct {
 	AccessToken   string
 }
 
-func getAccessToken(access_key string) string {
+func getAccessToken(access_key string) (accessToken string) {
 	cl := http.DefaultClient
 	params := make(map[string]string)
 	params["key"] = access_key
@@ -36,21 +36,23 @@ func getAccessToken(access_key string) string {
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := cl.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("auth: Error performing HTTP request: %v", err)
+		return accessToken
 	} else {
 		resp_decoded := make(map[string]string)
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("auth: Error reading HTTP response body: %v", err)
+			return accessToken
 		}
 		err = json.Unmarshal(body, &resp_decoded)
-		accessToken := resp_decoded["accessToken"]
-		if len(accessToken)	== 0 {
-			log.Fatal(fmt.Sprintf("Failed to obtain accessToken! %s", string(body)))
+		if err != nil {
+			log.Printf("auth: Error unmarshaling JSON response: %v", err)
+			return accessToken
 		}
-		return accessToken
+		accessToken = resp_decoded["accessToken"]
 	}
-	return ""
+	return accessToken
 }
 
 func naiHashArgon(size int, plaintext string, secret string, domain string) []byte {
@@ -86,9 +88,28 @@ func naiGenerateKeys(email string, password string) NaiKeys {
 	}
 }
 
-func Auth(email string, password string) NaiKeys {
-	keys := naiGenerateKeys(email, password)
-	keys.AccessToken = getAccessToken(keys.AccessKey)
+func generateUsernames(email string) (usernames []string) {
+	usernames = append(usernames, strings.ToLower(email))
+	if usernames[0] != email {
+		usernames = append(usernames, email)
+	}
+	usernames = append(usernames, strings.ToTitle(email[0:1])+email[1:])
+	return usernames
+}
+
+func Auth(email string, password string) (keys NaiKeys) {
+	usernames := generateUsernames(email)
+	for userIdx := range usernames {
+		username := usernames[userIdx]
+		keys = naiGenerateKeys(username, password)
+		log.Printf("auth: authenticating for '%s'\n", username)
+		keys.AccessToken = getAccessToken(keys.AccessKey)
+		if len(keys.AccessToken) == 0 {
+			log.Printf("auth: failed for '%s'\n", username)
+		} else {
+			break
+		}
+	}
 	return keys
 }
 
@@ -96,15 +117,18 @@ func AuthEnv() NaiKeys {
 	var authCfg AuthConfig
 	err := envconfig.Process("", &authCfg)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("auth: Error processing environment: %v", err)
+		os.Exit(1)
 	}
 	if len(authCfg.Username) == 0 || len(authCfg.Password) == 0 {
 		fmt.Fprintf(os.Stderr, "ERROR: %s\n",
 			"Please ensure that NAI_USERNAME and NAI_PASSWORD are set in your environment.")
 		os.Exit(1)
 	}
-	fmt.Fprintf(os.Stderr, "AUTH: authenticating for '%s'\n", authCfg.Username)
 	auth := Auth(authCfg.Username, authCfg.Password)
-	fmt.Fprintf(os.Stderr, "AUTH: sucessful for '%s'\n", authCfg.Username)
+	if len(auth.AccessToken) == 0 {
+		log.Printf("auth: failed to obtain AccessToken!")
+		os.Exit(1)
+	}
 	return auth
 }

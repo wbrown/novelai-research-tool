@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"log"
 	"math"
+	"os"
 	"regexp"
 	"sort"
 	"strings"
@@ -77,7 +78,8 @@ func NewEncoder() GPTEncoder {
 	}
 	pat, err := regexp.Compile("'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(\\S){0}|\\s+")
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("gpt_bpe: Fatal error compiling regular expression: %v", err)
+		os.Exit(1)
 	}
 	// Build the bytes to unicode tables.
 	bs := make([]uint8, 0)

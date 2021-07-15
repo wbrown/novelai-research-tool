@@ -1,0 +1,510 @@
+[{
+  "settings": {
+    "label": "Model=6B_v3,Prefix=theme_darkfantasy,PromptFilename=need_help_txt",
+    "model": "6B-v3",
+    "prefix": "theme_darkfantasy",
+    "prompt_filename": "need_help.txt",
+    "temperature": 0.55,
+    "max_length": 40,
+    "min_length": 40,
+    "top_k": 140,
+    "top_p": 0.9,
+    "tail_free_sampling": 1,
+    "repetition_penalty": 3.5,
+    "repetition_penalty_range": 1024,
+    "repetition_penalty_slope": 6.57,
+    "bad_words_ids": [],
+    "ban_brackets": true,
+    "use_cache": false,
+    "use_string": false,
+    "return_full_text": false
+  },
+  "prompt": "I need help. I'm not sure what's going on with me, but it's driving me crazy. After looking through the web, I found a Dr. Michael Szozas, who is a renowned psychiatrist and counselor.  Apparently he specializes in unusual cases. I'm not sure if my situation is unusual or not, and I'm not sure how to determine that, so I emailed him anyway.\nDr. Szozas was so nice, and he sounded so smart when he responded. He recommended at least an initial consultation. An appointment was made for Monday at 9am.\nI'm nervous when I come up to his office; the entrance is a solid wooden door, and I reach out to knock. Rap rap rap. His voice comes, well-modulated and educated, \"Come on in!\"\nI step into his office, and my eyes cast about; the lights are set to a soothing dim level, his walls are filled with books. I am tempted to read the titles, but I mustn't be rude, oh no. So I look at the man that is sitting behind his desk.\nThe first thing that strikes me is Dr. Szozas' warm, radiant grin -- with dimples! -- that told me that everything was going to be OK. Then these kind hazel eyes twinkling at me from behind a pair of wire-frame glasses. He rises up, and whoa, he's a tall man with a slender lanky frame that causes me to look up a bit at him. He wears a comfortable looking cardigan, and he has a pair of slacks, ending in some loafers. Dr. Szozas walks towards me, and takes my hand in his -- I immediately notice how large and warm his hand is, his skin soft as it wraps around my fingers, \"I'm glad to see you,\" he says, and he seems to mean it. One could fall in love with someone like him so quickly, with his apparent sincerity and kindness.\n\"Please, take a seat on the couch, make yourself comfortable.  State for the record your full name, and why you're here,\" he suggests, and he ambles over to sit in a comfortable armchair.  His hazel eyes fixate upon me, drinking and studying every detail of me as he waits for my response.\nI hesitate, and sit down on the couch, and I respond, \"",
+  "result": "My name is Rafe Deedle.\"  He smiles again, and nods slightly, \"And why are you here?\"\n\"Well...\" I stutter nervously, \"I think... maybe I've been having nightmares.\"\n\"Oh? Nightmares, hmm. What do they consist of?\"\n\"Um, I don't know. It's just a feeling inside me. Like something bad is happening, or will happen. And then sometimes, there's this image, or vision, of myself being hurt or killed. Or getting stabbed by a knife, or shot in the head. But I can't remember what happened before those images came up, or what caused them.\"\n\"Hmmm, okay. That sounds very much like PTSD. Can you tell me about any specific triggers?\"\n\"Trigger? Um, well, I guess it might have been seeing a dead body once.\"\n\"A dead body? Do you mind if we talk about that later? Let's start with the dreams first.\"\n\"Sure, but I also had a dream where I was standing next to a beautiful woman, only she wasn't really human, I thought. She looked like an angel, but her wings were spread out and I couldn't help but stare at them, because I knew that I would die soon, and I wanted to feel the joy I'd felt when I saw the angels in heaven. I kept thinking that I should try to touch her wings, but I didn't want to upset her. I woke up with a terrible headache, I'm still not sure why, but I'm pretty certain that I need to be careful about touching the wings of the women I meet, or else I'll end up killing myself.\"\nDr. Szozas thinks about that for a moment, \"Hmm, that does sound a lot like a classic case of sexual transference. You're attracted to the winged female, but the fact that she isn't a real person is",
+  "responses": [
+    "My name is Rafe Deedle.\"  He smiles again, and nods slightly, \"And why are you here?\"\n\"Well...\" I stutter nervously, \"I think... maybe",
+    " I've been having nightmares.\"\n\"Oh? Nightmares, hmm. What do they consist of?\"\n\"Um, I don't know. It's just a feeling inside me. Like something",
+    " bad is happening, or will happen. And then sometimes, there's this image, or vision, of myself being hurt or killed. Or getting stabbed by a knife, or shot in the head.",
+    " But I can't remember what happened before those images came up, or what caused them.\"\n\"Hmmm, okay. That sounds very much like PTSD. Can you tell me about any specific triggers",
+    "?\"\n\"Trigger? Um, well, I guess it might have been seeing a dead body once.\"\n\"A dead body? Do you mind if we talk about that later? Let's start",
+    " with the dreams first.\"\n\"Sure, but I also had a dream where I was standing next to a beautiful woman, only she wasn't really human, I thought. She looked like an angel",
+    ", but her wings were spread out and I couldn't help but stare at them, because I knew that I would die soon, and I wanted to feel the joy I'd felt when I saw the",
+    " angels in heaven. I kept thinking that I should try to touch her wings, but I didn't want to upset her. I woke up with a terrible headache, I'm still not sure why,",
+    " but I'm pretty certain that I need to be careful about touching the wings of the women I meet, or else I'll end up killing myself.\"\nDr. Szozas thinks about that for",
+    " a moment, \"Hmm, that does sound a lot like a classic case of sexual transference. You're attracted to the winged female, but the fact that she isn't a real person is"
+  ],
+  "encoded": {
+    "prompt": "KAD5Ag0EDQA6AU0ElwF2BoQCUgH4Az8BXwH2AQsA2wFUAVIBwxP2Af0bDQD1CP0HQAMGAZgPCwA6ARMEAQEvBg0AOw9GbY4hJAELAPwBPgEBAXxW53kiAbh8DQDcANwAwnZTAVp0HwEUIWcKDQA6AU0ElwF2BmMCaAICDD4BFCGJAZcBCwAiAToBTQSXAXYGvwIcAYwTRgELAAsCOgH7XqsCJRsNAMYAKxgNAEZtjiEkAXUBCwIlDgsAIgFTAf45CwJjEWoCUwGqGw0ApwLvG3sBDwYZAY4Qt0YNABwEDTF1AZ0DSQH5DHsBXANBAQ0AxgAoAE0ErypqAjoBAgX+ARwB0QEvChoABgGQKD4BAQF/EsY0XA0LACIBOgFPDPcBHAGTKQ0A+S//D/8PDQBfCeEOCggLAHADDAA6EtESIgEpPQsAbgGFQT8BHwGqCcYAKAC/CJAC0QEvCgsAIgFoAocLFg0iAhoABgGkHYUBhAMcAQEBhJ8PFdkECwDRASIehQENF18B+w4NADoBzAJSZhwBTAQGAQoiCwDbAToB/ARNANYBMwEyVgsA6C2FAg0AfgU6ASQDewEGAUYCRgE+AdIVbQjRAQMbDQDGANABzQLtBUYB/CL2AT4BLwYNAEZtjiEkAQYAthYLAHCrgkFhBV8BDxVGCQAAYQVGAREF9gFGAecIdQH4AxwBMwE1HQ0ArAwJA0sGSy2hAYcLmQKkAk8FewH2AaYBbQgBAS4UHgFnGQwAxziAOw0ApwJgQf4BCwAiAfwBQAALAFMBUgEBAaMcRgJfAQEByI8sAYSaaxZGAQgW9gEcASQD/gEBAWsGewGrAg0ApwKuQwEBiBr9B2EKjBULACIBUwHUAQEBLhQeAfkD8xELACgdHwFpAsacbAENAC8GDQBGbY4hJAFqKysN9gELACIBwQpoAv0DHwHRAWEFOgFBDaMPvwI0BiIBthbRAf0DPgELANEBSBCRCmMBVAGBa0AEaAKJJAsAbgEoAE0EyyUcAf4CWQEpAlMBcwQLACIBUwEbCRwBTAZUAQ0AWQfKAkkIHwEyB18BUghMAqsCCwKICwsAXwHRATwQFawiAU9dDQDGAAEAdBULAPMDAQHcFj8BBgFLSAsAEwO3DYgaDQDcANwANCNJAQYBpAYWAjgFngULACIB8QVZATUD4gMpAlMBDBYLACIBUwEzEz0DcQIcAXIGHwEBAYgaiwzRPw0A3ADcAP0ZSy2hAYcLoxB6AWIJ9gELACoeIgE5KxYDdw4eAfYBYwFTAcxuSQFoAkILDQDGACgAclkLACIBcgZiAz8BBgFLSAsAIgE6AdcLCwBuAQ==",
+    "responses": [
+      "Ug6eBT4BcwG7IQAEFAElAQ4C3ADcAAgGVVX1AgsAIgERiA4SCwBuAU4H8QWFAVkB4gOlBsYAAQCTFmEkOgFQAY0oPKkLAG4BKAB8A9oDFw8=",
+      "OgEdBEsCtwYVgg4CxgABALQWHgDVqQsAIQHMCw0ASwfSAeQBkQ0eAaUGxgABAKCRCwA6AUQD1gH4Ag0AeAJSAY8CAQFrEFEK9gENAK0RxwQ=",
+      "KQg+AcwWCwCJAeEBbQYNAEsDFAMgDQsAZAJSAawBewsLAIkBgRYLAB4BBQ5UAzIXiQFrCw0AvwW0BwhUoAEBAXUmCwCJAQcLHwEGAZ4EDQA=",
+      "dwM6AcwB1gGxDYQCzgtuA3MDpxBZBv4BCwCJAYQC6Q9eAg4CxgABACcAjGsLAFQiDQAoBXYUTQNxA0wCXmkNAJAGWQEYBvYBIgJVAoAINk4=",
+      "pQbGAAEA2LweAC9SCwBwAwsAOgF0ElQB3ASnAUsCGxEBAUwK5wbYBg4CxgABACAATArnBh4AXQhZAdAHYwJkARkGIgJGASAGHgBKD1IBmwM=",
+      "XwEGAYEpzQIOAsYAAQABTAsA2wE6AXsCJgIBAeAQKgM6AXUBvxMaBRwBAQFWE28JCwCzAqECvAnWAVMEnAYLADoBDwcNAF8FKgxMAhkBgEc=",
+      "CwDbAV8CQi8jAggQ9wEiAToBwQ3WAQ0E2wFqXnsBXgILAAwDOgGxC0YBOgExAjASFgoLACIBOgGzCBwB5gQGAQwiOgENBngLagI6AcEJBgE=",
+      "3VUfAUIlDQA6Ab4PHA5GAToBLwOdBxwBNg5fAkIvCwDbAToBjgXWAf0CHAEfJF8CDQA6AZRK/gFfAQEBih5GYQsAOgFNBN8DlwF2BvEFCwA=",
+      "2wE6AU0EvwnABkYBOgH5AhwBMwHhHyICiTsGAUIvHgEGAboFOgEiBwsAiQEZCDoBnwR2A/4BMhQFDg4CxgArGA0ARm2OISQBshoiAkYBSQE=",
+      "AQEdCgsAbgG5rAsARgFZA1AIAQHoBEwCAQGxGjsFHgGGDO8DwBANAJkDNQO1MRwBBgFbIRQB0A8LANsBBgFVBEYBoQJNCNYBAQFPBBgEPgE="
+    ]
+  }
+},
+{
+  "settings": {
+    "label": "Model=6B_v3,Prefix=theme_darkfantasy,PromptFilename=need_help_txt",
+    "model": "6B-v3",
+    "prefix": "theme_darkfantasy",
+    "prompt_filename": "need_help.txt",
+    "temperature": 0.55,
+    "max_length": 40,
+    "min_length": 40,
+    "top_k": 140,
+    "top_p": 0.9,
+    "tail_free_sampling": 1,
+    "repetition_penalty": 3.5,
+    "repetition_penalty_range": 1024,
+    "repetition_penalty_slope": 6.57,
+    "bad_words_ids": [],
+    "ban_brackets": true,
+    "use_cache": false,
+    "use_string": false,
+    "return_full_text": false
+  },
+  "prompt": "I need help. I'm not sure what's going on with me, but it's driving me crazy. After looking through the web, I found a Dr. Michael Szozas, who is a renowned psychiatrist and counselor.  Apparently he specializes in unusual cases. I'm not sure if my situation is unusual or not, and I'm not sure how to determine that, so I emailed him anyway.\nDr. Szozas was so nice, and he sounded so smart when he responded. He recommended at least an initial consultation. An appointment was made for Monday at 9am.\nI'm nervous when I come up to his office; the entrance is a solid wooden door, and I reach out to knock. Rap rap rap. His voice comes, well-modulated and educated, \"Come on in!\"\nI step into his office, and my eyes cast about; the lights are set to a soothing dim level, his walls are filled with books. I am tempted to read the titles, but I mustn't be rude, oh no. So I look at the man that is sitting behind his desk.\nThe first thing that strikes me is Dr. Szozas' warm, radiant grin -- with dimples! -- that told me that everything was going to be OK. Then these kind hazel eyes twinkling at me from behind a pair of wire-frame glasses. He rises up, and whoa, he's a tall man with a slender lanky frame that causes me to look up a bit at him. He wears a comfortable looking cardigan, and he has a pair of slacks, ending in some loafers. Dr. Szozas walks towards me, and takes my hand in his -- I immediately notice how large and warm his hand is, his skin soft as it wraps around my fingers, \"I'm glad to see you,\" he says, and he seems to mean it. One could fall in love with someone like him so quickly, with his apparent sincerity and kindness.\n\"Please, take a seat on the couch, make yourself comfortable.  State for the record your full name, and why you're here,\" he suggests, and he ambles over to sit in a comfortable armchair.  His hazel eyes fixate upon me, drinking and studying every detail of me as he waits for my response.\nI hesitate, and sit down on the couch, and I respond, \"",
+  "result": "My name is Elle. My friends call me Ellie.\"\nHe nods. \"And why have you come?\"\nWell this is awkward. What do I say? That I feel weird and strange, like something inside me is missing or broken, and that I want help figuring out what to do next? No way, too personal, maybe he'll think I'm crazy. Maybe I should just tell him whatever comes to mind?\n\"I don't know,\" I answer honestly. \"Maybe because I can't sleep or eat right. And sometimes I get scared...\" I trail off there.\nDr. Szozas smiles again, \"So you've been experiencing those symptoms for a while now?\"\nI nod. \"Yeah, since last year.\"\n\"Have you seen a doctor before?\" He asks me gently.\n\"No. Not really. Just a nurse practitioner once.\"\n\"Did she prescribe any medication?\"\n\"Yes, one time. A mild sleeping aid called Ambien.\" I mention this to him slowly, trying not to seem nervous.\nHe raises an eyebrow at me, \"Ambien... ah yes, I remember reading about that. It was a popular drug during the early 2000s, but it had side effects that were discovered later, including drowsiness, memory loss, even seizures. In fact, if I recall correctly, it caused quite the scandal when people started dying from its use. Do you still take them?\"\nOh crap, I'm nodding at his questions, I didn't realize I'd done that. I clear my throat, \"Um, yeah I guess I did stop taking them, but I got a refill recently. I'm afraid I might be starting to suffer the same problems that the other patients suffered when they took the pills. I'm worried I might be having a seizure or a stroke.\"\nHe looks at me with his head cocked to the side, his eyebrows raised, \"You are concerned about a",
+  "responses": [
+    "My name is Elle. My friends call me Ellie.\"\nHe nods. \"And why have you come?\"\nWell this is awkward. What do I say? That I feel weird and strange",
+    ", like something inside me is missing or broken, and that I want help figuring out what to do next? No way, too personal, maybe he'll think I'm crazy. Maybe I should just",
+    " tell him whatever comes to mind?\n\"I don't know,\" I answer honestly. \"Maybe because I can't sleep or eat right. And sometimes I get scared...\" I trail off there.",
+    "\nDr. Szozas smiles again, \"So you've been experiencing those symptoms for a while now?\"\nI nod. \"Yeah, since last year.\"\n\"Have you seen a doctor",
+    " before?\" He asks me gently.\n\"No. Not really. Just a nurse practitioner once.\"\n\"Did she prescribe any medication?\"\n\"Yes, one time. A mild sleeping aid called",
+    " Ambien.\" I mention this to him slowly, trying not to seem nervous.\nHe raises an eyebrow at me, \"Ambien... ah yes, I remember reading about that. It was a",
+    " popular drug during the early 2000s, but it had side effects that were discovered later, including drowsiness, memory loss, even seizures. In fact, if I recall correctly, it caused quite",
+    " the scandal when people started dying from its use. Do you still take them?\"\nOh crap, I'm nodding at his questions, I didn't realize I'd done that. I clear my throat",
+    ", \"Um, yeah I guess I did stop taking them, but I got a refill recently. I'm afraid I might be starting to suffer the same problems that the other patients suffered when they took",
+    " the pills. I'm worried I might be having a seizure or a stroke.\"\nHe looks at me with his head cocked to the side, his eyebrows raised, \"You are concerned about a"
+  ],
+  "encoded": {
+    "prompt": "KAD5Ag0EDQA6AU0ElwF2BoQCUgH4Az8BXwH2AQsA2wFUAVIBwxP2Af0bDQD1CP0HQAMGAZgPCwA6ARMEAQEvBg0AOw9GbY4hJAELAPwBPgEBAXxW53kiAbh8DQDcANwAwnZTAVp0HwEUIWcKDQA6AU0ElwF2BmMCaAICDD4BFCGJAZcBCwAiAToBTQSXAXYGvwIcAYwTRgELAAsCOgH7XqsCJRsNAMYAKxgNAEZtjiEkAXUBCwIlDgsAIgFTAf45CwJjEWoCUwGqGw0ApwLvG3sBDwYZAY4Qt0YNABwEDTF1AZ0DSQH5DHsBXANBAQ0AxgAoAE0ErypqAjoBAgX+ARwB0QEvChoABgGQKD4BAQF/EsY0XA0LACIBOgFPDPcBHAGTKQ0A+S//D/8PDQBfCeEOCggLAHADDAA6EtESIgEpPQsAbgGFQT8BHwGqCcYAKAC/CJAC0QEvCgsAIgFoAocLFg0iAhoABgGkHYUBhAMcAQEBhJ8PFdkECwDRASIehQENF18B+w4NADoBzAJSZhwBTAQGAQoiCwDbAToB/ARNANYBMwEyVgsA6C2FAg0AfgU6ASQDewEGAUYCRgE+AdIVbQjRAQMbDQDGANABzQLtBUYB/CL2AT4BLwYNAEZtjiEkAQYAthYLAHCrgkFhBV8BDxVGCQAAYQVGAREF9gFGAecIdQH4AxwBMwE1HQ0ArAwJA0sGSy2hAYcLmQKkAk8FewH2AaYBbQgBAS4UHgFnGQwAxziAOw0ApwJgQf4BCwAiAfwBQAALAFMBUgEBAaMcRgJfAQEByI8sAYSaaxZGAQgW9gEcASQD/gEBAWsGewGrAg0ApwKuQwEBiBr9B2EKjBULACIBUwHUAQEBLhQeAfkD8xELACgdHwFpAsacbAENAC8GDQBGbY4hJAFqKysN9gELACIBwQpoAv0DHwHRAWEFOgFBDaMPvwI0BiIBthbRAf0DPgELANEBSBCRCmMBVAGBa0AEaAKJJAsAbgEoAE0EyyUcAf4CWQEpAlMBcwQLACIBUwEbCRwBTAZUAQ0AWQfKAkkIHwEyB18BUghMAqsCCwKICwsAXwHRATwQFawiAU9dDQDGAAEAdBULAPMDAQHcFj8BBgFLSAsAEwO3DYgaDQDcANwANCNJAQYBpAYWAjgFngULACIB8QVZATUD4gMpAlMBDBYLACIBUwEzEz0DcQIcAXIGHwEBAYgaiwzRPw0A3ADcAP0ZSy2hAYcLoxB6AWIJ9gELACoeIgE5KxYDdw4eAfYBYwFTAcxuSQFoAkILDQDGACgAclkLACIBcgZiAz8BBgFLSAsAIgE6AdcLCwBuAQ==",
+    "responses": [
+      "Ug6eBT4BDgolAQ0A2wecCWUD9gEBrw4CxgAIBhGIDQBuAU4H8QWnAVkBAgWlBsYAkxasAT4BzjINAEsH0gE6AY4DHgAoBToB5gTiHSIBixg=",
+      "CwBMAscEUQr2AT4BzhKJAUUVCwAiAUYBOgH9Ag0Eulj3AYQCHAHSARoFHgB4BUMDCwCNBDYKCwAXD1MBnwR8AzoBTQT9Gw0AEho6AS8DjwI=",
+      "GAarAogQCggcAdAHHgDGAAEAKABEA9YB+AIpAjoB0AyaMQ0AbgH0MwwDOgHMAdYBmQ+JAYMROgMNAEsDIA06AYsC6C5hJDoBWR88AmQCDQA=",
+      "xgArGA0ARm2OISQBVVX1AgsAbgFcCVkBHQRLApA0cwMkHUkBAQHVAw8DpQbGACgA6kgNAG4B8yoLALEEqgNmAg4CxgABAMwuWQHvBgEBbRg=",
+      "bgOlBqcC1R72AT07DQDGAAEAhQsNAGQHUwQNABkJAQHpPW592AYOAsYAAQBxLaECi39VAhc3pQbGAAEAsRQLABICgAINAD0BVy0VK/UXpAU=",
+      "qTDdBw4COgH8C6wBHAGrAtwYCwA/CJcBHAEDBa8qDQDGAAgGKS8ZAUyVewH2AQsAbgFBi90H2gNycbMOCwA6AbEN4w0iAkYBDQB4AnUBAQE=",
+      "mAsDCnUEBgFvB48SUgALANsBVAEmAscG6AtGASMCzxMgBgsAbgUgAUQh+AQLAPgPsgsLAAQDi2ANACoCVQQLAGMCOgEeJ6QkCwBUAekPZwk=",
+      "BgHrKWoClQITCN4mpgGXAgsDDQBdCFkB3wPzA14CpQbGALQWiEkLADoBTQTfuXsB0QF7CgsAOgGOBdYBiRk6AQ0G4AZGAQ0AOgE+BmgCFTU=",
+      "CwBuAaCRCwDSJzoBdBI6Ae4CxQjXCF4CCwDbAToBcAUBAbO5WAsNADoBTQRrHjoB3AQzAQ8OHAHTIQYB0APJCkYBBgFIAh8PTRtqAuQBtgY=",
+      "BgFBTA0AOgFNBBgfOgHcBDMBtwYBAUJXiQEBAbA2DgLGAAgGAQx7AfYBXwHRAZ4EDQHXDRwBBgHHBgsA0QEwaRgRCwBuAWcGhQFdFCICAQE="
+    ]
+  }
+},
+{
+  "settings": {
+    "label": "Model=6B_v3,Prefix=theme_darkfantasy,PromptFilename=need_help_txt",
+    "model": "6B-v3",
+    "prefix": "theme_darkfantasy",
+    "prompt_filename": "need_help.txt",
+    "temperature": 0.55,
+    "max_length": 40,
+    "min_length": 40,
+    "top_k": 140,
+    "top_p": 0.9,
+    "tail_free_sampling": 1,
+    "repetition_penalty": 3.5,
+    "repetition_penalty_range": 1024,
+    "repetition_penalty_slope": 6.57,
+    "bad_words_ids": [],
+    "ban_brackets": true,
+    "use_cache": false,
+    "use_string": false,
+    "return_full_text": false
+  },
+  "prompt": "I need help. I'm not sure what's going on with me, but it's driving me crazy. After looking through the web, I found a Dr. Michael Szozas, who is a renowned psychiatrist and counselor.  Apparently he specializes in unusual cases. I'm not sure if my situation is unusual or not, and I'm not sure how to determine that, so I emailed him anyway.\nDr. Szozas was so nice, and he sounded so smart when he responded. He recommended at least an initial consultation. An appointment was made for Monday at 9am.\nI'm nervous when I come up to his office; the entrance is a solid wooden door, and I reach out to knock. Rap rap rap. His voice comes, well-modulated and educated, \"Come on in!\"\nI step into his office, and my eyes cast about; the lights are set to a soothing dim level, his walls are filled with books. I am tempted to read the titles, but I mustn't be rude, oh no. So I look at the man that is sitting behind his desk.\nThe first thing that strikes me is Dr. Szozas' warm, radiant grin -- with dimples! -- that told me that everything was going to be OK. Then these kind hazel eyes twinkling at me from behind a pair of wire-frame glasses. He rises up, and whoa, he's a tall man with a slender lanky frame that causes me to look up a bit at him. He wears a comfortable looking cardigan, and he has a pair of slacks, ending in some loafers. Dr. Szozas walks towards me, and takes my hand in his -- I immediately notice how large and warm his hand is, his skin soft as it wraps around my fingers, \"I'm glad to see you,\" he says, and he seems to mean it. One could fall in love with someone like him so quickly, with his apparent sincerity and kindness.\n\"Please, take a seat on the couch, make yourself comfortable.  State for the record your full name, and why you're here,\" he suggests, and he ambles over to sit in a comfortable armchair.  His hazel eyes fixate upon me, drinking and studying every detail of me as he waits for my response.\nI hesitate, and sit down on the couch, and I respond, \"",
+  "result": "My name is Erika Zane.\"\nHe nods slowly, and then he asks, \"And why did you contact me?\"\n\"Well...\" I begin, \"...I have this problem where I keep seeing things that aren't there...and hearing voices.\"\nHe smiles gently, and looks back at me, \"What do you think might cause such problems?\"\n\"Maybe something I ate? Or maybe something I drank? I don't know. It just started recently.\"\nHe sits forward, leaning slightly towards me, \"Erika, we can rule out drugs or alcohol. Your brain is fine. The reason for what you describe is called 'Auditory Hallucinations'. They happen all the time, especially when people are stressed or depressed. What makes them seem worse is that they are often accompanied by other symptoms: feelings of paranoia, fear, anxiety, nightmares, insomnia, flashbacks, etc. Do you feel any of those things?\"\nI shake my head. \"No, nothing like that. My life isn't very complicated right now, I'm not sure if that's normal though.\"\nDr. Szozas leans back in his chair again, \"That's perfectly normal. You are a young woman with a lot to deal with, but that is only natural. Tell me about your family situation. Are you close with your parents?\"\n\"Yes, I am. Both of them live nearby, but I haven't seen either one since I moved out last year.\"\n\"How about your friends, is anyone special to you?\"\n\"Not really. I had a few good friends in high school, but I lost touch with them after graduation.\"\n\"Do you work, or study at a university?\"\n\"Nope, I've been unemployed for the past two years.\"\n\"So, no job, no studies, no friends, no significant others, no siblings, no children, no pets, no hobbies, no interests outside of the internet",
+  "responses": [
+    "My name is Erika Zane.\"\nHe nods slowly, and then he asks, \"And why did you contact me?\"\n\"Well...\" I begin, \"...I have this problem where I",
+    " keep seeing things that aren't there...and hearing voices.\"\nHe smiles gently, and looks back at me, \"What do you think might cause such problems?\"\n\"Maybe something I ate?",
+    " Or maybe something I drank? I don't know. It just started recently.\"\nHe sits forward, leaning slightly towards me, \"Erika, we can rule out drugs or alcohol. Your brain",
+    " is fine. The reason for what you describe is called 'Auditory Hallucinations'. They happen all the time, especially when people are stressed or depressed. What makes them seem worse is that they",
+    " are often accompanied by other symptoms: feelings of paranoia, fear, anxiety, nightmares, insomnia, flashbacks, etc. Do you feel any of those things?\"\nI shake my head. \"No,",
+    " nothing like that. My life isn't very complicated right now, I'm not sure if that's normal though.\"\nDr. Szozas leans back in his chair again, \"That's perfectly",
+    " normal. You are a young woman with a lot to deal with, but that is only natural. Tell me about your family situation. Are you close with your parents?\"\n\"Yes, I am",
+    ". Both of them live nearby, but I haven't seen either one since I moved out last year.\"\n\"How about your friends, is anyone special to you?\"\n\"Not really. I",
+    " had a few good friends in high school, but I lost touch with them after graduation.\"\n\"Do you work, or study at a university?\"\n\"Nope, I've been unemployed for",
+    " the past two years.\"\n\"So, no job, no studies, no friends, no significant others, no siblings, no children, no pets, no hobbies, no interests outside of the internet"
+  ],
+  "encoded": {
+    "prompt": "KAD5Ag0EDQA6AU0ElwF2BoQCUgH4Az8BXwH2AQsA2wFUAVIBwxP2Af0bDQD1CP0HQAMGAZgPCwA6ARMEAQEvBg0AOw9GbY4hJAELAPwBPgEBAXxW53kiAbh8DQDcANwAwnZTAVp0HwEUIWcKDQA6AU0ElwF2BmMCaAICDD4BFCGJAZcBCwAiAToBTQSXAXYGvwIcAYwTRgELAAsCOgH7XqsCJRsNAMYAKxgNAEZtjiEkAXUBCwIlDgsAIgFTAf45CwJjEWoCUwGqGw0ApwLvG3sBDwYZAY4Qt0YNABwEDTF1AZ0DSQH5DHsBXANBAQ0AxgAoAE0ErypqAjoBAgX+ARwB0QEvChoABgGQKD4BAQF/EsY0XA0LACIBOgFPDPcBHAGTKQ0A+S//D/8PDQBfCeEOCggLAHADDAA6EtESIgEpPQsAbgGFQT8BHwGqCcYAKAC/CJAC0QEvCgsAIgFoAocLFg0iAhoABgGkHYUBhAMcAQEBhJ8PFdkECwDRASIehQENF18B+w4NADoBzAJSZhwBTAQGAQoiCwDbAToB/ARNANYBMwEyVgsA6C2FAg0AfgU6ASQDewEGAUYCRgE+AdIVbQjRAQMbDQDGANABzQLtBUYB/CL2AT4BLwYNAEZtjiEkAQYAthYLAHCrgkFhBV8BDxVGCQAAYQVGAREF9gFGAecIdQH4AxwBMwE1HQ0ArAwJA0sGSy2hAYcLmQKkAk8FewH2AaYBbQgBAS4UHgFnGQwAxziAOw0ApwJgQf4BCwAiAfwBQAALAFMBUgEBAaMcRgJfAQEByI8sAYSaaxZGAQgW9gEcASQD/gEBAWsGewGrAg0ApwKuQwEBiBr9B2EKjBULACIBUwHUAQEBLhQeAfkD8xELACgdHwFpAsacbAENAC8GDQBGbY4hJAFqKysN9gELACIBwQpoAv0DHwHRAWEFOgFBDaMPvwI0BiIBthbRAf0DPgELANEBSBCRCmMBVAGBa0AEaAKJJAsAbgEoAE0EyyUcAf4CWQEpAlMBcwQLACIBUwEbCRwBTAZUAQ0AWQfKAkkIHwEyB18BUghMAqsCCwKICwsAXwHRATwQFawiAU9dDQDGAAEAdBULAPMDAQHcFj8BBgFLSAsAEwO3DYgaDQDcANwANCNJAQYBpAYWAjgFngULACIB8QVZATUD4gMpAlMBDBYLACIBUwEzEz0DcQIcAXIGHwEBAYgaiwzRPw0A3ADcAP0ZSy2hAYcLoxB6AWIJ9gELACoeIgE5KxYDdw4eAfYBYwFTAcxuSQFoAkILDQDGACgAclkLACIBcgZiAz8BBgFLSAsAIgE6AdcLCwBuAQ==",
+    "responses": [
+      "Ug6eBT4BnAEscJAE+wUOAsYACAYRiNwYCwAiARQDUwHVHgsAbgFOB/EF7gJZAfAK9gGlBsYAAQCTFmEkOgGtCAsA+GwoAKcBrAF9ByoDOgE=",
+      "cgUbEdsERgEEDtYBZALaA4gB9hJXKg4CxgAIBlVVPTsLACIBAQzgAnsB9gELAG4BDQjSAVkBfAPcBKgKdAPJCqUGxgABAPQzxwQ6Adc6HgA=",
+      "vwUXD8cEOgEGXh4AOgFEA9YB+AINAHgCjwITCFgLDgLGAAgG3ilbCgsALFUOEisN9gELAG4BJAAscAsAZAHMATgP9wGSE4kBrBUNAE4NMA4=",
+      "PgGWDg0AfwHKBkkBhAJZAfUaPgGkBcEC4T+Fk7USzQS4HGoRXwRtBt0BBgGAAgsAIApqApUChQG5OokBl0oNAEsHLgdeAgMFsRI+AUYB5AE=",
+      "hQGaBg8uoAFIAiQdGQDyHR4BQoYLALQMCwAXJgsAFYILAAC4CwCTwQsArw0NAF0IWQHmBFUCHgFzA9sEpQbGACgA3zNoAp4EDQBuAYULCwA=",
+      "YwhMAkYBDQDbB7QETQjWAU0DPSA6Aw8DCwA6AU0ElwF2BmMCRgFSAZ8N5AMOAsYAKxgNAEZtjiEkAfiZ4AIfAdEB/hP1AgsAbgHICVIB4hs=",
+      "nw0NAJkDhQEBAUYHbwlfAQEB6AQcAcIGXwELANsBRgE+AbMC2AwNAMo29gEiAhYCaQYCDA0AhxBZAbEHXwEWAkUNpQbGAAEAsRQLADoBzAI=",
+      "DQBzFh4BXgI7CDwaCwDbAToBLhHWAe8G8wcSArEEOgEwD/cBqgNmAg4CxgABAIUJIgIWApwJCwA+AX8K+QccAVkBpQbGAAEAWQ5TBA0AOgE=",
+      "JgIBAZoEmgOcCR8BBQT0BQsA2wE6AUIKNg5fAV4CwgJDVA4CxgABAFsUWQGeAgsAiQECCHsBAQEDGaUGxgABAC0AwAsLADoBHQRLAh1SSQE=",
+      "BgFNBt4CLAMOAsYAAQBcCQsAhQKdBgsAhQI4DgsAhQKcCQsAhQJPCT4HCwCFAllQCwCFAtcGCwCFAmRDCwCFAgqyCwCFAukUMgkeAQYBbhQ="
+    ]
+  }
+},
+{
+  "settings": {
+    "label": "Model=6B_v3,Prefix=theme_darkfantasy,PromptFilename=need_help_txt",
+    "model": "6B-v3",
+    "prefix": "theme_darkfantasy",
+    "prompt_filename": "need_help.txt",
+    "temperature": 0.55,
+    "max_length": 40,
+    "min_length": 40,
+    "top_k": 140,
+    "top_p": 0.9,
+    "tail_free_sampling": 1,
+    "repetition_penalty": 3.5,
+    "repetition_penalty_range": 1024,
+    "repetition_penalty_slope": 6.57,
+    "bad_words_ids": [],
+    "ban_brackets": true,
+    "use_cache": false,
+    "use_string": false,
+    "return_full_text": false
+  },
+  "prompt": "I need help. I'm not sure what's going on with me, but it's driving me crazy. After looking through the web, I found a Dr. Michael Szozas, who is a renowned psychiatrist and counselor.  Apparently he specializes in unusual cases. I'm not sure if my situation is unusual or not, and I'm not sure how to determine that, so I emailed him anyway.\nDr. Szozas was so nice, and he sounded so smart when he responded. He recommended at least an initial consultation. An appointment was made for Monday at 9am.\nI'm nervous when I come up to his office; the entrance is a solid wooden door, and I reach out to knock. Rap rap rap. His voice comes, well-modulated and educated, \"Come on in!\"\nI step into his office, and my eyes cast about; the lights are set to a soothing dim level, his walls are filled with books. I am tempted to read the titles, but I mustn't be rude, oh no. So I look at the man that is sitting behind his desk.\nThe first thing that strikes me is Dr. Szozas' warm, radiant grin -- with dimples! -- that told me that everything was going to be OK. Then these kind hazel eyes twinkling at me from behind a pair of wire-frame glasses. He rises up, and whoa, he's a tall man with a slender lanky frame that causes me to look up a bit at him. He wears a comfortable looking cardigan, and he has a pair of slacks, ending in some loafers. Dr. Szozas walks towards me, and takes my hand in his -- I immediately notice how large and warm his hand is, his skin soft as it wraps around my fingers, \"I'm glad to see you,\" he says, and he seems to mean it. One could fall in love with someone like him so quickly, with his apparent sincerity and kindness.\n\"Please, take a seat on the couch, make yourself comfortable.  State for the record your full name, and why you're here,\" he suggests, and he ambles over to sit in a comfortable armchair.  His hazel eyes fixate upon me, drinking and studying every detail of me as he waits for my response.\nI hesitate, and sit down on the couch, and I respond, \"",
+  "result": "My name is Emma Smith.\" I pause, and then add, \"Emma...?\"\nHe smiles again, reassuringly this time, \"That's fine. Now tell me what brings you here today.\"\nSo I start talking, telling him all about myself: where I grew up, what my family does, my work history, my hobbies, my likes and dislikes. It feels good to talk about myself, to get something off my chest. And I feel better once I've finished. My mind drifts back to the questions I had asked earlier online, and I ask them now, \"What should I expect? What do we need to discuss?\"\nDr. Szozas laughs softly, \"Nothing too serious. I just want to know more about you, Emma. We'll go through some tests together, but I think it will probably be best if we meet face-to-face first. That way there won't be any surprises later. I don't want to miss anything.\"\n\"Well, okay...\" I say uncertainly. \"But I have to admit, I was a little surprised when they said 'psychiatrist'. You seem much younger than that title implies.\"\nSzozas chuckles, \"You are correct about that. I'm actually 34 years old, which is young for a psychiatrist, but I'm still considered an adult. I am also a graduate student at the university. I'm enrolled in a PhD program right now; I hope to become a professor someday, but I haven't decided yet whether I would teach or research.\"\n\"Wow, that sounds really exciting! I can't wait to hear about it. I'm sure I'd find it fascinating. Do you enjoy teaching?\" I inquire, trying to sound enthusiastic about the idea.\n\"Oh yes!\" he exclaims with enthusiasm. \"It's the most rewarding part of being a teacher. I love the interaction with the students, seeing their faces light up",
+  "responses": [
+    "My name is Emma Smith.\" I pause, and then add, \"Emma...?\"\nHe smiles again, reassuringly this time, \"That's fine. Now tell me what brings you here",
+    " today.\"\nSo I start talking, telling him all about myself: where I grew up, what my family does, my work history, my hobbies, my likes and dislikes. It feels good",
+    " to talk about myself, to get something off my chest. And I feel better once I've finished. My mind drifts back to the questions I had asked earlier online, and I ask them now",
+    ", \"What should I expect? What do we need to discuss?\"\nDr. Szozas laughs softly, \"Nothing too serious. I just want to know more about you, Emma. We",
+    "'ll go through some tests together, but I think it will probably be best if we meet face-to-face first. That way there won't be any surprises later. I don't want to",
+    " miss anything.\"\n\"Well, okay...\" I say uncertainly. \"But I have to admit, I was a little surprised when they said 'psychiatrist'. You seem much younger than that",
+    " title implies.\"\nSzozas chuckles, \"You are correct about that. I'm actually 34 years old, which is young for a psychiatrist, but I'm still considered an adult.",
+    " I am also a graduate student at the university. I'm enrolled in a PhD program right now; I hope to become a professor someday, but I haven't decided yet whether I would teach or research",
+    ".\"\n\"Wow, that sounds really exciting! I can't wait to hear about it. I'm sure I'd find it fascinating. Do you enjoy teaching?\" I inquire, trying to sound enthusiastic",
+    " about the idea.\n\"Oh yes!\" he exclaims with enthusiasm. \"It's the most rewarding part of being a teacher. I love the interaction with the students, seeing their faces light up"
+  ],
+  "encoded": {
+    "prompt": "KAD5Ag0EDQA6AU0ElwF2BoQCUgH4Az8BXwH2AQsA2wFUAVIBwxP2Af0bDQD1CP0HQAMGAZgPCwA6ARMEAQEvBg0AOw9GbY4hJAELAPwBPgEBAXxW53kiAbh8DQDcANwAwnZTAVp0HwEUIWcKDQA6AU0ElwF2BmMCaAICDD4BFCGJAZcBCwAiAToBTQSXAXYGvwIcAYwTRgELAAsCOgH7XqsCJRsNAMYAKxgNAEZtjiEkAXUBCwIlDgsAIgFTAf45CwJjEWoCUwGqGw0ApwLvG3sBDwYZAY4Qt0YNABwEDTF1AZ0DSQH5DHsBXANBAQ0AxgAoAE0ErypqAjoBAgX+ARwB0QEvChoABgGQKD4BAQF/EsY0XA0LACIBOgFPDPcBHAGTKQ0A+S//D/8PDQBfCeEOCggLAHADDAA6EtESIgEpPQsAbgGFQT8BHwGqCcYAKAC/CJAC0QEvCgsAIgFoAocLFg0iAhoABgGkHYUBhAMcAQEBhJ8PFdkECwDRASIehQENF18B+w4NADoBzAJSZhwBTAQGAQoiCwDbAToB/ARNANYBMwEyVgsA6C2FAg0AfgU6ASQDewEGAUYCRgE+AdIVbQjRAQMbDQDGANABzQLtBUYB/CL2AT4BLwYNAEZtjiEkAQYAthYLAHCrgkFhBV8BDxVGCQAAYQVGAREF9gFGAecIdQH4AxwBMwE1HQ0ArAwJA0sGSy2hAYcLmQKkAk8FewH2AaYBbQgBAS4UHgFnGQwAxziAOw0ApwJgQf4BCwAiAfwBQAALAFMBUgEBAaMcRgJfAQEByI8sAYSaaxZGAQgW9gEcASQD/gEBAWsGewGrAg0ApwKuQwEBiBr9B2EKjBULACIBUwHUAQEBLhQeAfkD8xELACgdHwFpAsacbAENAC8GDQBGbY4hJAFqKysN9gELACIBwQpoAv0DHwHRAWEFOgFBDaMPvwI0BiIBthbRAf0DPgELANEBSBCRCmMBVAGBa0AEaAKJJAsAbgEoAE0EyyUcAf4CWQEpAlMBcwQLACIBUwEbCRwBTAZUAQ0AWQfKAkkIHwEyB18BUghMAqsCCwKICwsAXwHRATwQFawiAU9dDQDGAAEAdBULAPMDAQHcFj8BBgFLSAsAEwO3DYgaDQDcANwANCNJAQYBpAYWAjgFngULACIB8QVZATUD4gMpAlMBDBYLACIBUwEzEz0DcQIcAXIGHwEBAYgaiwzRPw0A3ADcAP0ZSy2hAYcLoxB6AWIJ9gELACoeIgE5KxYDdw4eAfYBYwFTAcxuSQFoAkILDQDGACgAclkLACIBcgZiAz8BBgFLSAsAIgE6AdcLCwBuAQ==",
+    "responses": [
+      "Ug6eBT4BFkpQEA4COgGJOgsAIgEUA+8CCwBuAbEnMwraA6UGxgAIBlVV9QILAGKOMgGsAYACCwBuAcgJUgGWDg0ArwoYBvYBhAJ2GlkB4gM=",
+      "dQcOAsYAXAk6AZsDLw0LAB0UqwLdASICBQ4ZACoDOgHMGP4BCwCEAmgCaQZZAwsAaAKeAjoICwBoAgqyCwBoApgeIgGlTAIfDQB4ArQUmgM=",
+      "HAEZBiICBQ4LABwBiwLHBDwCaAIpHg0ASwM6AeYEVQXYBjoBHQRRFA0A2wfQBxEGQUvgAhwBBgF7CjoBJgKtB5ELgwoLACIBOgHxBF4CDwM=",
+      "CwBuAQ0ILwM6AUcGHgBLB9IBZAH5AhwBQAilBsYAKxgNAEZtjiEkASNWAWgLAG4BIUiNBKYKDQA6AY8C/QIcAfgCBQIiAlkBCwAWSg0ABwM=",
+      "nwTTAUADaQKGFLoHCwDbAToBfANUAeEBkAgzAfIEYwJkASIHwgcMALYFDAD2Cc0CDQAoBUMDZAIvB9YBMwFVAgheIAYNADoBRAPWAf0CHAE=",
+      "AwjNBw4CxgABAJMWCwBUImEkOgGOA7MhMgENAG4BAQY6AacBHAHHIwsAOgF1AQEBHgX/GWoC5AETAsECi13/FDEGahGZAwMFcQO7G20CRgE=",
+      "Vg7NPA4CxgAyAFkAjiEkATtQPQMLAG4BZwaFATANIgJGAQ0AOgFNBJIGbhMsA7wFCwAfAj4BRgdJAQEB53kLANsBOgFNBN8DaQwZAcwPDQA=",
+      "OgHMAnsCAQG8KH4OewEGAQMZDQA6AU0EJEkfAQEBCkCWBToDDwMaADoBXwscAbQGAQFgGOxjCwDbAToBLhHWAfoLSQfrBjoBMQLBEYkB2wg=",
+      "DgLGAAEAAVYLAEYBdhRTBNceAAA6AcwB1gHLDxwB1QwiAlQBDQA6AU0EdgY6AQ0GKARUAUs2DQBdCFkBQws/HqUGOgFElQsAPwgcAVAIWFU=",
+      "IgIGAU4IDQDGAAEAtBazDqoJUwGHvlIAXwHrQg0AbgECBFIBBgHtAmxbfAIeAVQDAQFdEg0AOgEyBwYBhyhfAQYBjAkLABsR/wEqGnkG/gE="
+    ]
+  }
+},
+{
+  "settings": {
+    "label": "Model=6B_v3,Prefix=theme_darkfantasy,PromptFilename=need_help_txt",
+    "model": "6B-v3",
+    "prefix": "theme_darkfantasy",
+    "prompt_filename": "need_help.txt",
+    "temperature": 0.55,
+    "max_length": 40,
+    "min_length": 40,
+    "top_k": 140,
+    "top_p": 0.9,
+    "tail_free_sampling": 1,
+    "repetition_penalty": 3.5,
+    "repetition_penalty_range": 1024,
+    "repetition_penalty_slope": 6.57,
+    "bad_words_ids": [],
+    "ban_brackets": true,
+    "use_cache": false,
+    "use_string": false,
+    "return_full_text": false
+  },
+  "prompt": "I need help. I'm not sure what's going on with me, but it's driving me crazy. After looking through the web, I found a Dr. Michael Szozas, who is a renowned psychiatrist and counselor.  Apparently he specializes in unusual cases. I'm not sure if my situation is unusual or not, and I'm not sure how to determine that, so I emailed him anyway.\nDr. Szozas was so nice, and he sounded so smart when he responded. He recommended at least an initial consultation. An appointment was made for Monday at 9am.\nI'm nervous when I come up to his office; the entrance is a solid wooden door, and I reach out to knock. Rap rap rap. His voice comes, well-modulated and educated, \"Come on in!\"\nI step into his office, and my eyes cast about; the lights are set to a soothing dim level, his walls are filled with books. I am tempted to read the titles, but I mustn't be rude, oh no. So I look at the man that is sitting behind his desk.\nThe first thing that strikes me is Dr. Szozas' warm, radiant grin -- with dimples! -- that told me that everything was going to be OK. Then these kind hazel eyes twinkling at me from behind a pair of wire-frame glasses. He rises up, and whoa, he's a tall man with a slender lanky frame that causes me to look up a bit at him. He wears a comfortable looking cardigan, and he has a pair of slacks, ending in some loafers. Dr. Szozas walks towards me, and takes my hand in his -- I immediately notice how large and warm his hand is, his skin soft as it wraps around my fingers, \"I'm glad to see you,\" he says, and he seems to mean it. One could fall in love with someone like him so quickly, with his apparent sincerity and kindness.\n\"Please, take a seat on the couch, make yourself comfortable.  State for the record your full name, and why you're here,\" he suggests, and he ambles over to sit in a comfortable armchair.  His hazel eyes fixate upon me, drinking and studying every detail of me as he waits for my response.\nI hesitate, and sit down on the couch, and I respond, \"",
+  "result": "My name is Selena Jansen, and I've been having nightmares.\"\r\nHe nods, \"And they seem related to something that happened recently?\"\r\n\"Yes, I think so. But I don't know what it means,\" I say honestly.\r\n\"Well, let's start by establishing the facts. What do we have? When did this all begin?\" he asks gently.\r\nSo I tell him about my father leaving us when I was only four years old, and my mother moving away shortly after. I explain about living alone in our house, with nothing but each other to rely on. The move seemed sudden, and I remember being very frightened, wondering if she would return, or where she had gone.\r\nI also talk about the dreams that began soon afterward, when I was seven years old. They were always the same: waking up screaming, with visions of fire and blood and screams. It was terrifying, especially when I woke up wet with sweat and trembling, knowing that I had just experienced another nightmare. My parents tried to comfort me, but there wasn't much they could really offer.\r\n\"What about the past few weeks? Any changes in your life?\" he asks.\r\n\"No, not really,\" I answer. \"We went to the beach last week. We took a trip to the park a couple days ago, but that was about it.\"\r\nDr. Szozas smiles again, \"You're not taking any medication for sleep issues, are you?\"\r\n\"No, I haven't taken anything since I started getting the nightmares,\" I admit. \"But I feel fine now. I'm not tired at night anymore, and I can get through the day without falling asleep at work.\" I pause, thinking about that. \"It might be that I'm feeling better because I'm sleeping less than usual. Maybe that makes it worse somehow...\" I trail off uncertainly.\r\nDr.",
+  "responses": [
+    "My name is Selena Jansen, and I've been having nightmares.\"\r\nHe nods, \"And they seem related to something that happened recently?\"\r\n\"Yes, I think so.",
+    " But I don't know what it means,\" I say honestly.\r\n\"Well, let's start by establishing the facts. What do we have? When did this all begin?\" he asks gently",
+    ".\r\nSo I tell him about my father leaving us when I was only four years old, and my mother moving away shortly after. I explain about living alone in our house, with nothing but",
+    " each other to rely on. The move seemed sudden, and I remember being very frightened, wondering if she would return, or where she had gone.\r\nI also talk about the dreams that began",
+    " soon afterward, when I was seven years old. They were always the same: waking up screaming, with visions of fire and blood and screams. It was terrifying, especially when I woke up wet with",
+    " sweat and trembling, knowing that I had just experienced another nightmare. My parents tried to comfort me, but there wasn't much they could really offer.\r\n\"What about the past few weeks?",
+    " Any changes in your life?\" he asks.\r\n\"No, not really,\" I answer. \"We went to the beach last week. We took a trip to the park a couple days ago",
+    ", but that was about it.\"\r\nDr. Szozas smiles again, \"You're not taking any medication for sleep issues, are you?\"\r\n\"No, I haven't taken",
+    " anything since I started getting the nightmares,\" I admit. \"But I feel fine now. I'm not tired at night anymore, and I can get through the day without falling asleep at work.\" I",
+    " pause, thinking about that. \"It might be that I'm feeling better because I'm sleeping less than usual. Maybe that makes it worse somehow...\" I trail off uncertainly.\r\nDr."
+  ],
+  "encoded": {
+    "prompt": "KAD5Ag0EDQA6AU0ElwF2BoQCUgH4Az8BXwH2AQsA2wFUAVIBwxP2Af0bDQD1CP0HQAMGAZgPCwA6ARMEAQEvBg0AOw9GbY4hJAELAPwBPgEBAXxW53kiAbh8DQDcANwAwnZTAVp0HwEUIWcKDQA6AU0ElwF2BmMCaAICDD4BFCGJAZcBCwAiAToBTQSXAXYGvwIcAYwTRgELAAsCOgH7XqsCJRsNAMYAKxgNAEZtjiEkAXUBCwIlDgsAIgFTAf45CwJjEWoCUwGqGw0ApwLvG3sBDwYZAY4Qt0YNABwEDTF1AZ0DSQH5DHsBXANBAQ0AxgAoAE0ErypqAjoBAgX+ARwB0QEvChoABgGQKD4BAQF/EsY0XA0LACIBOgFPDPcBHAGTKQ0A+S//D/8PDQBfCeEOCggLAHADDAA6EtESIgEpPQsAbgGFQT8BHwGqCcYAKAC/CJAC0QEvCgsAIgFoAocLFg0iAhoABgGkHYUBhAMcAQEBhJ8PFdkECwDRASIehQENF18B+w4NADoBzAJSZhwBTAQGAQoiCwDbAToB/ARNANYBMwEyVgsA6C2FAg0AfgU6ASQDewEGAUYCRgE+AdIVbQjRAQMbDQDGANABzQLtBUYB/CL2AT4BLwYNAEZtjiEkAQYAthYLAHCrgkFhBV8BDxVGCQAAYQVGAREF9gFGAecIdQH4AxwBMwE1HQ0ArAwJA0sGSy2hAYcLmQKkAk8FewH2AaYBbQgBAS4UHgFnGQwAxziAOw0ApwJgQf4BCwAiAfwBQAALAFMBUgEBAaMcRgJfAQEByI8sAYSaaxZGAQgW9gEcASQD/gEBAWsGewGrAg0ApwKuQwEBiBr9B2EKjBULACIBUwHUAQEBLhQeAfkD8xELACgdHwFpAsacbAENAC8GDQBGbY4hJAFqKysN9gELACIBwQpoAv0DHwHRAWEFOgFBDaMPvwI0BiIBthbRAf0DPgELANEBSBCRCmMBVAGBa0AEaAKJJAsAbgEoAE0EyyUcAf4CWQEpAlMBcwQLACIBUwEbCRwBTAZUAQ0AWQfKAkkIHwEyB18BUghMAqsCCwKICwsAXwHRATwQFawiAU9dDQDGAAEAdBULAPMDAQHcFj8BBgFLSAsAEwO3DYgaDQDcANwANCNJAQYBpAYWAjgFngULACIB8QVZATUD4gMpAlMBDBYLACIBUwEzEz0DcQIcAXIGHwEBAYgaiwzRPw0A3ADcAP0ZSy2hAYcLoxB6AWIJ9gELACoeIgE5KxYDdw4eAfYBYwFTAcxuSQFoAkILDQDGACgAclkLACIBcgZiAz8BBgFLSAsAIgE6AdcLCwBuAQ==",
+    "responses": [
+      "Ug6eBT4BxDurH8EBD4QLACIBOgEdBEsCtwYVgg4CyQDGAAgGEYgLAG4BTgfkAQMFvw0cAccERgHOC1gLpQbJAMYAAQCxFAsAOgF8AwsCDQA=",
+      "dwM6AUQD1gH4AoQCVAG8BikCOgGOA5oxDQDJAMYAAQCTFgsAHQVSAZsDoAGiOgYBExkNAEsH0gFkAacBHgBxBu4CrAHdAa0IpQZTAdUePTs=",
+      "DQDJAMYAXAk6ARgGqwIiAmgCrAvREAICagI6AXUBswKgBSwDvAULACIBaALyChsP2QUMI8ICDQA6AXcSIgI9C2wNHwGiAmwICwBfAWMI2wE=",
+      "YwRIAhwBbiI/AQ0AfwGlBWsPwhILACIBOgGxDVQDTQPIYAsA/ytjAqECMQKhBQsAiQEqA6ECJgKmDg0AyQDGACgAewIZBiICBgGBKUYB7Ak=",
+      "FgqLUQsAagI6AXUBDg4sA7wFDQBfBCMCuAUGAdADGQBhWv4BxDkLAF8B8GUeAf4HIgFeCyIBvWcNAHgCdQHXRAsAIApqAjoBlEr+AW8lXwE=",
+      "gDwiATyZCwA6G0YBOgEmAo8CJBeqBONCDQDbB0UNEAwcAXMR9gELANsBZAK8CdYBcQPkAcoCUwRRCw0AyQDGAAEADQgiAgYBTQaaBLkKHgA=",
+      "GRGaCR8BFgK0BKUGUwHVHg0AyQDGAAEAhQsLAJcBUwQpAjoB0AwNAG4BbwQYBxwBBgHxKKoDBQUNAAcDtgYBAbAUHAEGAXAPAQFTDPgFJAg=",
+      "CwDbAUYBdQEiAlQBDgLJAMYAKxgNAEZtjiEkAVVV9QILAG4BZwY1A5cB1whVAhc3SQGZD3wJCwCFAVkBpQbJAMYAAQCFCwsAOgEuEdYBHQg=",
+      "zQexBDoBEwi0BwYBFYIpAjoBxyMNAG4BAQY6AeYElg4PAw0AOgFNBJcBMCd7AdsGLx0LACIBOgHMAYsCQAMGAVYEzwQnHac+ewGeAg4COgE=",
+      "iToLABwOIgJGAQ0AbgECBNwEMwFGAToBTQRrEFUFDAM6AU0EFSs+BW0CFhoNABIaRgEuB1QBsRKvHWEkOgFZHzwCsyEyAQ0AyQDGACsYDQA="
+    ]
+  }
+},
+{
+  "settings": {
+    "label": "Model=6B_v3,Prefix=theme_darkfantasy,PromptFilename=need_help_txt",
+    "model": "6B-v3",
+    "prefix": "theme_darkfantasy",
+    "prompt_filename": "need_help.txt",
+    "temperature": 0.55,
+    "max_length": 40,
+    "min_length": 40,
+    "top_k": 140,
+    "top_p": 0.9,
+    "tail_free_sampling": 1,
+    "repetition_penalty": 3.5,
+    "repetition_penalty_range": 1024,
+    "repetition_penalty_slope": 6.57,
+    "bad_words_ids": [],
+    "ban_brackets": true,
+    "use_cache": false,
+    "use_string": false,
+    "return_full_text": false
+  },
+  "prompt": "I need help. I'm not sure what's going on with me, but it's driving me crazy. After looking through the web, I found a Dr. Michael Szozas, who is a renowned psychiatrist and counselor.  Apparently he specializes in unusual cases. I'm not sure if my situation is unusual or not, and I'm not sure how to determine that, so I emailed him anyway.\nDr. Szozas was so nice, and he sounded so smart when he responded. He recommended at least an initial consultation. An appointment was made for Monday at 9am.\nI'm nervous when I come up to his office; the entrance is a solid wooden door, and I reach out to knock. Rap rap rap. His voice comes, well-modulated and educated, \"Come on in!\"\nI step into his office, and my eyes cast about; the lights are set to a soothing dim level, his walls are filled with books. I am tempted to read the titles, but I mustn't be rude, oh no. So I look at the man that is sitting behind his desk.\nThe first thing that strikes me is Dr. Szozas' warm, radiant grin -- with dimples! -- that told me that everything was going to be OK. Then these kind hazel eyes twinkling at me from behind a pair of wire-frame glasses. He rises up, and whoa, he's a tall man with a slender lanky frame that causes me to look up a bit at him. He wears a comfortable looking cardigan, and he has a pair of slacks, ending in some loafers. Dr. Szozas walks towards me, and takes my hand in his -- I immediately notice how large and warm his hand is, his skin soft as it wraps around my fingers, \"I'm glad to see you,\" he says, and he seems to mean it. One could fall in love with someone like him so quickly, with his apparent sincerity and kindness.\n\"Please, take a seat on the couch, make yourself comfortable.  State for the record your full name, and why you're here,\" he suggests, and he ambles over to sit in a comfortable armchair.  His hazel eyes fixate upon me, drinking and studying every detail of me as he waits for my response.\nI hesitate, and sit down on the couch, and I respond, \"",
+  "result": "My name is Caryn MacKenzie.\"   \"And?\" prompts Dr. Szozas, waiting patiently.\r\n\"Well... uhm...\" I begin hesitantly, trying to decide where to start. My mind spins in circles, unable to settle on anything specific. I glance back at Dr. Szozas, wondering what he would do next. Would he tell me to just spit it all out? Or maybe ask questions until I get it all out? What if I don't know what to say? But then again, perhaps I should keep this to myself and figure things out later. I feel very much alone, and vulnerable, and confused. The only thing I can think of is: \"I've been having weird dreams lately. Dreams about being lost. Like I'm trapped inside a maze, or something similar. And I have trouble sleeping because of them. I also wake up feeling depressed sometimes, even though I haven't done anything wrong. It's hard to explain, but I think there might be a connection between the two.\"\r\nDr. Szozas listens intently as I talk, nodding occasionally when appropriate. He asks a few clarifying questions, but doesn't push too hard. When I finish talking, he sits quietly, thinking. I watch his face, and I am struck by the fact that his features are almost identical to those of his twin brother, Michael. I wonder if they are twins, but I cannot bring myself to ask. I wait patiently for his response.\r\n\"Caryn, I am going to refer you to another doctor that specializes in dreams and sleep disorders, but before we go any further I want to be sure that I understand the situation correctly. Are you saying that you are suffering from insomnia and nightmares due to stress, anxiety, depression, and/or other emotional issues that may be contributing to these problems?\"   \"Yes, sir. I'm afraid that I am.\" \"Do you",
+  "responses": [
+    "My name is Caryn MacKenzie.\"   \"And?\" prompts Dr. Szozas, waiting patiently.\r\n\"Well... uhm...\" I begin hesitantly, trying to",
+    " decide where to start. My mind spins in circles, unable to settle on anything specific. I glance back at Dr. Szozas, wondering what he would do next. Would he tell me to",
+    " just spit it all out? Or maybe ask questions until I get it all out? What if I don't know what to say? But then again, perhaps I should keep this to myself and figure",
+    " things out later. I feel very much alone, and vulnerable, and confused. The only thing I can think of is: \"I've been having weird dreams lately. Dreams about being lost. Like",
+    " I'm trapped inside a maze, or something similar. And I have trouble sleeping because of them. I also wake up feeling depressed sometimes, even though I haven't done anything wrong. It's hard",
+    " to explain, but I think there might be a connection between the two.\"\r\nDr. Szozas listens intently as I talk, nodding occasionally when appropriate. He asks a few clarifying",
+    " questions, but doesn't push too hard. When I finish talking, he sits quietly, thinking. I watch his face, and I am struck by the fact that his features are almost identical to those",
+    " of his twin brother, Michael. I wonder if they are twins, but I cannot bring myself to ask. I wait patiently for his response.\r\n\"Caryn, I am going to refer",
+    " you to another doctor that specializes in dreams and sleep disorders, but before we go any further I want to be sure that I understand the situation correctly. Are you saying that you are suffering from insomnia and",
+    " nightmares due to stress, anxiety, depression, and/or other emotional issues that may be contributing to these problems?\"   \"Yes, sir. I'm afraid that I am.\" \"Do you"
+  ],
+  "encoded": {
+    "prompt": "KAD5Ag0EDQA6AU0ElwF2BoQCUgH4Az8BXwH2AQsA2wFUAVIBwxP2Af0bDQD1CP0HQAMGAZgPCwA6ARMEAQEvBg0AOw9GbY4hJAELAPwBPgEBAXxW53kiAbh8DQDcANwAwnZTAVp0HwEUIWcKDQA6AU0ElwF2BmMCaAICDD4BFCGJAZcBCwAiAToBTQSXAXYGvwIcAYwTRgELAAsCOgH7XqsCJRsNAMYAKxgNAEZtjiEkAXUBCwIlDgsAIgFTAf45CwJjEWoCUwGqGw0ApwLvG3sBDwYZAY4Qt0YNABwEDTF1AZ0DSQH5DHsBXANBAQ0AxgAoAE0ErypqAjoBAgX+ARwB0QEvChoABgGQKD4BAQF/EsY0XA0LACIBOgFPDPcBHAGTKQ0A+S//D/8PDQBfCeEOCggLAHADDAA6EtESIgEpPQsAbgGFQT8BHwGqCcYAKAC/CJAC0QEvCgsAIgFoAocLFg0iAhoABgGkHYUBhAMcAQEBhJ8PFdkECwDRASIehQENF18B+w4NADoBzAJSZhwBTAQGAQoiCwDbAToB/ARNANYBMwEyVgsA6C2FAg0AfgU6ASQDewEGAUYCRgE+AdIVbQjRAQMbDQDGANABzQLtBUYB/CL2AT4BLwYNAEZtjiEkAQYAthYLAHCrgkFhBV8BDxVGCQAAYQVGAREF9gFGAecIdQH4AxwBMwE1HQ0ArAwJA0sGSy2hAYcLmQKkAk8FewH2AaYBbQgBAS4UHgFnGQwAxziAOw0ApwJgQf4BCwAiAfwBQAALAFMBUgEBAaMcRgJfAQEByI8sAYSaaxZGAQgW9gEcASQD/gEBAWsGewGrAg0ApwKuQwEBiBr9B2EKjBULACIBUwHUAQEBLhQeAfkD8xELACgdHwFpAsacbAENAC8GDQBGbY4hJAFqKysN9gELACIBwQpoAv0DHwHRAWEFOgFBDaMPvwI0BiIBthbRAf0DPgELANEBSBCRCmMBVAGBa0AEaAKJJAsAbgEoAE0EyyUcAf4CWQEpAlMBcwQLACIBUwEbCRwBTAZUAQ0AWQfKAkkIHwEyB18BUghMAqsCCwKICwsAXwHRATwQFawiAU9dDQDGAAEAdBULAPMDAQHcFj8BBgFLSAsAEwO3DYgaDQDcANwANCNJAQYBpAYWAjgFngULACIB8QVZATUD4gMpAlMBDBYLACIBUwEzEz0DcQIcAXIGHwEBAYgaiwzRPw0A3ADcAP0ZSy2hAYcLoxB6AWIJ9gELACoeIgE5KxYDdw4eAfYBYwFTAcxuSQFoAkILDQDGACgAclkLACIBcgZiAz8BBgFLSAsAIgE6AdcLCwBuAQ==",
+    "responses": [
+      "Ug6eBT4BRwHdlgQQKgAVZw4C3ADcAG4BTgelBmaOLwYNAEZtjiEkAQsAWRNkkQ0AyQDGAAEAkxbaA+hTTABhJDoBrQhCKg4BIw8LAD8IHAE=",
+      "IRUqAxwBmwMNANsH0Af1kh8BFDQLABIXHAHjLz8BzQeACA0AOgHWPuACewEvBg0ARm2OISQBCwD/K4QCUwExAtIBGgUNALAqUwEYBvYBHAE=",
+      "jwLHa1QB3QH3AR4AvwUXD/EEewoeBjoBiwJUAd0B9wEeAEsHYwI6AUQD1gH4AoQCHAGOAx4AdwMUA/UCCwCZDjoBLwNyBawBHAEFDiIByQ4=",
+      "2wT3ASAGDQA6AeYETQNxA2wNCwAiAXoiCwAiAbAoDQB/AbMC7QU6AcwBfAMeAT4BGQBuASgAHQRLArcG4h2BKZlADQAXVCICVANCCg0ArRE=",
+      "OgFNBEg1UQoBAQV6CwCJAccELAgNAEsDOgGnAfQWFSsMAx4BXgINADoBewJVHv4BaxCXSiANCwAEA+QDOgEuEdYB4AbNB1IKDQB4AlIBLwU=",
+      "HAF3EgsA2wE6AXwDZALcBDMBAQEdEv4DBgHeAg4CyQDGACsYDQBGbY4hJAHLiO0BwQVjAToBGQYLAN+5+yhqAqsTDQCnAtUeAQGaBOQnww8=",
+      "ewoLANsBOwbWAd4RjQQvBQ0AcQY6AVUVLw0LAFMB3imfMQsAHA4NADoBJgnRAcIHCwAiAToBzAIBHaABBgFVBEYB0QHZC4UBAAirKBwBcwM=",
+      "HgHRAWM7dA8LADsPDQA6AZAQYwLkAYUBeU8LANsBOgEKCa4IBQ4cAfEEDQA6AcsPZJFJAdEBQgsNAMkAxgABACIA3ZYLADoBzAL4AxwBwg0=",
+      "WQEcAaoEbRhGAVp0HwGBKSIBmQ+MLgsA2wFuA2QB0wFVAswIOgH9AhwBMwF2BkYBOgEpBwYBAgykJA0AhxBZAeoIRgFZAYUBGxymAQC4IgE=",
+      "FYK5CBwBfxULABcmCwCeIgsAIgEOABEBSAJoG3wJRgHnAjMB+TccAQkDyQqlBtwA3ABuAbEUCwBfPg0AOgFNBGseRgE6AcwCDgJuAVsUWQE="
+    ]
+  }
+},
+{
+  "settings": {
+    "label": "Model=6B_v3,Prefix=theme_darkfantasy,PromptFilename=need_help_txt",
+    "model": "6B-v3",
+    "prefix": "theme_darkfantasy",
+    "prompt_filename": "need_help.txt",
+    "temperature": 0.55,
+    "max_length": 40,
+    "min_length": 40,
+    "top_k": 140,
+    "top_p": 0.9,
+    "tail_free_sampling": 1,
+    "repetition_penalty": 3.5,
+    "repetition_penalty_range": 1024,
+    "repetition_penalty_slope": 6.57,
+    "bad_words_ids": [],
+    "ban_brackets": true,
+    "use_cache": false,
+    "use_string": false,
+    "return_full_text": false
+  },
+  "prompt": "I need help. I'm not sure what's going on with me, but it's driving me crazy. After looking through the web, I found a Dr. Michael Szozas, who is a renowned psychiatrist and counselor.  Apparently he specializes in unusual cases. I'm not sure if my situation is unusual or not, and I'm not sure how to determine that, so I emailed him anyway.\nDr. Szozas was so nice, and he sounded so smart when he responded. He recommended at least an initial consultation. An appointment was made for Monday at 9am.\nI'm nervous when I come up to his office; the entrance is a solid wooden door, and I reach out to knock. Rap rap rap. His voice comes, well-modulated and educated, \"Come on in!\"\nI step into his office, and my eyes cast about; the lights are set to a soothing dim level, his walls are filled with books. I am tempted to read the titles, but I mustn't be rude, oh no. So I look at the man that is sitting behind his desk.\nThe first thing that strikes me is Dr. Szozas' warm, radiant grin -- with dimples! -- that told me that everything was going to be OK. Then these kind hazel eyes twinkling at me from behind a pair of wire-frame glasses. He rises up, and whoa, he's a tall man with a slender lanky frame that causes me to look up a bit at him. He wears a comfortable looking cardigan, and he has a pair of slacks, ending in some loafers. Dr. Szozas walks towards me, and takes my hand in his -- I immediately notice how large and warm his hand is, his skin soft as it wraps around my fingers, \"I'm glad to see you,\" he says, and he seems to mean it. One could fall in love with someone like him so quickly, with his apparent sincerity and kindness.\n\"Please, take a seat on the couch, make yourself comfortable.  State for the record your full name, and why you're here,\" he suggests, and he ambles over to sit in a comfortable armchair.  His hazel eyes fixate upon me, drinking and studying every detail of me as he waits for my response.\nI hesitate, and sit down on the couch, and I respond, \"",
+  "result": "My name is Angie Lillis.\"\nHe nods, \"Go ahead.\"\n\"Well, um... I don't know where to start...\"\nHe smiles again, \"That's ok, just tell me whatever you think will help us understand each other better.\"\nSo I continue, \"OK, uhm... Well, I've been having dreams lately... They're really vivid and real, almost too real sometimes. And they seem to change all the time. Some nights I have this dream where I'm standing in front of a big white building, and there's a guy coming out of one of the doors, and then he looks at me, and he yells something, but I can't hear what he said because he speaks in another language. It sounds like Russian or Chinese or maybe Spanish? But when I wake up, I remember nothing else except that the guy was yelling at me, 'Get out!' He was very angry, and I woke up scared. That's one night. The next night, I had a different dream. This time, I was walking along a street with lots of people going by, and I saw a girl who looked exactly like me; she was wearing the same clothes that I am. She waved at me, and I smiled back at her. We went into the store together, we bought some groceries, and I paid for them with cash that I pulled from a pocket inside my shirt. When I got home, I put the groceries away, and I ate dinner with the woman. I sat across the table from her at the kitchen table, and I noticed that she wasn't eating anything; she kept glancing at me, but I couldn't read any emotion on her face. I thought that I should say something to her, but I didn't know what to talk about. I felt awkward, but I tried to break the silence, \"You look familiar to me.\"\nShe laughed a little, but it sounded hollow,",
+  "responses": [
+    "My name is Angie Lillis.\"\nHe nods, \"Go ahead.\"\n\"Well, um... I don't know where to start...\"\nHe smiles again, \"That's ok",
+    ", just tell me whatever you think will help us understand each other better.\"\nSo I continue, \"OK, uhm... Well, I've been having dreams lately... They're really vivid and",
+    " real, almost too real sometimes. And they seem to change all the time. Some nights I have this dream where I'm standing in front of a big white building, and there's a guy coming",
+    " out of one of the doors, and then he looks at me, and he yells something, but I can't hear what he said because he speaks in another language. It sounds like Russian or Chinese",
+    " or maybe Spanish? But when I wake up, I remember nothing else except that the guy was yelling at me, 'Get out!' He was very angry, and I woke up scared. That's",
+    " one night. The next night, I had a different dream. This time, I was walking along a street with lots of people going by, and I saw a girl who looked exactly like me;",
+    " she was wearing the same clothes that I am. She waved at me, and I smiled back at her. We went into the store together, we bought some groceries, and I paid for them with",
+    " cash that I pulled from a pocket inside my shirt. When I got home, I put the groceries away, and I ate dinner with the woman. I sat across the table from her at the kitchen",
+    " table, and I noticed that she wasn't eating anything; she kept glancing at me, but I couldn't read any emotion on her face. I thought that I should say something to her,",
+    " but I didn't know what to talk about. I felt awkward, but I tried to break the silence, \"You look familiar to me.\"\nShe laughed a little, but it sounded hollow,"
+  ],
+  "encoded": {
+    "prompt": "KAD5Ag0EDQA6AU0ElwF2BoQCUgH4Az8BXwH2AQsA2wFUAVIBwxP2Af0bDQD1CP0HQAMGAZgPCwA6ARMEAQEvBg0AOw9GbY4hJAELAPwBPgEBAXxW53kiAbh8DQDcANwAwnZTAVp0HwEUIWcKDQA6AU0ElwF2BmMCaAICDD4BFCGJAZcBCwAiAToBTQSXAXYGvwIcAYwTRgELAAsCOgH7XqsCJRsNAMYAKxgNAEZtjiEkAXUBCwIlDgsAIgFTAf45CwJjEWoCUwGqGw0ApwLvG3sBDwYZAY4Qt0YNABwEDTF1AZ0DSQH5DHsBXANBAQ0AxgAoAE0ErypqAjoBAgX+ARwB0QEvChoABgGQKD4BAQF/EsY0XA0LACIBOgFPDPcBHAGTKQ0A+S//D/8PDQBfCeEOCggLAHADDAA6EtESIgEpPQsAbgGFQT8BHwGqCcYAKAC/CJAC0QEvCgsAIgFoAocLFg0iAhoABgGkHYUBhAMcAQEBhJ8PFdkECwDRASIehQENF18B+w4NADoBzAJSZhwBTAQGAQoiCwDbAToB/ARNANYBMwEyVgsA6C2FAg0AfgU6ASQDewEGAUYCRgE+AdIVbQjRAQMbDQDGANABzQLtBUYB/CL2AT4BLwYNAEZtjiEkAQYAthYLAHCrgkFhBV8BDxVGCQAAYQVGAREF9gFGAecIdQH4AxwBMwE1HQ0ArAwJA0sGSy2hAYcLmQKkAk8FewH2AaYBbQgBAS4UHgFnGQwAxziAOw0ApwJgQf4BCwAiAfwBQAALAFMBUgEBAaMcRgJfAQEByI8sAYSaaxZGAQgW9gEcASQD/gEBAWsGewGrAg0ApwKuQwEBiBr9B2EKjBULACIBUwHUAQEBLhQeAfkD8xELACgdHwFpAsacbAENAC8GDQBGbY4hJAFqKysN9gELACIBwQpoAv0DHwHRAWEFOgFBDaMPvwI0BiIBthbRAf0DPgELANEBSBCRCmMBVAGBa0AEaAKJJAsAbgEoAE0EyyUcAf4CWQEpAlMBcwQLACIBUwEbCRwBTAZUAQ0AWQfKAkkIHwEyB18BUghMAqsCCwKICwsAXwHRATwQFawiAU9dDQDGAAEAdBULAPMDAQHcFj8BBgFLSAsAEwO3DYgaDQDcANwANCNJAQYBpAYWAjgFngULACIB8QVZATUD4gMpAlMBDBYLACIBUwEzEz0DcQIcAXIGHwEBAYgaiwzRPw0A3ADcAP0ZSy2hAYcLoxB6AWIJ9gELACoeIgE5KxYDdw4eAfYBYwFTAcxuSQFoAkILDQDGACgAclkLACIBcgZiAz8BBgFLSAsAIgE6AdcLCwBuAQ==",
+    "responses": [
+      "Ug6eBT4BTwvuAZYBZwEPAQ4CxgAIBhGICwBuAX8U2g8OAsYAAQCTFgsA5VzaAzoBRAPWAfgCKgMcAZsDYSTGAAgGVVX1AgsAbgHICVIBTDI=",
+      "CwCPAhgG9gGIEFkBfAPhAQ0EAgIpB2MESAJVBQ4CxgBcCToB+wkLAG4BdCwLAOhTTADaAzYPCwA6AR0ESwK3BoEpmUDaA18ENQNTBApSIgE=",
+      "TwQLAAAIjQRPBCANDQBLA+QBAwUcAc8F3QEGAYACDQDVCuEwOgGnAawB4BAqAzoBTQS/Ex8BdggeAQEB7wQaCTcKCwAiAWQCUgEBAbwNZgk=",
+      "9wEeARICHgEGARcgCwAiARQDUwEBDHsB9gELACIBUwGzpscECwDbAToBzAHWAdUMhAJTARMCDANTAfkjHwGqBOcMDQB4AnYUTAJCDYkBnw8=",
+      "iQEXD9keHgB3A2oCOgFVHv4BCwA6AbENYwgZCB0LRgEGAbwNdQGrVnsB9gELAMECDw/3AW81pwJ1AU0DEh8LACIBOgGUSv4B6C4NACgFUgE=",
+      "EgLbBg0AfwEaBdsGCwA6ASYCAQGcBOAQDQACA4ACCwA6AXUBCxhHBwEBQxJfAZkXHgGVAvgDoAELACIBOgHBCQEBEAr8ASoMdg1MAvYBGgA=",
+      "oQJ1AYIWBgHQAzIgRgE6AcwCDQBfBdJoewH2AQsAIgE6AeU04AJ7AV8CDQAHAxgHkAIGAUIOugcLAGQBzxZpAkCWCwAiAToBaA1JAV4CXwE=",
+      "ixNGAToBQhemAQEBECdRCmgCoycNAHEGOgFwBVMFCwA6AdIEBgFAltkFCwAiAToB1zqJH18BBgFvCQ0AOgEEDbUHBgEMDKYBXwJ7AQYBeCU=",
+      "DAwLACIBOgGaGkYBoQK8CdYByBnNBxoAoQK+D/4E1RN7AfYBCwDbAToBwQ3WAUwEVQLWJj8BXwLCBw0AOgEPB0YBOgEvA44DxwQcAV8CCwA=",
+      "2wE6AY4F1gH4AoQCHAEZBiICDQA6AXgLzjILANsBOgEQDBwB3ggGAU4lCwBuAWcGJAMJFRwB9gEOAsYAEw36NQEBHgULANsBVAH+OXRQCwA="
+    ]
+  }
+},
+{
+  "settings": {
+    "label": "Model=6B_v3,Prefix=theme_darkfantasy,PromptFilename=need_help_txt",
+    "model": "6B-v3",
+    "prefix": "theme_darkfantasy",
+    "prompt_filename": "need_help.txt",
+    "temperature": 0.55,
+    "max_length": 40,
+    "min_length": 40,
+    "top_k": 140,
+    "top_p": 0.9,
+    "tail_free_sampling": 1,
+    "repetition_penalty": 3.5,
+    "repetition_penalty_range": 1024,
+    "repetition_penalty_slope": 6.57,
+    "bad_words_ids": [],
+    "ban_brackets": true,
+    "use_cache": false,
+    "use_string": false,
+    "return_full_text": false
+  },
+  "prompt": "I need help. I'm not sure what's going on with me, but it's driving me crazy. After looking through the web, I found a Dr. Michael Szozas, who is a renowned psychiatrist and counselor.  Apparently he specializes in unusual cases. I'm not sure if my situation is unusual or not, and I'm not sure how to determine that, so I emailed him anyway.\nDr. Szozas was so nice, and he sounded so smart when he responded. He recommended at least an initial consultation. An appointment was made for Monday at 9am.\nI'm nervous when I come up to his office; the entrance is a solid wooden door, and I reach out to knock. Rap rap rap. His voice comes, well-modulated and educated, \"Come on in!\"\nI step into his office, and my eyes cast about; the lights are set to a soothing dim level, his walls are filled with books. I am tempted to read the titles, but I mustn't be rude, oh no. So I look at the man that is sitting behind his desk.\nThe first thing that strikes me is Dr. Szozas' warm, radiant grin -- with dimples! -- that told me that everything was going to be OK. Then these kind hazel eyes twinkling at me from behind a pair of wire-frame glasses. He rises up, and whoa, he's a tall man with a slender lanky frame that causes me to look up a bit at him. He wears a comfortable looking cardigan, and he has a pair of slacks, ending in some loafers. Dr. Szozas walks towards me, and takes my hand in his -- I immediately notice how large and warm his hand is, his skin soft as it wraps around my fingers, \"I'm glad to see you,\" he says, and he seems to mean it. One could fall in love with someone like him so quickly, with his apparent sincerity and kindness.\n\"Please, take a seat on the couch, make yourself comfortable.  State for the record your full name, and why you're here,\" he suggests, and he ambles over to sit in a comfortable armchair.  His hazel eyes fixate upon me, drinking and studying every detail of me as he waits for my response.\nI hesitate, and sit down on the couch, and I respond, \"",
+  "result": "My name is Lena. My friends call me Lenny.\"\r\nHe nods slowly, \"Lena, do you mind telling me what brings you here today?\"\r\nI have been thinking about this all day, and I've decided to just tell him the truth: \"Well, I think I may be having problems with... Well, let me start by saying that I don't know anything about myself. It feels like I'm losing control of my own body sometimes, especially when I'm doing things that I shouldn't be able to do. And I can't seem to stop eating meat or sweets.\"\r\nDr. Szozas raises an eyebrow, \"And what does that feel like? How would you describe it?\"\r\n\"It feels like I'm not really there anymore. Like I'm watching myself from somewhere else, almost like I'm dreaming while awake.\"\r\n\"Are you experiencing any other symptoms?\"\r\n\"No, nothing that stands out. Just the feeling that I'm not fully present, and also being hungry.\"\r\n\"Have you ever had any issues with food before?\"\r\n\"Not really. I always ate healthy, and never seemed to gain weight. But lately I've noticed that I eat more than usual, but I still don't get fat. I wonder if that means something...\"\r\n\"So what are your thoughts about the cause of these feelings, Lena? Do they come to you suddenly, without warning? Or is there a trigger that sets them off?\"\r\n\"Well, I guess I thought that maybe I was depressed because I was unhappy with my life, but then I realized that I was happy with my job at the hospital, but I was also miserable with my personal relationships, which I couldn't figure out why I was even with the people I was with. Then I started to think that maybe I was getting sick, but I didn't want to go to the doctor because I knew that I'd",
+  "responses": [
+    "My name is Lena. My friends call me Lenny.\"\r\nHe nods slowly, \"Lena, do you mind telling me what brings you here today?\"\r\nI have been thinking about",
+    " this all day, and I've decided to just tell him the truth: \"Well, I think I may be having problems with... Well, let me start by saying that I don't know anything",
+    " about myself. It feels like I'm losing control of my own body sometimes, especially when I'm doing things that I shouldn't be able to do. And I can't seem to stop eating meat",
+    " or sweets.\"\r\nDr. Szozas raises an eyebrow, \"And what does that feel like? How would you describe it?\"\r\n\"It feels like I'm not really there anymore",
+    ". Like I'm watching myself from somewhere else, almost like I'm dreaming while awake.\"\r\n\"Are you experiencing any other symptoms?\"\r\n\"No, nothing that stands out. Just the",
+    " feeling that I'm not fully present, and also being hungry.\"\r\n\"Have you ever had any issues with food before?\"\r\n\"Not really. I always ate healthy, and never seemed",
+    " to gain weight. But lately I've noticed that I eat more than usual, but I still don't get fat. I wonder if that means something...\"\r\n\"So what are your thoughts about",
+    " the cause of these feelings, Lena? Do they come to you suddenly, without warning? Or is there a trigger that sets them off?\"\r\n\"Well, I guess I thought that maybe I",
+    " was depressed because I was unhappy with my life, but then I realized that I was happy with my job at the hospital, but I was also miserable with my personal relationships, which I couldn't figure",
+    " out why I was even with the people I was with. Then I started to think that maybe I was getting sick, but I didn't want to go to the doctor because I knew that I'd"
+  ],
+  "encoded": {
+    "prompt": "KAD5Ag0EDQA6AU0ElwF2BoQCUgH4Az8BXwH2AQsA2wFUAVIBwxP2Af0bDQD1CP0HQAMGAZgPCwA6ARMEAQEvBg0AOw9GbY4hJAELAPwBPgEBAXxW53kiAbh8DQDcANwAwnZTAVp0HwEUIWcKDQA6AU0ElwF2BmMCaAICDD4BFCGJAZcBCwAiAToBTQSXAXYGvwIcAYwTRgELAAsCOgH7XqsCJRsNAMYAKxgNAEZtjiEkAXUBCwIlDgsAIgFTAf45CwJjEWoCUwGqGw0ApwLvG3sBDwYZAY4Qt0YNABwEDTF1AZ0DSQH5DHsBXANBAQ0AxgAoAE0ErypqAjoBAgX+ARwB0QEvChoABgGQKD4BAQF/EsY0XA0LACIBOgFPDPcBHAGTKQ0A+S//D/8PDQBfCeEOCggLAHADDAA6EtESIgEpPQsAbgGFQT8BHwGqCcYAKAC/CJAC0QEvCgsAIgFoAocLFg0iAhoABgGkHYUBhAMcAQEBhJ8PFdkECwDRASIehQENF18B+w4NADoBzAJSZhwBTAQGAQoiCwDbAToB/ARNANYBMwEyVgsA6C2FAg0AfgU6ASQDewEGAUYCRgE+AdIVbQjRAQMbDQDGANABzQLtBUYB/CL2AT4BLwYNAEZtjiEkAQYAthYLAHCrgkFhBV8BDxVGCQAAYQVGAREF9gFGAecIdQH4AxwBMwE1HQ0ArAwJA0sGSy2hAYcLmQKkAk8FewH2AaYBbQgBAS4UHgFnGQwAxziAOw0ApwJgQf4BCwAiAfwBQAALAFMBUgEBAaMcRgJfAQEByI8sAYSaaxZGAQgW9gEcASQD/gEBAWsGewGrAg0ApwKuQwEBiBr9B2EKjBULACIBUwHUAQEBLhQeAfkD8xELACgdHwFpAsacbAENAC8GDQBGbY4hJAFqKysN9gELACIBwQpoAv0DHwHRAWEFOgFBDaMPvwI0BiIBthbRAf0DPgELANEBSBCRCmMBVAGBa0AEaAKJJAsAbgEoAE0EyyUcAf4CWQEpAlMBcwQLACIBUwEbCRwBTAZUAQ0AWQfKAkkIHwEyB18BUghMAqsCCwKICwsAXwHRATwQFawiAU9dDQDGAAEAdBULAPMDAQHcFj8BBgFLSAsAEwO3DYgaDQDcANwANCNJAQYBpAYWAjgFngULACIB8QVZATUD4gMpAlMBDBYLACIBUwEzEz0DcQIcAXIGHwEBAYgaiwzRPw0A3ADcAP0ZSy2hAYcLoxB6AWIJ9gELACoeIgE5KxYDdw4eAfYBYwFTAcxuSQFoAkILDQDGACgAclkLACIBcgZiAz8BBgFLSAsAIgE6AdcLCwBuAQ==",
+    "responses": [
+      "Ug6eBT4BY6wNANsHnAllA/YBlgFeLg4CyQDGAAgGEYjcGAsAbgErAKsfCwDSAVkB0AcdFPYBhAJ2GlkB4gN1B6UGyQDGACgApwFLAhwOIgI=",
+      "rAHdAVYECwAiAToBHQT6CxwBjwIYBqsCBgEgDxkAbgGTFgsAOgF8AzoB5wIzAbcGyQpfAdoDNg8LAB0F9gGbA6AB6ghGAToBRAPWAfgCzQc=",
+      "IgIFDg0AeAK0FEwCOgFNBL4XXgYeAWgCggPnBiANCwAgCmoCOgFNBAwH2wRGAToBuBnWATMB2gUcAdIBDQBLAzoBzAHWAQMFHAHFCMgZHhg=",
+      "iQGipQ4CyQDGACsYDQBGbY4hJAEpLxkBTJULAG4BTgeEAlkDRgHmBEwCHgBeBTECWQH1GlQBpQbJAMYAAQACBLQUTAI6AU0ElwFTBGQCLx0=",
+      "DQCtEToBTQRkEwUOpgHWHBkICwAACEwCOgFNBNBu1QO9VA4CyQDGAAEAKyFZAZA0VQJIAiQdpQbJAMYAAQCFCwsAYwhGAZgY9wENABkJBgE=",
+      "axBGAToBTQSXAWIPmAcLACIBewJUA4A5DgLJAMYAAQDMLlkBkwYmAlUCfAlfAQkIbgOlBskAxgABAFkOUwQNADoBuAXXOkgVCwAiAdcEaw8=",
+      "HAFtEYcNDQB3A5lAOgEdBJoaRgE6AYMRBQJtAhYaCwDbAToB3wNEA9YBiwKXDg0AOgGQEGMCRgG8BscEYSTJAMYAAQBcCYQChQEWArIXIgI=",
+      "BgGoCh4BCQPyHQsAY6weAF0I5AECBRwBWQEzGQsAzwRtGR4AvwU+AWQCAQHAHUYB9RVeAjwCpQbJAMYAAQCTFgsAOgF0EjoBDwdGARcPOgE=",
+      "dQGXSgwDOgF1AVNLXwFoArQECwDbARQDOgEbG0YBOgF1AbwOXwFoAp0GewEGAVQRCwDbAToBdQF7AqxXXwFoAjYKLhsLAB8COgHBDdYByQ4=",
+      "9wHxBToBdQEEA18BBgGVAjoBdQFfAQ0ArAw6ARMIHAF8A0YBFw86AXUBtAfvGQsA2wE6AY4F1gH9AhwB0wEcAQYBbRgMAzoBsQtGAToBDQY="
+    ]
+  }
+},
+{
+  "settings": {
+    "label": "Model=6B_v3,Prefix=theme_darkfantasy,PromptFilename=need_help_txt",
+    "model": "6B-v3",
+    "prefix": "theme_darkfantasy",
+    "prompt_filename": "need_help.txt",
+    "temperature": 0.55,
+    "max_length": 40,
+    "min_length": 40,
+    "top_k": 140,
+    "top_p": 0.9,
+    "tail_free_sampling": 1,
+    "repetition_penalty": 3.5,
+    "repetition_penalty_range": 1024,
+    "repetition_penalty_slope": 6.57,
+    "bad_words_ids": [],
+    "ban_brackets": true,
+    "use_cache": false,
+    "use_string": false,
+    "return_full_text": false
+  },
+  "prompt": "I need help. I'm not sure what's going on with me, but it's driving me crazy. After looking through the web, I found a Dr. Michael Szozas, who is a renowned psychiatrist and counselor.  Apparently he specializes in unusual cases. I'm not sure if my situation is unusual or not, and I'm not sure how to determine that, so I emailed him anyway.\nDr. Szozas was so nice, and he sounded so smart when he responded. He recommended at least an initial consultation. An appointment was made for Monday at 9am.\nI'm nervous when I come up to his office; the entrance is a solid wooden door, and I reach out to knock. Rap rap rap. His voice comes, well-modulated and educated, \"Come on in!\"\nI step into his office, and my eyes cast about; the lights are set to a soothing dim level, his walls are filled with books. I am tempted to read the titles, but I mustn't be rude, oh no. So I look at the man that is sitting behind his desk.\nThe first thing that strikes me is Dr. Szozas' warm, radiant grin -- with dimples! -- that told me that everything was going to be OK. Then these kind hazel eyes twinkling at me from behind a pair of wire-frame glasses. He rises up, and whoa, he's a tall man with a slender lanky frame that causes me to look up a bit at him. He wears a comfortable looking cardigan, and he has a pair of slacks, ending in some loafers. Dr. Szozas walks towards me, and takes my hand in his -- I immediately notice how large and warm his hand is, his skin soft as it wraps around my fingers, \"I'm glad to see you,\" he says, and he seems to mean it. One could fall in love with someone like him so quickly, with his apparent sincerity and kindness.\n\"Please, take a seat on the couch, make yourself comfortable.  State for the record your full name, and why you're here,\" he suggests, and he ambles over to sit in a comfortable armchair.  His hazel eyes fixate upon me, drinking and studying every detail of me as he waits for my response.\nI hesitate, and sit down on the couch, and I respond, \"",
+  "result": "My name is Rebecca Ann Delaney.\" I pause briefly before continuing, \"I'm... uh... just starting college this year...\" And then I stop myself, because what I want to say next isn't something that should be said aloud, ever. But Dr. Szozas doesn't seem surprised by anything I've said, and after a momentary hesitation, I continue, \"Well, actually, I'm not really 'starting' school anymore. It looks like I might have been kicked out.\"\nHe nods slightly, and asks gently, \"Why do you think that?\"\nSo I start talking, and I tell him about the dreams, and the nightmares, and the panic attacks, and the way I can feel things changing inside of me. I explain that I don't know if they'll get worse, or better, but that whatever happens will probably be permanent. I describe the feelings I had when I woke up from one particular nightmare, and how my body felt different when I did. The way that my muscles hurt and ached even though nothing seemed wrong with them. I try to keep the conversation light, but not too much; I know that Dr. Szozas is a professional, and he needs all the details that I can give him.\nWhen I finish describing the worst part of the dream, the part where I was being forced to eat the contents of the dead bodies, I close my mouth, and look at the doctor to gauge his reaction. He sits there quietly, with a thoughtful expression on his face, nodding occasionally. When I look back at him, I realize that I'm having trouble seeing his eyes through the thick lenses. I clear my throat, \"Um, I'm sorry; I'm a little distracted. I'm not sure what I'm supposed to be looking at right now,\" I apologize.\nDr. Szozas smiles again, \"No worries, I understand completely. You are quite handsome; I'm going to be",
+  "responses": [
+    "My name is Rebecca Ann Delaney.\" I pause briefly before continuing, \"I'm... uh... just starting college this year...\" And then I stop myself, because what I want to say next isn",
+    "'t something that should be said aloud, ever. But Dr. Szozas doesn't seem surprised by anything I've said, and after a momentary hesitation, I continue, \"Well, actually",
+    ", I'm not really 'starting' school anymore. It looks like I might have been kicked out.\"\nHe nods slightly, and asks gently, \"Why do you think that?\"\nSo I",
+    " start talking, and I tell him about the dreams, and the nightmares, and the panic attacks, and the way I can feel things changing inside of me. I explain that I don't know if",
+    " they'll get worse, or better, but that whatever happens will probably be permanent. I describe the feelings I had when I woke up from one particular nightmare, and how my body felt different when I",
+    " did. The way that my muscles hurt and ached even though nothing seemed wrong with them. I try to keep the conversation light, but not too much; I know that Dr. Szozas",
+    " is a professional, and he needs all the details that I can give him.\nWhen I finish describing the worst part of the dream, the part where I was being forced to eat the contents of",
+    " the dead bodies, I close my mouth, and look at the doctor to gauge his reaction. He sits there quietly, with a thoughtful expression on his face, nodding occasionally. When I look back at",
+    " him, I realize that I'm having trouble seeing his eyes through the thick lenses. I clear my throat, \"Um, I'm sorry; I'm a little distracted. I'm not sure what",
+    " I'm supposed to be looking at right now,\" I apologize.\nDr. Szozas smiles again, \"No worries, I understand completely. You are quite handsome; I'm going to be"
+  ],
+  "encoded": {
+    "prompt": "KAD5Ag0EDQA6AU0ElwF2BoQCUgH4Az8BXwH2AQsA2wFUAVIBwxP2Af0bDQD1CP0HQAMGAZgPCwA6ARMEAQEvBg0AOw9GbY4hJAELAPwBPgEBAXxW53kiAbh8DQDcANwAwnZTAVp0HwEUIWcKDQA6AU0ElwF2BmMCaAICDD4BFCGJAZcBCwAiAToBTQSXAXYGvwIcAYwTRgELAAsCOgH7XqsCJRsNAMYAKxgNAEZtjiEkAXUBCwIlDgsAIgFTAf45CwJjEWoCUwGqGw0ApwLvG3sBDwYZAY4Qt0YNABwEDTF1AZ0DSQH5DHsBXANBAQ0AxgAoAE0ErypqAjoBAgX+ARwB0QEvChoABgGQKD4BAQF/EsY0XA0LACIBOgFPDPcBHAGTKQ0A+S//D/8PDQBfCeEOCggLAHADDAA6EtESIgEpPQsAbgGFQT8BHwGqCcYAKAC/CJAC0QEvCgsAIgFoAocLFg0iAhoABgGkHYUBhAMcAQEBhJ8PFdkECwDRASIehQENF18B+w4NADoBzAJSZhwBTAQGAQoiCwDbAToB/ARNANYBMwEyVgsA6C2FAg0AfgU6ASQDewEGAUYCRgE+AdIVbQjRAQMbDQDGANABzQLtBUYB/CL2AT4BLwYNAEZtjiEkAQYAthYLAHCrgkFhBV8BDxVGCQAAYQVGAREF9gFGAecIdQH4AxwBMwE1HQ0ArAwJA0sGSy2hAYcLmQKkAk8FewH2AaYBbQgBAS4UHgFnGQwAxziAOw0ApwJgQf4BCwAiAfwBQAALAFMBUgEBAaMcRgJfAQEByI8sAYSaaxZGAQgW9gEcASQD/gEBAWsGewGrAg0ApwKuQwEBiBr9B2EKjBULACIBUwHUAQEBLhQeAfkD8xELACgdHwFpAsacbAENAC8GDQBGbY4hJAFqKysN9gELACIBwQpoAv0DHwHRAWEFOgFBDaMPvwI0BiIBthbRAf0DPgELANEBSBCRCmMBVAGBa0AEaAKJJAsAbgEoAE0EyyUcAf4CWQEpAlMBcwQLACIBUwEbCRwBTAZUAQ0AWQfKAkkIHwEyB18BUghMAqsCCwKICwsAXwHRATwQFawiAU9dDQDGAAEAdBULAPMDAQHcFj8BBgFLSAsAEwO3DYgaDQDcANwANCNJAQYBpAYWAjgFngULACIB8QVZATUD4gMpAlMBDBYLACIBUwEzEz0DcQIcAXIGHwEBAYgaiwzRPw0A3ADcAP0ZSy2hAYcLoxB6AWIJ9gELACoeIgE5KxYDdw4eAfYBYwFTAcxuSQFoAkILDQDGACgAclkLACIBcgZiAz8BBgFLSAsAIgE6AdcLCwBuAQ==",
+    "responses": [
+      "Ug6eBT4BwVuCFXgQGVcOAjoBiTpFLW4DWiALAG4BKABNBNoD6FPaA48CDw44EKwBZgJhJEsDFAM6AcUIBQ4LAAwDhAI6Af0CHAGOAxoFTQg=",
+      "1gHHBEYBLwMzARMC430LAJMGDQB3Ay8GDQBGbY4hJAE7BtYBAwX/GaABzQc6AR0EEwILACIBwgIBAR0KMAKYcwsAOgH7CQsAbgGTFgsAkgY=",
+      "CwA6AU0ElwFTBMECIpcGAPQFLx0NAHgCAQxMAjoB3ASnAUsChS/3AQ4CxgAIBhGIDhILACIB1R49OwsAbgFLFNIBWQF8A0YBpQbGAFwJOgE=",
+      "mwMvDQsAIgE6ARgGqwIiAgYBgSkLACIBBgEVggsAIgEGATM1ag0LACIBBgFDAzoBzAHmBNsE6RVRCh4B9gENADoBdxJGAToBRAPWAfgCYwI=",
+      "5AGfBIsCsRILAIkBVQULANsBRgGIEOUQ4QGQCDMBRB4NADoB9RoGAfIdOgEmAmoCOgGUSv4BpgESApwH40ILACIBvwJoAucGeAucBGoCOgE=",
+      "7gINAH8BQwNGAWgCzTEyFyIBqAPAAgQD5ANjCGsPUgpfAV4CDQA6AZ0HHAFyBQYBmRR5BgsA2wGXAY0EcQMaADoB+AJGAS8GDQBGbY4hJAE=",
+      "PgEBAWQSCwAiAVMBrAndAQYB6wxGAToBzAEpBqsCDQDGAKcIOgFVFRsvBgGqFHwCHgEGAeAQCwAGAXwCKgM6AXUBVAMpEBwBgxEGAaonHgE=",
+      "BgFMCiAXCwA6AbEHaAIuFQsAIgEkA3sBBgFtGBwBWkfRAa0YDQCnAt4pZAKfMQsAXwEBAZVYIBU/AdEBwgcLAN+5+ygNAHEGOgEkA+ACewE=",
+      "qwILADoBiRlGAToBTQS3BvQWGxHRAYcLQAMGAZIZ5UcNADoBPgZoAhU1CwBuAaCRCwA6AU0E9h4aADoBTQQBAR4Fn1kNADoBTQSXAXYGhAI=",
+      "OgFNBCERHAEzAf0HewE6Aw8DKQI6AYlADQDGACsYDQBGbY4hJAFVVfUCCwBuAYULjEgLADoBKQd2DA0AmQOFAWcJiVgaADoBTQT4AxwBMwE="
+    ]
+  }
+},
+{
+  "settings": {
+    "label": "Model=6B_v3,Prefix=theme_darkfantasy,PromptFilename=need_help_txt",
+    "model": "6B-v3",
+    "prefix": "theme_darkfantasy",
+    "prompt_filename": "need_help.txt",
+    "temperature": 0.55,
+    "max_length": 40,
+    "min_length": 40,
+    "top_k": 140,
+    "top_p": 0.9,
+    "tail_free_sampling": 1,
+    "repetition_penalty": 3.5,
+    "repetition_penalty_range": 1024,
+    "repetition_penalty_slope": 6.57,
+    "bad_words_ids": [],
+    "ban_brackets": true,
+    "use_cache": false,
+    "use_string": false,
+    "return_full_text": false
+  },
+  "prompt": "I need help. I'm not sure what's going on with me, but it's driving me crazy. After looking through the web, I found a Dr. Michael Szozas, who is a renowned psychiatrist and counselor.  Apparently he specializes in unusual cases. I'm not sure if my situation is unusual or not, and I'm not sure how to determine that, so I emailed him anyway.\nDr. Szozas was so nice, and he sounded so smart when he responded. He recommended at least an initial consultation. An appointment was made for Monday at 9am.\nI'm nervous when I come up to his office; the entrance is a solid wooden door, and I reach out to knock. Rap rap rap. His voice comes, well-modulated and educated, \"Come on in!\"\nI step into his office, and my eyes cast about; the lights are set to a soothing dim level, his walls are filled with books. I am tempted to read the titles, but I mustn't be rude, oh no. So I look at the man that is sitting behind his desk.\nThe first thing that strikes me is Dr. Szozas' warm, radiant grin -- with dimples! -- that told me that everything was going to be OK. Then these kind hazel eyes twinkling at me from behind a pair of wire-frame glasses. He rises up, and whoa, he's a tall man with a slender lanky frame that causes me to look up a bit at him. He wears a comfortable looking cardigan, and he has a pair of slacks, ending in some loafers. Dr. Szozas walks towards me, and takes my hand in his -- I immediately notice how large and warm his hand is, his skin soft as it wraps around my fingers, \"I'm glad to see you,\" he says, and he seems to mean it. One could fall in love with someone like him so quickly, with his apparent sincerity and kindness.\n\"Please, take a seat on the couch, make yourself comfortable.  State for the record your full name, and why you're here,\" he suggests, and he ambles over to sit in a comfortable armchair.  His hazel eyes fixate upon me, drinking and studying every detail of me as he waits for my response.\nI hesitate, and sit down on the couch, and I respond, \"",
+  "result": "My name is Rebecca Shuey.\" I pause, then continue, \"And I want to talk to somebody because I've been having problems lately...\" My voice trails off, but I can tell by his expression that he understands what I'm saying. The next words pour out of my mouth, \"Ever since I got back from France... things have changed.\"\nHe nods slowly, waiting for more. I go on, \"It started last week when I had this dream where there were two men standing outside my house, and they just looked at each other, smiled, and walked away. And ever since then, whenever I close my eyes, I see them walking past me in the street.\" I stop, and try to collect myself before continuing. \"They don't even exist, right? They're figments of my imagination?\"\nDr. Szozas responds without hesitation, \"No, I think we should probably begin with an evaluation to determine if you are experiencing a psychotic episode or not.\" His voice is gentle, reassuring, \"Can you describe the hallucinations that you are seeing?\"\nI shake my head, \"Not really. Just a couple times I saw something black walk across the road ahead of me, and another time I thought I heard a woman scream out 'Help me!' But that was all I remember. It was only a few seconds long, but I swear I was certain that I was hearing a real person screaming for help. I know it sounds crazy, but I'm telling the truth!\"\nThe doctor nods, and continues to ask questions, \"Have you experienced any strange dreams recently?\"\n\"Yes,\" I answer, \"and I keep waking up with these weird feelings inside me, like I'm missing something important.\" I look at the floor, embarrassed, and I'm shaking a bit, trying to contain the emotion that is bubbling up within me.\n\"Are you afraid that you might be losing touch with reality?\"\nI nod, and",
+  "responses": [
+    "My name is Rebecca Shuey.\" I pause, then continue, \"And I want to talk to somebody because I've been having problems lately...\" My voice trails off, but I can tell by",
+    " his expression that he understands what I'm saying. The next words pour out of my mouth, \"Ever since I got back from France... things have changed.\"\nHe nods slowly, waiting for more",
+    ". I go on, \"It started last week when I had this dream where there were two men standing outside my house, and they just looked at each other, smiled, and walked away. And",
+    " ever since then, whenever I close my eyes, I see them walking past me in the street.\" I stop, and try to collect myself before continuing. \"They don't even exist, right?",
+    " They're figments of my imagination?\"\nDr. Szozas responds without hesitation, \"No, I think we should probably begin with an evaluation to determine if you are experiencing a psychotic episode or",
+    " not.\" His voice is gentle, reassuring, \"Can you describe the hallucinations that you are seeing?\"\nI shake my head, \"Not really. Just a couple times I saw something black walk across",
+    " the road ahead of me, and another time I thought I heard a woman scream out 'Help me!' But that was all I remember. It was only a few seconds long, but I swear I",
+    " was certain that I was hearing a real person screaming for help. I know it sounds crazy, but I'm telling the truth!\"\nThe doctor nods, and continues to ask questions, \"Have you",
+    " experienced any strange dreams recently?\"\n\"Yes,\" I answer, \"and I keep waking up with these weird feelings inside me, like I'm missing something important.\" I look at the floor, embarrassed",
+    ", and I'm shaking a bit, trying to contain the emotion that is bubbling up within me.\n\"Are you afraid that you might be losing touch with reality?\"\nI nod, and"
+  ],
+  "encoded": {
+    "prompt": "KAD5Ag0EDQA6AU0ElwF2BoQCUgH4Az8BXwH2AQsA2wFUAVIBwxP2Af0bDQD1CP0HQAMGAZgPCwA6ARMEAQEvBg0AOw9GbY4hJAELAPwBPgEBAXxW53kiAbh8DQDcANwAwnZTAVp0HwEUIWcKDQA6AU0ElwF2BmMCaAICDD4BFCGJAZcBCwAiAToBTQSXAXYGvwIcAYwTRgELAAsCOgH7XqsCJRsNAMYAKxgNAEZtjiEkAXUBCwIlDgsAIgFTAf45CwJjEWoCUwGqGw0ApwLvG3sBDwYZAY4Qt0YNABwEDTF1AZ0DSQH5DHsBXANBAQ0AxgAoAE0ErypqAjoBAgX+ARwB0QEvChoABgGQKD4BAQF/EsY0XA0LACIBOgFPDPcBHAGTKQ0A+S//D/8PDQBfCeEOCggLAHADDAA6EtESIgEpPQsAbgGFQT8BHwGqCcYAKAC/CJAC0QEvCgsAIgFoAocLFg0iAhoABgGkHYUBhAMcAQEBhJ8PFdkECwDRASIehQENF18B+w4NADoBzAJSZhwBTAQGAQoiCwDbAToB/ARNANYBMwEyVgsA6C2FAg0AfgU6ASQDewEGAUYCRgE+AdIVbQjRAQMbDQDGANABzQLtBUYB/CL2AT4BLwYNAEZtjiEkAQYAthYLAHCrgkFhBV8BDxVGCQAAYQVGAREF9gFGAecIdQH4AxwBMwE1HQ0ArAwJA0sGSy2hAYcLmQKkAk8FewH2AaYBbQgBAS4UHgFnGQwAxziAOw0ApwJgQf4BCwAiAfwBQAALAFMBUgEBAaMcRgJfAQEByI8sAYSaaxZGAQgW9gEcASQD/gEBAWsGewGrAg0ApwKuQwEBiBr9B2EKjBULACIBUwHUAQEBLhQeAfkD8xELACgdHwFpAsacbAENAC8GDQBGbY4hJAFqKysN9gELACIBwQpoAv0DHwHRAWEFOgFBDaMPvwI0BiIBthbRAf0DPgELANEBSBCRCmMBVAGBa0AEaAKJJAsAbgEoAE0EyyUcAf4CWQEpAlMBcwQLACIBUwEbCRwBTAZUAQ0AWQfKAkkIHwEyB18BUghMAqsCCwKICwsAXwHRATwQFawiAU9dDQDGAAEAdBULAPMDAQHcFj8BBgFLSAsAEwO3DYgaDQDcANwANCNJAQYBpAYWAjgFngULACIB8QVZATUD4gMpAlMBDBYLACIBUwEzEz0DcQIcAXIGHwEBAYgaiwzRPw0A3ADcAP0ZSy2hAYcLoxB6AWIJ9gELACoeIgE5KxYDdw4eAfYBYwFTAcxuSQFoAkILDQDGACgAclkLACIBcgZiAz8BBgFLSAsAIgE6AdcLCwBuAQ==",
+    "responses": [
+      "Ug6eBT4BwVuPAwYCWAAOAjoBiToLABQD+wkLAG4BTgc6Af0CHAEZBhwBVCAMAzoBHQRLArcGyQqZQGEk2wfhDvxKPAILANsBOgHMARgGoAE=",
+      "0QEgFUYBUwGnOYQCOgFNBOoIDQB/ARoFmAn9MfcBHgFoAi4VCwBuAXFdsQQ6AXAF4AKmARET2gPbBKcBXQ0OAsYACAYRiNwYCwBZE0kBBQI=",
+      "DQA6AdMBPwELAG4BAgQTCKoDBQVqAjoBJgKsAeAQKgNkAiMC3gKqBb8TMgloAmwICwAiAeQBjwIqDHsBYwRIAgsA5TQLACIBlxrZBQ0ASwM=",
+      "kwaxBBQDCwBdIjoBsQdoAocLCwA6Af4CXgILGE0G9gEfAQYBQxIOAjoBxQgLACIBnQccAQgLBQ5uA1ogDQBuAa4LRAPWAQQDaAgLADoDHgA=",
+      "XwQ1AyAJhgMeAWgCEzalBsYAKxgNAEZtjiEkAWNOzwSYcwsAbgGFCwsAOgF8A2QBLwOQCK0IXwEZAXQxHAGME2MCWQGFAZA0AQEqkXcRiQE=",
+      "lwEOAl8J4Q4+ATgoCwBijgsAbgHKF1kB9RoGAbOdRgFZAYUBGxGlBsYAKADfM2gCngQLAG4BWQ5TBA0AGQkBAVMMfQY6AcEJxwT6B9EJtQc=",
+      "BgGfC9oPHgH2AQsAIgGqBIACOgEPBzoBpgsBAW8JBCD3AcECR1b2AW81dwNGAXUB3QE6AbENDQB4AnUBswIBAZoEaRB6AwsA2wE6AchSOgE=",
+      "dQHABkYBOgF1AfYSAQFPBBgExDlJAQ0EDQA6AfgCVAF2FP0bCwDbAToBTQQdFAYBIA+qCcYA0AFtGBGICwAiAX0RHAHxBHsKCwBuAcwuWQE=",
+      "JBdVAosYgSlYC6UGxgABALEUKQI6AdAMCwBuAYgBOgFyBWFa/gFfAQkD4h3yHVEK9gELAEwCOgFNBM4SxwQ5Bg4COgEkA3sBBgHaEAsAbFI=",
+      "CwAiAToBTQR7QwEBawYLAD8IHAGaDwYB1iZGAT4BHydkK/4BWgb2AQ0AxgABACshWQFrHkYBWQHcBDMBvhc2Dl8Bbg+lBsYAKADqSAsAIgE="
+    ]
+  }
+}]

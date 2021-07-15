@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"runtime"
 	"time"
 )
@@ -170,14 +171,16 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("API: Error reading HTTP body: %s", err)
+		os.Exit(1)
 	}
 	err = json.Unmarshal(body, &respDecoded)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("API: Error unmarshaling JSON response: %s", err)
+		os.Exit(1)
 	}
 	if len(respDecoded.Error) > 0 {
-		log.Fatal(fmt.Sprintf("ERROR: %s %s",
+		log.Fatal(fmt.Sprintf("API: Server error [%s]: %s",
 			respDecoded.StatusCode, respDecoded.Error))
 	}
 	return respDecoded

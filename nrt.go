@@ -129,7 +129,7 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) (tests
 			newTest.PromptFilename = newTest.Parameters.PromptFilename
 			newTest.PromptPath = filepath.Join(newTest.WorkingDir, newTest.PromptFilename)
 			if _, err := os.Stat(ct.PromptPath); os.IsNotExist(err) {
-				fmt.Printf("`%v` does not exist!\n", ct.PromptPath)
+				log.Printf("nrt: Prompt file `%v` does not exist!\n", ct.PromptPath)
 				os.Exit(1)
 			}
 			newTest.loadPrompt(newTest.PromptPath)
@@ -159,7 +159,8 @@ func (ct *ContentTest) generateOutputPath() string {
 func (ct *ContentTest) loadPrompt(path string) {
 	promptBytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("nrt: Error loading prompt file `%s`: %v", path, err)
+		os.Exit(1)
 	}
 	ct.Prompt = string(promptBytes)
 }
@@ -182,18 +183,20 @@ func (ct ContentTest) Perform() {
 func GenerateTestsFromFile(path string) (tests []ContentTest) {
 	configBytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("nrt: Error loading JSON specification file `%s`: %v", path, err)
+		os.Exit(1)
 	}
 	var test ContentTest
 	test.API = novelai_api.NewNovelAiAPI()
 	err = json.Unmarshal(configBytes, &test)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("nrt: Error loading JSON specification file `%s`: %v", path, err)
+		os.Exit(1)
 	}
 	test.WorkingDir = filepath.Dir(path)
 	test.PromptPath = filepath.Join(test.WorkingDir, test.PromptFilename)
 	if _, err := os.Stat(test.PromptPath); os.IsNotExist(err) {
-		fmt.Printf("`%v` does not exist!\n", test.PromptPath)
+		log.Printf("nrt: Prompt file `%v` does not exist!\n", test.PromptPath)
 		os.Exit(1)
 	}
 	test.loadPrompt(test.PromptPath)
