@@ -44,7 +44,11 @@ func getAccessToken(access_key string) string {
 			log.Fatal(err)
 		}
 		err = json.Unmarshal(body, &resp_decoded)
-		return resp_decoded["accessToken"]
+		accessToken := resp_decoded["accessToken"]
+		if len(accessToken)	== 0 {
+			log.Fatal("Failed to obtain accessToken!")
+		}
+		return accessToken
 	}
 	return ""
 }
@@ -99,5 +103,7 @@ func AuthEnv() NaiKeys {
 			"Please ensure that NAI_USERNAME and NAI_PASSWORD are set in your environment.")
 		os.Exit(1)
 	}
-	return Auth(authCfg.Username, authCfg.Password)
+	auth := Auth(authCfg.Username, authCfg.Password)
+	fmt.Fprintf(os.Stderr, "AUTH: sucessful for %s\n", authCfg.Username)
+	return auth
 }

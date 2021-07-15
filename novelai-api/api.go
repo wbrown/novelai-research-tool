@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
 	"io/ioutil"
 	"log"
@@ -174,6 +175,10 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 	err = json.Unmarshal(body, &respDecoded)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if len(respDecoded.Error) > 0 {
+		log.Fatal(fmt.Sprintf("ERROR: %s %s",
+			respDecoded.StatusCode, respDecoded.Error))
 	}
 	return respDecoded
 }
