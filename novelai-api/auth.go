@@ -103,7 +103,8 @@ func AuthEnv() NaiKeys {
 			"Please ensure that NAI_USERNAME and NAI_PASSWORD are set in your environment.")
 		os.Exit(1)
 	}
+	fmt.Fprintf(os.Stderr, "AUTH: authenticating for '%s'\n", authCfg.Username)
 	auth := Auth(authCfg.Username, authCfg.Password)
-	fmt.Fprintf(os.Stderr, "AUTH: sucessful for %s\n", authCfg.Username)
+	fmt.Fprintf(os.Stderr, "AUTH: sucessful for '%s'\n", authCfg.Username)
 	return auth
 }
