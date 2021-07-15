@@ -2,7 +2,7 @@
   "prompt_filename": "white_samurai.txt",
   "output_prefix": "white_samurai/white_samruai",
   "iterations": 10,
-  "generations": 25,
+  "generations": 22,
   "parameters": {
     "model": "6B-v3",
     "prefix": "vanilla",
@@ -23,19 +23,14 @@
   },
   "permutations": [
     {
-      "top_k": [
-        100,
-        120,
-        140
+      "temperature": [
+        0.40,
+        0.50,
+        0.60,
+        0.70
       ],
       "prefix": [
-        "vanilla",
-        "style_arthurconandoyle",
-        "style_edgarallanpoe",
-        "style_hplovecraft",
-        "style_shridanlefanu",
-        "style_julesverne",
-        "theme_19thcenturyromance",
+
         "theme_actionarcheology",
         "theme_airships",
         "theme_ai",
