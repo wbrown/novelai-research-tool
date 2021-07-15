@@ -46,7 +46,7 @@ func getAccessToken(access_key string) string {
 		err = json.Unmarshal(body, &resp_decoded)
 		accessToken := resp_decoded["accessToken"]
 		if len(accessToken)	== 0 {
-			log.Fatal("Failed to obtain accessToken! %s", body)
+			log.Fatal(fmt.Sprintf("Failed to obtain accessToken! %s", string(body)))
 		}
 		return accessToken
 	}
