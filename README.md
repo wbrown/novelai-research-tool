@@ -26,7 +26,7 @@ Get a copy of the source code either by:
 
 Once you have the source code extracted, go into the the source directory, and do the following from the command line:
   * `go get -u`
-  * `go build nrt.go`
+  * `go build nrt-cli/nrt.go`
 
 This will produce a binary `nrt` file.
 
@@ -128,42 +128,63 @@ will highlight some specific ones:
   * `parameters` - contains NovelAI configuration parameters according to the
     API's specifications.
 
-The sample `tests/need_help.json` can be used as a template, along with a
-`tests/need_help.txt` prompt file. There is also an example
-`tests/need_help_output_6B-vanilla.json` file that contains an example of what
-output `nrt` produces.
+The sample [need_help.json](tests/need_help.json) can be used as a template,
+along with a [need_help.txt](tests/need_help.txt) prompt file. There is also
+an example [need_help-6B_v3-vanilla.json](tests/need_help_output/need_help-Model=6B_v3,Prefix=vanilla,PromptFilename=need_help_txt,TS=2021-07-14T1659.json)
+and [need_help-6B_v3-vanilla.txt](tests/need_help_output/need_help-Model=6B_v3,Prefix=vanilla,PromptFilename=need_help_txt,TS=2021-07-14T1659.txt)
+file that contains an example of what output `nrt` produces.
 
-Permutation
------------
-There is a special field of the `.json` file, `permutations`. Most of the
-fields under `parameters` have a list counterpart under `permutations`.
+Permutation Specs
+-----------------
+There is a special field of the `.json` file, `permutations`.  It is an array
+of permutation specs, each permutation spec is a combinatorial set in and of
+itself.
 
-For example, `model` might look like:
+Most of the fields under `parameters` have a list counterpart under `permutations`.
+
+You may find the current list of variables that may be permuted upon
+(here)[https://github.com/wbrown/novelai-research-tool/blob/main/nrt.go#L16]
+
+For example, a permutation spec that permutes on model `model` might look like:
 ```json
 { "permutations": { "model": [ "2.7B", "6B-v3" ] } }
 ```
-This will cause the `nrt` tool to perform iterations acrosa both models.
+This will cause the `nrt` tool to perform iterations across both models.
 
-If we add another field to permute on, such as `prefix`, it becomes a
-combinatorial exercise -- the below `permutations` example will generate
-`28` combinations tests to perform:
+If we add other fields to permute on, such as `prefix` or `prompt_path`, it
+becomes a combinatorial exercise -- the below `permutations` example will
+generate `62` combinations and tests to perform:
 ```json
-{ "permutations": {
+{ "permutations": [ {
+    "prompt_path": [ "need_help.txt", "need_help_an_memory.txt" ],
     "model": [ "2.7B", "6B-v3" ],
-    "prefix": [ "vanilla", "theme_naval", "theme_egypt", "theme_dragons",
-                "theme_mars", "theme_dragons", "theme_libraries",
-                "style_hplovecraft", "style_edgarallanpoe",
-                "style_epic_fantasy", "style_slice_of_life",
-                "style_romantic", "style_lighthearted_fantasy",
-                "style_mmo" ] } }
+    "prefix": [ "vanilla", "style_arthurconandoyle", "style_edgarallanpoe",
+      "style_hplovecraft", "style_shridanlefanu", "style_julesverne",
+      "theme_19thcenturyromance", "theme_actionarcheology",
+      "theme_airships", "theme_ai", "theme_darkfantasy",
+      "theme_dragons", "theme_egypt", "theme_generalfantasy",
+      "theme_huntergatherer", "theme_magicacademy", "theme_libraries",
+      "theme_mars", "theme_medieval", "theme_militaryscifi",
+      "theme_naval", "theme_pirates", "theme_postapocalyptic",
+      "theme_rats", "theme_romanceofthreekingdoms",
+      "theme_superheroes", "inspiration_crabsnailandmonkey",
+      "inspiration_mercantilewolfgirlromance", "inspiration_nervegear",
+      "inspiration_thronewars", "inspiration_witchatlevelcap" ] } ] }
 ```
+
+The above permutation set will test all the combinations of:
+* prompts with and without author's note and memory.
+* models `2.7B`, `6B-v3`
+* all the current AI modules.
 
 Another example is if we wanted to permute on the `temperature` value:
 ```json
-{ "permutations": {
-  "temperature": [ 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 ]
-}}
+{ "permutations": [ {
+  "temperature": [ 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 ] } ] }
 ```
+
+The above will cause 8 tests to be created, covering the `temperature` in `0.1`
+steps from `0.1` to `0.8`.
 
 Configuration Notes
 -------------------
@@ -172,20 +193,55 @@ As of the writing of this section:
 The `prefix` takes the following values and requires the `model` attribute to
 have the `6B-v3` value:
 * `vanilla`
-* `theme_naval`
-* `theme_egypt`
-* `theme_dragons`
-* `theme_mars`
-* `theme_libraries`
-* `style_hplovecraft`
+* `style_arthurconandoyle`
 * `style_edgarallanpoe`
-* `style_epic_fantasy`
-* `style_slice_of_life`
-* `style_romantic`
-* `style_lighthearted_fantasy`
-* `style_mmo`
+* `style_hplovecraft`
+* `style_shridanlefanu`
+* `style_julesverne`
+* `theme_19thcenturyromance`
+* `theme_actionarcheology`
+* `theme_airships`
+* `theme_ai`
+* `theme_darkfantasy`
+* `theme_dragons`
+* `theme_egypt`
+* `theme_generalfantasy`
+* `theme_huntergatherer`
+* `theme_magicacademy`
+* `theme_libraries`
+* `theme_mars`
+* `theme_medieval`
+* `theme_militaryscifi`
+* `theme_naval`
+* `theme_pirates`
+* `theme_postapocalyptic`
+* `theme_rats`
+* `theme_romanceofthreekingdoms`
+* `theme_superheroes`
+* `inspiration_crabsnailandmonkey`
+* `inspiration_mercantilewolfgirlromance`
+* `inspiration_nervegear`
+* `inspiration_thronewars`
+* `inspiration_witchatlevelcap`
 
-The `model` parameter takes the following values:
+The `model` parameter takes the following values, but `6B` is not available as of this commit:
 * `2.7B`
 * `6B`
 * `6B-v3`
+
+Adventure Game
+--------------
+As a reward for reaching the very end of the document, there's a special treat.  An Adventure
+module that replicates the classic _Zork_ experience.
+
+To build it, go into the `adventure` subdirectory and type `go build adventure.go`.  This will
+produce a binary `adventure` or `adventure.exe`.
+
+Run it by invoking `./adventure` or `adventure.exe`, and you will be brought to a prompt:
+```text
+You are in a maze of twisty passages, all alike. There are exits to the north, east, south, and west.
+> 
+```
+
+Enjoy!
+

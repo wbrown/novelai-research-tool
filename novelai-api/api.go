@@ -5,10 +5,14 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"runtime"
+	"time"
 )
 
 type NovelAiAPI struct {
@@ -45,8 +49,10 @@ type NaiGenerateHTTPResp struct {
 }
 
 type NaiGenerateParams struct {
+	Label                  string     `json:"label"`
 	Model                  string     `json:"model"`
 	Prefix                 string     `json:"prefix"`
+	PromptFilename         string     `json:"prompt_filename"`
 	Temperature            float64    `json:"temperature"`
 	MaxLength              uint       `json:"max_length"`
 	MinLength              uint       `json:"min_length"`
@@ -64,10 +70,10 @@ type NaiGenerateParams struct {
 }
 
 type NaiGenerateResp struct {
-	EncodedRequest string `json:"encoded_request"`
+	EncodedRequest  string `json:"encoded_request"`
 	EncodedResponse string `json:"encoded_response"`
-	Response string `json:"response"`
-	Error error `json:"error"`
+	Response        string `json:"response"`
+	Error           error  `json:"error"`
 }
 
 func BannedBrackets() [][]uint16 {
@@ -147,20 +153,35 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 	encoded, _ := json.Marshal(params)
 	req, _ := http.NewRequest("POST", "https://api.novelai.net/ai/generate",
 		bytes.NewBuffer(encoded))
+	req.Header.Set("User-Agent",
+		"nrt/0.1 (" + runtime.GOOS + "; " + runtime.GOARCH +")")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+keys.AccessToken)
-	resp, err := cl.Do(req)
+
+	// Retry up to 3 times.
+	var resp *http.Response
+	for tries := 0; tries < 3; tries++ {
+		var err error
+		resp, err = cl.Do(req)
+		if err == nil {
+			break
+		}
+		log.Println(err)
+		time.Sleep(3)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
-	} else {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-		err = json.Unmarshal(body, &respDecoded)
-		if err != nil {
-			log.Fatal(err)
-		}
+		log.Printf("API: Error reading HTTP body: %s", err)
+		os.Exit(1)
+	}
+	err = json.Unmarshal(body, &respDecoded)
+	if err != nil {
+		log.Printf("API: Error unmarshaling JSON response: %s", err)
+		os.Exit(1)
+	}
+	if len(respDecoded.Error) > 0 {
+		log.Fatal(fmt.Sprintf("API: Server error [%s]: %s",
+			respDecoded.StatusCode, respDecoded.Error))
 	}
 	return respDecoded
 }

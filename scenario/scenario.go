@@ -1,4 +1,4 @@
-package main
+package scenario
 
 import (
 	"encoding/json"
@@ -191,14 +191,14 @@ func (scenario Scenario) GenerateContext(story string) (newContext string) {
 	return""
 }
 
-func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scenario) {
+func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scenario, err error) {
 	scenarioBytes, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		return scenario, err
 	}
 	err = json.Unmarshal(scenarioBytes, &scenario)
 	if err != nil {
-		log.Fatal(err)
+		return scenario, err
 	}
 	scenario.Tokenizer = tokenizer
 	for ctxIdx := range scenario.Context {
@@ -222,6 +222,5 @@ func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scen
 		}
 		scenario.Lorebook.Entries[loreIdx] = loreEntry
 	}
-
-	return scenario
+	return scenario, err
 }
