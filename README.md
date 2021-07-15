@@ -130,8 +130,8 @@ will highlight some specific ones:
 
 The sample [need_help.json](tests/need_help.json) can be used as a template,
 along with a [need_help.txt](tests/need_help.txt) prompt file. There is also
-an example [need_help-6B_v3-vanilla.json](tests/need_help_output/need_help-6B_v3-vanilla.json)
-and [need_help-6B_v3-vanilla.txt](tests/need_help_output/need_help-6B_v3-vanilla.txt)
+an example [need_help-6B_v3-vanilla.json](tests/need_help_output/need_help-Model=6B_v3,Prefix=vanilla,PromptFilename=need_help_txt,TS=2021-07-14T1659.json)
+and [need_help-6B_v3-vanilla.txt](tests/need_help_output/need_help-Model=6B_v3,Prefix=vanilla,PromptFilename=need_help_txt,TS=2021-07-14T1659.txt)
 file that contains an example of what output `nrt` produces.
 
 Permutation Specs
