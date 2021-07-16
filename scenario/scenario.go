@@ -236,17 +236,17 @@ func (ctx *ContextEntry) ResolveTrim(tokenizer *gpt_bpe.GPTEncoder, budget int) 
 		// We have enough to fit this into the budget.
 		trimSize = numTokens
 	} else {
-		if float32(numTokens)*0.3 < float32(budget) {
-			trimSize = 0
-		} else {
+		if float32(numTokens)*0.3 <= float32(budget) {
 			trimSize = budget
+		} else {
+			trimSize = 0
 		}
 	}
 	trimDirection := ctx.getTrimDirection()
 	maxTrimType := ctx.getMaxTrimType()
 	trimmedTokens, _ = tokenizer.TrimNewlines(ctx.Tokens, trimDirection, uint(trimSize))
 	if len(*trimmedTokens) == 0 && maxTrimType >= TrimSentences {
-		trimmedTokens, _ = tokenizer.TrimNewlines(ctx.Tokens, trimDirection, uint(trimSize))
+		trimmedTokens, _ = tokenizer.TrimSentences(ctx.Tokens, trimDirection, uint(trimSize))
 	}
 	if len(*trimmedTokens) == 0 && maxTrimType == TrimTokens {
 		tokens := *ctx.Tokens
@@ -271,7 +271,6 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 	contexts = append(contexts, lorebookContexts...)
 	budget -= int(scenario.Settings.Parameters.MaxLength)
 	reservedContexts := getReservedContexts(contexts)
-	// sort.Sort(sort.Reverse(priorityContexts))
 	for ctxIdx := range reservedContexts {
 		ctx := reservedContexts[ctxIdx]
 		reservedTokens := ctx.ContextCfg.ReservedTokens
