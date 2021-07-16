@@ -53,6 +53,13 @@ func (ctxes ContextEntries) Less(i, j int) bool {
 	return false
 }
 
+type MaxTrimType uint
+
+const (
+	TrimSentences MaxTrimType = iota
+	TrimNewlines  MaxTrimType = iota
+	TrimTokens    MaxTrimType = iota
+)
 
 type LorebookEntry struct {
 	Text                string        `json:"text"`
@@ -195,7 +202,66 @@ func getReservedContexts(ctxts ContextEntries) (reserved ContextEntries) {
 	return reserved
 }
 
+func (ctx *ContextEntry) getTrimDirection() gpt_bpe.TrimDirection {
+	switch ctx.ContextCfg.TrimDirection {
+	case "trimTop":
+		return gpt_bpe.TrimTop
+	case "trimBottom":
+		return gpt_bpe.TrimBottom
+	default:
+		return gpt_bpe.TrimNone
+	}
+}
 
+func (ctx *ContextEntry) getMaxTrimType() MaxTrimType {
+	switch ctx.ContextCfg.MaximumTrimType {
+	case "sentence":
+		return TrimSentences
+	case "newline":
+		return TrimNewlines
+	case "token":
+		return TrimTokens
+	default:
+		return TrimNewlines
+	}
+}
+
+func (ctx *ContextEntry) ResolveTrim(tokenizer *gpt_bpe.GPTEncoder, budget int) (trimmedTokens *[]uint16) {
+	trimSize := 0
+	numTokens := len(*ctx.Tokens)
+	projected := budget - numTokens + ctx.ContextCfg.ReservedTokens
+	if projected > ctx.ContextCfg.TokenBudget {
+		trimSize = ctx.ContextCfg.TokenBudget
+	} else if projected >= 0 {
+		// We have enough to fit this into the budget.
+		trimSize = numTokens
+	} else {
+		if float32(numTokens)*0.3 < float32(budget) {
+			trimSize = 0
+		} else {
+			trimSize = budget
+		}
+	}
+	trimDirection := ctx.getTrimDirection()
+	maxTrimType := ctx.getMaxTrimType()
+	trimmedTokens, _ = tokenizer.TrimNewlines(ctx.Tokens, trimDirection, uint(trimSize))
+	if len(*trimmedTokens) == 0 && maxTrimType >= TrimSentences {
+		trimmedTokens, _ = tokenizer.TrimNewlines(ctx.Tokens, trimDirection, uint(trimSize))
+	}
+	if len(*trimmedTokens) == 0 && maxTrimType == TrimTokens {
+		tokens := *ctx.Tokens
+		switch trimDirection {
+		case gpt_bpe.TrimTop:
+			tokens = tokens[numTokens-trimSize:]
+		case gpt_bpe.TrimBottom:
+			tokens = tokens[:trimSize]
+		default:
+			tokens = *trimmedTokens
+		}
+		trimmedTokens = &tokens
+	}
+	return trimmedTokens
+}
 
 func (scenario Scenario) GenerateContext(story string, budget int) (newContext string) {
 	storyEntry := scenario.createStoryContext(story)
@@ -206,61 +272,35 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 	budget -= int(scenario.Settings.Parameters.MaxLength)
 	reservedContexts := getReservedContexts(contexts)
 	// sort.Sort(sort.Reverse(priorityContexts))
-	for ctxIdx := range(reservedContexts) {
+	for ctxIdx := range reservedContexts {
 		ctx := reservedContexts[ctxIdx]
-		rsrvdTokens := ctx.ContextCfg.ReservedTokens
+		reservedTokens := ctx.ContextCfg.ReservedTokens
 		szTokens := len(*ctx.Tokens)
-		if szTokens < rsrvdTokens {
+		if szTokens < reservedTokens {
 			budget -= szTokens
 		} else {
-			budget -= rsrvdTokens
+			budget -= reservedTokens
 		}
 	}
 	sort.Sort(sort.Reverse(contexts))
 	for ctxIdx := range(contexts) {
 		ctx := contexts[ctxIdx]
-		drop := true
-		// var trimmed []uint16
-		if ctx.ContextCfg.ReservedTokens == 0 {
-			numTokens := len(*contexts[ctxIdx].Tokens)
-			projected := budget - numTokens
-			if projected >= 0 {
-				budget = projected
-				// trimmed = ctx.Trim(ctx.ContextCfg.TokenBudget)
-				drop = false
-			} else {
-				// var goal int
-				if budget < ctx.ContextCfg.TokenBudget {
-					if float32(numTokens) * 0.3 < float32(budget) {
-						// trimmed = ctx.Trim(budget)
-					}
-
-				} else {
-					// goal = ctx.ContextCfg.TokenBudget
-				}
-
-
-				// trimmed = ctx.Trim(goal)
-				// goal := -budget
-			}
-
-		} else {
-			drop = false
-		}
-		if !drop {
-		fmt.Printf("PRIORITY: %4v RESERVED: %4v ACTUAL: %4v LEFT: %4v LABEL: %15v INSERTION_POS: %4v INSERTION_TYPE: %8v TRIM_TYPE: %8v TRIM_DIRECTION: %10v\n",
+		trimmedTokens := ctx.ResolveTrim(scenario.Tokenizer, budget)
+		numTokens := len(*trimmedTokens)
+		budget -= numTokens
+		fmt.Printf("PRIORITY: %4v RESERVED: %4v ACTUAL: %4v TRIMMED: %4v LEFT: %4v LABEL: %15v INSERTION_POS: %4v INSERTION_TYPE: %8v TRIM_TYPE: %8v TRIM_DIRECTION: %10v\n",
 			contexts[ctxIdx].ContextCfg.BudgetPriority,
 			contexts[ctxIdx].ContextCfg.ReservedTokens,
 			len(*contexts[ctxIdx].Tokens),
+			numTokens,
 			budget,
 			contexts[ctxIdx].Label,
 			contexts[ctxIdx].ContextCfg.InsertionPosition,
 			contexts[ctxIdx].ContextCfg.InsertionType,
 			contexts[ctxIdx].ContextCfg.MaximumTrimType,
 			contexts[ctxIdx].ContextCfg.TrimDirection)
-		}
 	}
-	return""
+	return ""
 }
 
 func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scenario, err error) {
