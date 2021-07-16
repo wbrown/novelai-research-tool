@@ -24,11 +24,12 @@ type ContextConfig struct {
 }
 
 type ContextEntry struct {
-	Text       string        `json:"text"`
-	ContextCfg ContextConfig `json:"contextConfig"`
-	Tokens     []uint16
-	Label      string
-	Indexes    [][]int
+	Text         string        `json:"text"`
+	ContextCfg   ContextConfig `json:"contextConfig"`
+	Tokens       *[]uint16
+	Label        string
+	MatchIndexes []map[string][][]int
+	Index        uint
 }
 
 type ContextEntries []ContextEntry
@@ -42,8 +43,14 @@ func (ctxes ContextEntries) Swap(i, j int) {
 }
 
 func (ctxes ContextEntries) Less(i, j int) bool {
-	return ctxes[i].ContextCfg.BudgetPriority <
-		ctxes[j].ContextCfg.BudgetPriority
+	if ctxes[i].ContextCfg.BudgetPriority <
+		ctxes[j].ContextCfg.BudgetPriority {
+		return true
+	} else if ctxes[i].ContextCfg.BudgetPriority ==
+		ctxes[j].ContextCfg.BudgetPriority {
+		return ctxes[i].Index > ctxes[j].Index
+	}
+	return false
 }
 
 
@@ -58,7 +65,7 @@ type LorebookEntry struct {
 	ForceActivation     bool          `json:"forceActivation"`
 	KeyRelative         bool          `json:"keyRelative"`
 	NonStoryActivatable bool          `json:"nonStoryActivatable"`
-	Tokens              []uint16
+	Tokens              *[]uint16
 	KeysRegex           []*regexp.Regexp
 }
 
@@ -92,6 +99,7 @@ type Scenario struct {
 }
 
 func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries ContextEntries) {
+	beginIdx := len(contexts)
 	for loreIdx := range scenario.Lorebook.Entries {
 		lorebookEntry := scenario.Lorebook.Entries[loreIdx]
 		if !lorebookEntry.Enabled {
@@ -99,7 +107,7 @@ func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries Conte
 		}
 		keys := lorebookEntry.Keys
 		keysRegex := lorebookEntry.KeysRegex
-		indexes := make([][]int, 0)
+		indexes := make([]map[string][][]int, 0)
 		searchRange := lorebookEntry.SearchRange
 		for keyIdx := range keysRegex {
 			keyRegex := keysRegex[keyIdx]
@@ -110,25 +118,31 @@ func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries Conte
 					searchText = searchText[searchLen:]
 				}
 				ctxMatches := keyRegex.FindAllStringIndex(searchText, -1)
+				keyMatches := make(map[string][][]int, 0)
 				if searchLen > 0 {
 					for ctxMatchIdx := range ctxMatches {
 						ctxMatches[ctxMatchIdx][0] = ctxMatches[ctxMatchIdx][0] + searchLen
 						ctxMatches[ctxMatchIdx][1] = ctxMatches[ctxMatchIdx][1] + searchLen
 					}
 				}
-				indexes = append(indexes, ctxMatches...)
+				if len(ctxMatches) > 0 {
+					keyMatches[keys[keyIdx]] = append(keyMatches[keys[keyIdx]], ctxMatches...)
+				}
+				if len(keyMatches) > 0 {
+					indexes = append(indexes, keyMatches)
+				}
 			}
 		}
-		if len(indexes) > 0 {
+		if len(indexes) > 0 || lorebookEntry.ForceActivation {
 			entry := ContextEntry{
 				Text: lorebookEntry.Text,
 				ContextCfg: lorebookEntry.ContextCfg,
 				Tokens: lorebookEntry.Tokens,
 				Label: lorebookEntry.DisplayName,
-				Indexes: indexes,
+				MatchIndexes: indexes,
+				Index: uint(beginIdx + loreIdx),
 			}
 			entries = append(entries, entry)
-			fmt.Printf("KEYS: %v @ %v\n", keys, indexes)
 		}
 	}
 	return entries
@@ -150,10 +164,8 @@ For each entry in the context list
     reduce reserved tokens
 */
 
-
-
-func (scenario Scenario) GenerateContext(story string) (newContext string) {
-	storyEntry := ContextEntry{
+func (scenario Scenario) createStoryContext(story string) ContextEntry {
+	return ContextEntry{
 		Text: story,
 		ContextCfg: ContextConfig{
 			Prefix: "",
@@ -166,27 +178,87 @@ func (scenario Scenario) GenerateContext(story string) (newContext string) {
 			InsertionType: "newline",
 			MaximumTrimType: "sentence",
 		},
-		Tokens: scenario.Tokenizer.Encode(story),
+		Tokens: scenario.Tokenizer.Encode(&story),
 		Label: "Story",
+		Index: 0,
 	}
+}
+
+func getReservedContexts(ctxts ContextEntries) (reserved ContextEntries) {
+	for ctxIdx := range(ctxts) {
+		ctx := ctxts[ctxIdx]
+		if ctx.ContextCfg.ReservedTokens > 0 {
+			reserved = append(reserved, ctx)
+		}
+	}
+	sort.Sort(sort.Reverse(reserved))
+	return reserved
+}
+
+
+
+func (scenario Scenario) GenerateContext(story string, budget int) (newContext string) {
+	storyEntry := scenario.createStoryContext(story)
 	contexts := ContextEntries{storyEntry}
 	lorebookContexts := scenario.ResolveLorebook(contexts)
 	contexts = append(contexts, scenario.Context...)
 	contexts = append(contexts, lorebookContexts...)
-	budget := int(1024 - scenario.Settings.Parameters.MaxLength)
+	budget -= int(scenario.Settings.Parameters.MaxLength)
+	reservedContexts := getReservedContexts(contexts)
+	// sort.Sort(sort.Reverse(priorityContexts))
+	for ctxIdx := range(reservedContexts) {
+		ctx := reservedContexts[ctxIdx]
+		rsrvdTokens := ctx.ContextCfg.ReservedTokens
+		szTokens := len(*ctx.Tokens)
+		if szTokens < rsrvdTokens {
+			budget -= szTokens
+		} else {
+			budget -= rsrvdTokens
+		}
+	}
 	sort.Sort(sort.Reverse(contexts))
 	for ctxIdx := range(contexts) {
-		budget = budget - len(contexts[ctxIdx].Tokens)
-		fmt.Printf("PRIORITY: %4v RESERVED: %4v ACTUAL: %4v LEFT: %4v LABEL: %8v INSERTION_POS: %4v INSERTION_TYPE: %8v TRIM_TYPE: %8v TRIM_DIRECTION: %10v\n",
+		ctx := contexts[ctxIdx]
+		drop := true
+		// var trimmed []uint16
+		if ctx.ContextCfg.ReservedTokens == 0 {
+			numTokens := len(*contexts[ctxIdx].Tokens)
+			projected := budget - numTokens
+			if projected >= 0 {
+				budget = projected
+				// trimmed = ctx.Trim(ctx.ContextCfg.TokenBudget)
+				drop = false
+			} else {
+				// var goal int
+				if budget < ctx.ContextCfg.TokenBudget {
+					if float32(numTokens) * 0.3 < float32(budget) {
+						// trimmed = ctx.Trim(budget)
+					}
+
+				} else {
+					// goal = ctx.ContextCfg.TokenBudget
+				}
+
+
+				// trimmed = ctx.Trim(goal)
+				// goal := -budget
+			}
+
+		} else {
+			drop = false
+		}
+		if !drop {
+		fmt.Printf("PRIORITY: %4v RESERVED: %4v ACTUAL: %4v LEFT: %4v LABEL: %15v INSERTION_POS: %4v INSERTION_TYPE: %8v TRIM_TYPE: %8v TRIM_DIRECTION: %10v\n",
 			contexts[ctxIdx].ContextCfg.BudgetPriority,
 			contexts[ctxIdx].ContextCfg.ReservedTokens,
-			len(contexts[ctxIdx].Tokens),
+			len(*contexts[ctxIdx].Tokens),
 			budget,
 			contexts[ctxIdx].Label,
 			contexts[ctxIdx].ContextCfg.InsertionPosition,
 			contexts[ctxIdx].ContextCfg.InsertionType,
 			contexts[ctxIdx].ContextCfg.MaximumTrimType,
 			contexts[ctxIdx].ContextCfg.TrimDirection)
+		}
 	}
 	return""
 }
@@ -203,15 +275,18 @@ func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scen
 	scenario.Tokenizer = tokenizer
 	for ctxIdx := range scenario.Context {
 		ctx := scenario.Context[ctxIdx]
-		ctx.Tokens = tokenizer.Encode(ctx.ContextCfg.Prefix +
-			ctx.Text + ctx.ContextCfg.Suffix)
+		toEncode := ctx.ContextCfg.Prefix +
+			ctx.Text + ctx.ContextCfg.Suffix
+		ctx.Tokens = tokenizer.Encode(&toEncode)
 		scenario.Context[ctxIdx] = ctx
 	}
 	scenario.Context[0].Label = "Memory"
+	scenario.Context[0].Index = 1
 	scenario.Context[1].Label = "A/N"
+	scenario.Context[1].Index = 2
 	for loreIdx := range scenario.Lorebook.Entries {
 		loreEntry := scenario.Lorebook.Entries[loreIdx]
-		loreEntry.Tokens = tokenizer.Encode(loreEntry.Text)
+		loreEntry.Tokens = tokenizer.Encode(&loreEntry.Text)
 		for keyIdx := range loreEntry.Keys {
 			key := loreEntry.Keys[keyIdx]
 			keyRegex, err := regexp.Compile("(?i)(^|\\W)(" + key + ")($|\\W)")

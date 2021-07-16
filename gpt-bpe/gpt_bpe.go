@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"embed"
 	"encoding/json"
+	lru "github.com/hashicorp/golang-lru"
 	"log"
 	"math"
 	"os"
@@ -18,6 +19,8 @@ import (
 
 var f embed.FS
 
+const BPE_LRU_SZ = 8192
+
 type GPTEncoder struct {
 	encoder    map[string]uint16
 	decoder    map[uint16][]byte
@@ -25,7 +28,7 @@ type GPTEncoder struct {
 	pattern    *regexp.Regexp
 	byteToRune map[byte]rune
 	runeToByte map[rune]byte
-	cache      map[string][]string
+	cache      *lru.Cache
 }
 
 type GPTPair struct {
@@ -108,6 +111,8 @@ func NewEncoder() GPTEncoder {
 			uct += 1
 		}
 	}
+	cache, _ := lru.New(BPE_LRU_SZ)
+
 	return GPTEncoder{
 		encoderTokens,
 		tokensEncoder,
@@ -115,7 +120,7 @@ func NewEncoder() GPTEncoder {
 		pat,
 		bytesUnicode,
 		unicodeBytes,
-		make(map[string][]string, 0),
+		cache,
 	}
 }
 
@@ -136,7 +141,7 @@ func getPairs(word []string) []GPTPair {
 	return pairs
 }
 
-func (encoder GPTEncoder) rankPairs(pairs []GPTPair) BGERanks {
+func (encoder *GPTEncoder) rankPairs(pairs []GPTPair) BGERanks {
 	rankedPairs := make(BGERanks, 0)
 	for idx := range pairs {
 		bpe, ok := encoder.bpe_ranks[pairs[idx]]
@@ -149,7 +154,7 @@ func (encoder GPTEncoder) rankPairs(pairs []GPTPair) BGERanks {
 	return rankedPairs
 }
 
-func (encoder GPTEncoder) minPair(pairs []GPTPair) (retPair GPTPair) {
+func (encoder *GPTEncoder) minPair(pairs []GPTPair) (retPair GPTPair) {
 	rankedPairs := encoder.rankPairs(pairs)
 	if len(rankedPairs) > 0 {
 		retPair = rankedPairs[0].bigram
@@ -157,9 +162,9 @@ func (encoder GPTEncoder) minPair(pairs []GPTPair) (retPair GPTPair) {
 	return retPair
 }
 
-func (encoder GPTEncoder) toUnicode(text string) string {
+func (encoder *GPTEncoder) toUnicode(text *string) string {
 	outArr := make([]rune, 0)
-	textBytes := []byte(text)
+	textBytes := []byte(*text)
 	for idx := range textBytes {
 		outArr = append(outArr, encoder.byteToRune[textBytes[idx]])
 	}
@@ -175,16 +180,16 @@ func pos(word []string, seek string, i int) int {
 	return -1
 }
 
-func (encoder GPTEncoder) encodeTokens(tokens []string) (encoded []uint16) {
-	for idx := range tokens {
-		encoded = append(encoded, encoder.encoder[tokens[idx]])
+func (encoder *GPTEncoder) encodeTokens(tokens *[]string) (encoded []uint16) {
+	for idx := range *tokens {
+		encoded = append(encoded, encoder.encoder[(*tokens)[idx]])
 	}
 	return encoded
 }
 
-func (encoder GPTEncoder) toBPE(text string) []string {
-	if lookup, ok := encoder.cache[text]; ok {
-		return lookup
+func (encoder *GPTEncoder) toBPE(text string) []string {
+	if lookup, ok := encoder.cache.Get(text); ok {
+		return lookup.([]string)
 	}
 	word := strings.Split(text, "")
 	pairs := getPairs(word)
@@ -222,33 +227,35 @@ func (encoder GPTEncoder) toBPE(text string) []string {
 			pairs = getPairs(word)
 		}
 	}
-	encoder.cache[text] = word
+	encoder.cache.Add(text, word)
 	return word
 }
 
-func (encoder GPTEncoder) SplitWords(text string) (words []string) {
-	idxes := encoder.pattern.FindAllStringIndex(text, -1)
+func (encoder *GPTEncoder) SplitWords(text *string) *[]string {
+	idxes := encoder.pattern.FindAllStringIndex(*text, -1)
+	words := make([]string, 0)
 	for idx := range idxes {
-		words = append(words, text[idxes[idx][0]:idxes[idx][1]])
+		words = append(words, (*text)[idxes[idx][0]:idxes[idx][1]])
 	}
-	return words
+	return &words
 }
 
-func (encoder GPTEncoder) Encode(text string) (encoded []uint16) {
+func (encoder *GPTEncoder) Encode(text *string) *[]uint16 {
 	words := encoder.SplitWords(text)
-	for idx := range words {
-		fragment := encoder.toUnicode(words[idx])
+	encoded := make([]uint16, 0)
+	for idx := range *words {
+		fragment := encoder.toUnicode(&(*words)[idx])
 		token := encoder.toBPE(fragment)
-		encoded = append(encoded, encoder.encodeTokens(token)...)
+		encoded = append(encoded, encoder.encodeTokens(&token)...)
 	}
-	return encoded
+	return &encoded
 }
 
-func (encoder GPTEncoder) Decode(encoded []uint16) (text string) {
+func (encoder *GPTEncoder) Decode(encoded *[]uint16) (text string) {
 	// First convert our `uint16` tokens into an 8-bit byte array.
 	bs := make([]byte, 0)
-	for idx := range encoded {
-		if v, ok := encoder.decoder[encoded[idx]]; ok {
+	for idx := range *encoded {
+		if v, ok := encoder.decoder[(*encoded)[idx]]; ok {
 			for bIdx := range v {
 				bs = append(bs, v[bIdx])
 			}

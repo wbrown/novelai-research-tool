@@ -3,9 +3,7 @@ package nrt
 import (
 	"encoding/json"
 	"fmt"
-	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
-	scenario "github.com/wbrown/novelai-research-tool/scenario"
 	"io/ioutil"
 	"log"
 	"os"
@@ -63,7 +61,7 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	results.Parameters = ct.Parameters
 	throttle := time.NewTimer(1100 * time.Millisecond)
 	for generation := 0; generation < generations; generation++ {
-		resp := ct.API.GenerateWithParams(context, ct.Parameters)
+		resp := ct.API.GenerateWithParams(&context, ct.Parameters)
 		if generation == 0 {
 			results.Encoded.Prompt = resp.EncodedRequest
 		}

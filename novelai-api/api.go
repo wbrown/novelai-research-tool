@@ -21,15 +21,17 @@ type NovelAiAPI struct {
 	encoder gpt_bpe.GPTEncoder
 }
 
-func toBin(tokens []uint16) []byte {
+func toBin(tokens *[]uint16) []byte {
 	buf := bytes.NewBuffer(make([]byte, 0))
-	for idx := range tokens {
-		binary.Write(buf, binary.LittleEndian, tokens[idx])
+	for idx := range *tokens {
+		bs := (*tokens)[idx]
+		binary.Write(buf, binary.LittleEndian, bs)
 	}
 	return buf.Bytes()
 }
 
-func fromBin(bin []byte) (tokens []uint16) {
+func fromBin(bin []byte) *[]uint16 {
+	tokens := make([]uint16, 0)
 	buf := bytes.NewReader(bin)
 	for {
 		var token uint16
@@ -38,7 +40,7 @@ func fromBin(bin []byte) (tokens []uint16) {
 		}
 		tokens = append(tokens, token)
 	}
-	return tokens
+	return &tokens
 }
 
 type NaiGenerateHTTPResp struct {
@@ -176,7 +178,7 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 	}
 	err = json.Unmarshal(body, &respDecoded)
 	if err != nil {
-		log.Printf("API: Error unmarshaling JSON response: %s", err)
+		log.Printf("API: Error unmarshaling JSON response: %s %s", err, resp.Body)
 		os.Exit(1)
 	}
 	if len(respDecoded.Error) > 0 {
@@ -194,7 +196,7 @@ func NewNovelAiAPI() NovelAiAPI {
 	}
 }
 
-func (api NovelAiAPI) GenerateWithParams(content string, params NaiGenerateParams) (resp NaiGenerateResp) {
+func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGenerateParams) (resp NaiGenerateResp) {
 	encoded := api.encoder.Encode(content)
 	encodedBytes := toBin(encoded)
 	encodedBytes64 := base64.StdEncoding.EncodeToString(encodedBytes)
@@ -214,5 +216,5 @@ func (api NovelAiAPI) GenerateWithParams(content string, params NaiGenerateParam
 
 func (api NovelAiAPI) Generate(content string) (decoded string) {
 	defaultParams := NewGenerateParams()
-	return api.GenerateWithParams(content, defaultParams).Response
+	return api.GenerateWithParams(&content, defaultParams).Response
 }
