@@ -26,7 +26,7 @@ type GPTEncoder struct {
 	decoder    map[uint16][]byte
 	bpe_ranks  map[GPTPair]float64
 	pattern    *regexp.Regexp
-	byteToRune map[byte]rune
+	byteToRune [256]rune
 	runeToByte map[rune]byte
 	cache      *lru.Cache
 }
@@ -85,31 +85,29 @@ func NewEncoder() GPTEncoder {
 		os.Exit(1)
 	}
 	// Build the bytes to unicode tables.
-	bs := make([]uint8, 0)
-	bytesUnicode := make(map[byte]rune)
+	bytesUnicodeMap := make(map[byte]rune)
 	unicodeBytes := make(map[rune]byte)
 	for b := uint8('!'); b < uint8('~')+1; b++ {
-		bs = append(bs, b)
-		bytesUnicode[b] = rune(b)
+		bytesUnicodeMap[b] = rune(b)
 		unicodeBytes[rune(b)] = b
 	}
 	for b := uint8('¡'); b < uint8('¬')+1; b++ {
-		bs = append(bs, b)
-		bytesUnicode[b] = rune(b)
+		bytesUnicodeMap[b] = rune(b)
 		unicodeBytes[rune(b)] = b
 	}
 	for b := uint16('®'); b < uint16('ÿ')+1; b++ {
-		bs = append(bs, byte(b))
-		bytesUnicode[byte(b)] = rune(b)
+		bytesUnicodeMap[byte(b)] = rune(b)
 		unicodeBytes[rune(b)] = byte(b)
 	}
 	uct := 0
+	var bytesUnicode [256]rune
 	for b := uint16(0); b < 256; b++ {
-		if _, ok := bytesUnicode[uint8(b)]; !ok {
-			bytesUnicode[uint8(b)] = rune(256 + uct)
+		if _, ok := bytesUnicodeMap[uint8(b)]; !ok {
+			bytesUnicodeMap[uint8(b)] = rune(256 + uct)
 			unicodeBytes[rune(256+uct)] = uint8(b)
 			uct += 1
 		}
+		bytesUnicode[b] = bytesUnicodeMap[uint8(b)]
 	}
 	cache, _ := lru.New(BPE_LRU_SZ)
 
@@ -232,10 +230,22 @@ func (encoder *GPTEncoder) toBPE(text string) []string {
 }
 
 func (encoder *GPTEncoder) SplitWords(text *string) *[]string {
-	idxes := encoder.pattern.FindAllStringIndex(*text, -1)
+	splitLines := strings.SplitAfter(*text, "\n")
 	words := make([]string, 0)
-	for idx := range idxes {
-		words = append(words, (*text)[idxes[idx][0]:idxes[idx][1]])
+	for lineIdx := 0; lineIdx < len(splitLines); lineIdx++ {
+		line := splitLines[lineIdx]
+		for ; lineIdx < len(splitLines)-1; {
+			if splitLines[lineIdx+1] == "\n" {
+				line = line + "\n"
+				lineIdx += 1
+			} else {
+				break
+			}
+		}
+		idxes := encoder.pattern.FindAllStringIndex(line, -1)
+		for idx := range idxes {
+			words = append(words, line[idxes[idx][0]:idxes[idx][1]])
+		}
 	}
 	return &words
 }
