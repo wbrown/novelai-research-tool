@@ -156,7 +156,7 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 	req, _ := http.NewRequest("POST", "https://api.novelai.net/ai/generate",
 		bytes.NewBuffer(encoded))
 	req.Header.Set("User-Agent",
-		"nrt/0.1 (" + runtime.GOOS + "; " + runtime.GOARCH +")")
+		"nrt/0.1 ("+runtime.GOOS+"; "+runtime.GOARCH+")")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+keys.AccessToken)
 
@@ -178,7 +178,7 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 	}
 	err = json.Unmarshal(body, &respDecoded)
 	if err != nil {
-		log.Printf("API: Error unmarshaling JSON response: %s %s", err, resp.Body)
+		log.Printf("API: Error unmarshaling JSON response: %s %s", err, string(body))
 		os.Exit(1)
 	}
 	if len(respDecoded.Error) > 0 {
