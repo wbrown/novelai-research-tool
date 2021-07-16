@@ -39,9 +39,9 @@ type TrimTest struct {
 }
 
 const sent1 = "This is test sentence 1.  This is test sentence 2.  This is test sentence 3."
-const sent2 = "This is test sentence 4.\nThis is test sentence 5.\nThis is test sentence 6."
+const sent2 = "\nThis is test sentence 4.\nThis is test sentence 5.\nThis is test sentence 6.\n"
 
-var TrimTests = []TrimTest{
+var TrimSentencesTests = []TrimTest{
 	{sent1, TrimTop, 10,
 		" This is test sentence 3."},
 	{sent1, TrimTop, 20,
@@ -49,28 +49,46 @@ var TrimTests = []TrimTest{
 	{sent1, TrimTop, 30,
 		sent1},
 	{sent2, TrimTop, 10,
-		"\nThis is test sentence 6."},
+		"\nThis is test sentence 6.\n"},
 	{sent2, TrimTop, 18,
-		"\nThis is test sentence 5.\nThis is test sentence 6."},
+		"\nThis is test sentence 5.\nThis is test sentence 6.\n"},
 	{sent2, TrimTop, 30,
 		sent2},
 	{sent1, TrimBottom, 10,
-		"This is test sentence 1. "},
+		"This is test sentence 1."},
 	{sent1, TrimBottom, 20,
 		"This is test sentence 1.  This is test sentence 2."},
 	{sent1, TrimBottom, 30,
 		sent1},
 	{sent2, TrimBottom, 10,
-		"This is test sentence 4.\n"},
+		"\nThis is test sentence 4.\n"},
 	{sent2, TrimBottom, 18,
-		"This is test sentence 4.\nThis is test sentence 5.\n"},
+		"\nThis is test sentence 4.\nThis is test sentence 5.\n"},
 	{sent2, TrimBottom, 30,
 		sent2},
 }
 
+var TrimNewLinesTests = append(TrimSentencesTests[3:5], TrimSentencesTests[9:11]...)
+
+func TestGPTEncoder_TrimNewlines(t *testing.T) {
+	for testIdx := range TrimNewLinesTests {
+		test := TrimNewLinesTests[testIdx]
+		res, err := encoder.TrimNewlines(encoder.Encode(&test.Input),
+			test.Direction, test.Limit)
+		if err != nil {
+			t.Error("TrimNewlines: error:", err)
+		}
+		decodeRes := encoder.Decode(res)
+		if decodeRes != test.Expected {
+			t.Error("TrimNewlines: expected '" + test.Expected + "' got '" +
+				decodeRes + "'")
+		}
+	}
+}
+
 func TestGPTEncoder_TrimSentences(t *testing.T) {
-	for testIdx := range TrimTests {
-		test := TrimTests[testIdx]
+	for testIdx := range TrimSentencesTests {
+		test := TrimSentencesTests[testIdx]
 		res, err := encoder.TrimSentences(encoder.Encode(&test.Input),
 			test.Direction, test.Limit)
 		if err != nil {
@@ -85,24 +103,26 @@ func TestGPTEncoder_TrimSentences(t *testing.T) {
 }
 
 type SplitTest struct {
-	Input     string
-	Expected  []string
+	Input    string
+	Expected []string
 }
 
 var SplitTests = []SplitTest{
 	{"we'll go jump in a lake.",
 		[]string{"we", "'ll", " go", " jump", " in", " a", " lake", "."}},
 	{"multiple  encoded spaces.",
-	[]string{"multiple", "  ", "encoded", " spaces", "."}},
+		[]string{"multiple", "  ", "encoded", " spaces", "."}},
 	{"Capitalized Words Are Cool",
 		[]string{"Capitalized", " Words", " Are", " Cool"}},
 	{"we'LL test irregular cApitalizatioN.",
-	[]string{"we", "'", "LL", " test", " irregular", " cApitalizatioN", "."}},
+		[]string{"we", "'", "LL", " test", " irregular", " cApitalizatioN", "."}},
 	{"multilines\nare awesome",
-	[]string{"multilines", "\n", "are", " awesome"}}}
+		[]string{"multilines", "\n", "are", " awesome"}},
+	{"\nstarting with multilines\nis awesome",
+		[]string{"\n", "starting", " with", " multilines", "\n", "is", " awesome"}}}
 
 func TestGPTEncoder_Split(t *testing.T) {
-	for testIdx := range(SplitTests) {
+	for testIdx := range SplitTests {
 		test := SplitTests[testIdx]
 		AssertEqual(t, *(encoder.SplitWords(&test.Input)), test.Expected)
 	}
@@ -134,7 +154,6 @@ func TestGPTEncoder_Encode(t *testing.T) {
 	duration := time.Since(start)
 	t.Log(fmt.Sprintf("%v bytes into %v tokens over %v\n",
 		len(corpus), tokenCt, duration))
-	// TBD
 }
 
 func TestGPTEncoder_Decode(t *testing.T) {
