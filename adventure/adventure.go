@@ -58,15 +58,15 @@ func (adventure Adventure) start() {
 		}
 		adventure.Context = adventure.Context + "\n> " + line + "\n"
 		for {
-			tokens := adventure.Encoder.Encode(adventure.Context)
-			if uint(len(tokens)) > adventure.MaxTokens {
+			tokens := adventure.Encoder.Encode(&adventure.Context)
+			if uint(len(*tokens)) > adventure.MaxTokens {
 				adventure.Context = strings.Join(
 					strings.Split(adventure.Context, "\n")[1:], "\n")
 			} else {
 				break
 			}
 		}
-		resp := adventure.API.GenerateWithParams(adventure.Context,
+		resp := adventure.API.GenerateWithParams(&adventure.Context,
 			adventure.Parameters)
 		output = resp.Response
 		doc, err := prose.NewDocument(output)
