@@ -88,7 +88,7 @@ func TestScenario_GenerateContext(t *testing.T) {
 	if sc, err = ScenarioFromFile(&encoder, scenarioPath); err != nil {
 		t.Errorf("Failed to load scenario file: %v", err)
 	}
-	sc.GenerateContext(sc.Prompt, 1100)
+	sc.GenerateContext(sc.Prompt, 2048)
 }
 
 func TestMain(m *testing.M) {

@@ -1,6 +1,9 @@
 {
   "prompt_filename": "need_help.txt",
+  "memory": "I'm seeing a counselor named Dr. Michael Szozas about an issue that I'm having. Dr. Szozas is really smart, kind, and so attractive! He has hazel eyes, glasses, wear a comfortable cardigan, slacks, and he's really tall!",
+  "authors_note": "[Period: Modern Day]\n[Year: 2020 AD]\n[Style: Stream of consciousness, intelligent, funny]",
   "output_prefix": "need_help_output/need_help",
+  "max_tokens": 2048,
   "iterations": 10,
   "generations": 10,
   "parameters": {
@@ -27,8 +30,7 @@
     },
     {
       "prompt_filename": [
-        "need_help.txt",
-        "need_help_an_memory.txt"
+        "need_help.txt"
       ],
       "model": [
         "2.7B",

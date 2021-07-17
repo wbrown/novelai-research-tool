@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
+	"github.com/wbrown/novelai-research-tool/scenario"
 	"io/ioutil"
 	"log"
 	"os"
@@ -31,6 +32,9 @@ type PermutationsSpec struct {
 type ContentTest struct {
 	OutputPrefix   string                        `json:"output_prefix"`
 	PromptFilename string                        `json:"prompt_filename"`
+	Memory         string                        `json:"memory"`
+	AuthorsNote    string                        `json:"authors_note""`
+	MaxTokens      int                           `json:"max_tokens"`
 	Iterations     int                           `json:"iterations"`
 	Generations    int                           `json:"generations"`
 	Parameters     novelai_api.NaiGenerateParams `json:"parameters"`
@@ -38,6 +42,7 @@ type ContentTest struct {
 	Prompt         string
 	WorkingDir     string
 	PromptPath     string
+	Scenario       scenario.Scenario
 	API            novelai_api.NovelAiAPI
 }
 
@@ -61,7 +66,8 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	results.Parameters = ct.Parameters
 	throttle := time.NewTimer(1100 * time.Millisecond)
 	for generation := 0; generation < generations; generation++ {
-		resp := ct.API.GenerateWithParams(&context, ct.Parameters)
+		submission := ct.Scenario.GenerateContext(context, ct.MaxTokens)
+		resp := ct.API.GenerateWithParams(&submission, ct.Parameters)
 		if generation == 0 {
 			results.Encoded.Prompt = resp.EncodedRequest
 		}
@@ -193,6 +199,9 @@ func GenerateTestsFromFile(path string) (tests []ContentTest) {
 		log.Printf("nrt: Error loading JSON specification file `%s`: %v", path, err)
 		os.Exit(1)
 	}
+	if test.MaxTokens == 0 {
+		test.MaxTokens = 2048
+	}
 	test.WorkingDir = filepath.Dir(path)
 	test.PromptPath = filepath.Join(test.WorkingDir, test.PromptFilename)
 	if _, err := os.Stat(test.PromptPath); os.IsNotExist(err) {
@@ -200,5 +209,7 @@ func GenerateTestsFromFile(path string) (tests []ContentTest) {
 		os.Exit(1)
 	}
 	test.loadPrompt(test.PromptPath)
+	test.Scenario = scenario.ScenarioFromSpec(test.Prompt, test.Memory,
+		test.AuthorsNote)
 	return test.GeneratePermutations()
 }

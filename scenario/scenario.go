@@ -2,13 +2,13 @@ package scenario
 
 import (
 	"encoding/json"
-	"fmt"
 	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
 	"io/ioutil"
 	"log"
 	"regexp"
 	"sort"
+	"strings"
 )
 
 type ContextConfig struct {
@@ -142,12 +142,12 @@ func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries Conte
 		}
 		if len(indexes) > 0 || lorebookEntry.ForceActivation {
 			entry := ContextEntry{
-				Text: lorebookEntry.Text,
-				ContextCfg: lorebookEntry.ContextCfg,
-				Tokens: lorebookEntry.Tokens,
-				Label: lorebookEntry.DisplayName,
+				Text:         lorebookEntry.Text,
+				ContextCfg:   lorebookEntry.ContextCfg,
+				Tokens:       lorebookEntry.Tokens,
+				Label:        lorebookEntry.DisplayName,
 				MatchIndexes: indexes,
-				Index: uint(beginIdx + loreIdx),
+				Index:        uint(beginIdx + loreIdx),
 			}
 			entries = append(entries, entry)
 		}
@@ -175,24 +175,24 @@ func (scenario Scenario) createStoryContext(story string) ContextEntry {
 	return ContextEntry{
 		Text: story,
 		ContextCfg: ContextConfig{
-			Prefix: "",
-			Suffix: "",
-			ReservedTokens: 512,
+			Prefix:            "",
+			Suffix:            "",
+			ReservedTokens:    512,
 			InsertionPosition: -1,
-			TokenBudget: 2048,
-			BudgetPriority: 0,
-			TrimDirection: "trimTop",
-			InsertionType: "newline",
-			MaximumTrimType: "sentence",
+			TokenBudget:       2048,
+			BudgetPriority:    0,
+			TrimDirection:     "trimTop",
+			InsertionType:     "newline",
+			MaximumTrimType:   "sentence",
 		},
 		Tokens: scenario.Tokenizer.Encode(&story),
-		Label: "Story",
-		Index: 0,
+		Label:  "Story",
+		Index:  0,
 	}
 }
 
 func getReservedContexts(ctxts ContextEntries) (reserved ContextEntries) {
-	for ctxIdx := range(ctxts) {
+	for ctxIdx := range ctxts {
 		ctx := ctxts[ctxIdx]
 		if ctx.ContextCfg.ReservedTokens > 0 {
 			reserved = append(reserved, ctx)
@@ -270,6 +270,7 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 	contexts = append(contexts, scenario.Context...)
 	contexts = append(contexts, lorebookContexts...)
 	budget -= int(scenario.Settings.Parameters.MaxLength)
+	reservations := 0
 	reservedContexts := getReservedContexts(contexts)
 	for ctxIdx := range reservedContexts {
 		ctx := reservedContexts[ctxIdx]
@@ -277,32 +278,111 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 		szTokens := len(*ctx.Tokens)
 		if szTokens < reservedTokens {
 			budget -= szTokens
+			reservations += szTokens
 		} else {
 			budget -= reservedTokens
+			reservations += reservedTokens
 		}
 	}
 	sort.Sort(sort.Reverse(contexts))
-	for ctxIdx := range(contexts) {
+	newContexts := make([]string, 0)
+	for ctxIdx := range contexts {
 		ctx := contexts[ctxIdx]
-		trimmedTokens := ctx.ResolveTrim(scenario.Tokenizer, budget)
+		reserved := 0
+		if ctx.ContextCfg.ReservedTokens > 0 {
+			if len(*ctx.Tokens) > ctx.ContextCfg.ReservedTokens {
+				reserved = ctx.ContextCfg.ReservedTokens
+			} else {
+				reserved = len(*ctx.Tokens)
+			}
+		}
+		trimmedTokens := ctx.ResolveTrim(scenario.Tokenizer, budget+reserved)
 		numTokens := len(*trimmedTokens)
-		budget -= numTokens
-		fmt.Printf("PRIORITY: %4v RESERVED: %4v ACTUAL: %4v TRIMMED: %4v LEFT: %4v LABEL: %15v INSERTION_POS: %4v INSERTION_TYPE: %8v TRIM_TYPE: %8v TRIM_DIRECTION: %10v\n",
+		budget -= numTokens - reserved
+		reservations -= reserved
+		contextText := strings.Split(scenario.Tokenizer.Decode(trimmedTokens), "\n")
+		ctxInsertion := ctx.ContextCfg.InsertionPosition
+		var before []string
+		var after []string
+		if ctxInsertion < 0 {
+			ctxInsertion += 1
+			before = newContexts[0 : len(newContexts)+ctxInsertion]
+			after = newContexts[len(newContexts)+ctxInsertion:]
+		} else {
+			before = newContexts[0:ctxInsertion]
+			after = newContexts[ctxInsertion:]
+		}
+		newContexts = make([]string, 0)
+		for bIdx := range before {
+			newContexts = append(newContexts, before[bIdx])
+		}
+		for cIdx := range contextText {
+			newContexts = append(newContexts, contextText[cIdx])
+		}
+		for aIdx := range after {
+			newContexts = append(newContexts, after[aIdx])
+		}
+		/* fmt.Printf("PRIORITY: %4v RESERVATIONS: %4v, RESERVED: %4v ACTUAL: %4v TRIMMED: %4v LEFT: %4v LABEL: %15v INSERTION_POS: %4v TRIM_TYPE: %8v TRIM_DIRECTION: %10v\n",
 			contexts[ctxIdx].ContextCfg.BudgetPriority,
-			contexts[ctxIdx].ContextCfg.ReservedTokens,
+			reservations,
+			reserved,
 			len(*contexts[ctxIdx].Tokens),
 			numTokens,
 			budget,
 			contexts[ctxIdx].Label,
 			contexts[ctxIdx].ContextCfg.InsertionPosition,
-			contexts[ctxIdx].ContextCfg.InsertionType,
 			contexts[ctxIdx].ContextCfg.MaximumTrimType,
 			contexts[ctxIdx].ContextCfg.TrimDirection)
+		for ctxTextIdx := range(newContexts) {
+			fmt.Printf("resolvedText: %v\n", newContexts[ctxTextIdx])
+		} */
 	}
-	return ""
+	return strings.Join(newContexts, "\n")
 }
 
-func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scenario, err error) {
+func ScenarioFromSpec(prompt string, memory string, an string) (scenario Scenario) {
+	encoder := gpt_bpe.NewEncoder()
+	scenario.Tokenizer = &encoder
+	scenario.Prompt = prompt
+	scenario.Context = ContextEntries{
+		{Text: memory,
+			ContextCfg: ContextConfig{
+				Prefix:            "",
+				Suffix:            "\n",
+				TokenBudget:       2048,
+				ReservedTokens:    0,
+				BudgetPriority:    800,
+				TrimDirection:     "trimBottom",
+				InsertionType:     "newline",
+				InsertionPosition: 0,
+			},
+			Tokens: encoder.Encode(&memory),
+			Label:  "Memory",
+			Index:  1},
+		{Text: an,
+			ContextCfg: ContextConfig{
+				Prefix:            "",
+				Suffix:            "\n",
+				TokenBudget:       2048,
+				ReservedTokens:    2048,
+				BudgetPriority:    -400,
+				TrimDirection:     "trimBottom",
+				InsertionType:     "newline",
+				InsertionPosition: -4,
+			},
+			Tokens: encoder.Encode(&an),
+			Label:  "A/N",
+			Index:  2}}
+	return scenario
+}
+
+func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scenario,
+	err error) {
+	if tokenizer == nil {
+		encoder := gpt_bpe.NewEncoder()
+		tokenizer = &encoder
+	}
+	scenario.Tokenizer = tokenizer
 	scenarioBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return scenario, err
@@ -311,11 +391,10 @@ func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scen
 	if err != nil {
 		return scenario, err
 	}
-	scenario.Tokenizer = tokenizer
 	for ctxIdx := range scenario.Context {
 		ctx := scenario.Context[ctxIdx]
 		toEncode := ctx.ContextCfg.Prefix +
-			ctx.Text + ctx.ContextCfg.Suffix
+			ctx.Text
 		ctx.Tokens = tokenizer.Encode(&toEncode)
 		scenario.Context[ctxIdx] = ctx
 	}
