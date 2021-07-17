@@ -54,7 +54,6 @@ type NaiGenerateParams struct {
 	Label                  string     `json:"label"`
 	Model                  string     `json:"model"`
 	Prefix                 string     `json:"prefix"`
-	PromptFilename         string     `json:"prompt_filename"`
 	Temperature            float64    `json:"temperature"`
 	MaxLength              uint       `json:"max_length"`
 	MinLength              uint       `json:"min_length"`
@@ -72,9 +71,10 @@ type NaiGenerateParams struct {
 }
 
 type NaiGenerateResp struct {
+	Request         string `json:"request"`
+	Response        string `json:"response"`
 	EncodedRequest  string `json:"encoded_request"`
 	EncodedResponse string `json:"encoded_response"`
-	Response        string `json:"response"`
 	Error           error  `json:"error"`
 }
 
@@ -200,6 +200,7 @@ func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGeneratePara
 	encoded := api.encoder.Encode(content)
 	encodedBytes := toBin(encoded)
 	encodedBytes64 := base64.StdEncoding.EncodeToString(encodedBytes)
+	resp.Request = *content
 	resp.EncodedRequest = encodedBytes64
 	msg := NewGenerateMsg(encodedBytes64)
 	msg.Parameters = params

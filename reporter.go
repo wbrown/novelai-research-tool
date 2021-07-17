@@ -43,8 +43,16 @@ func (ct *ContentTest) CreateConsoleReporter() (ur ConsoleReporter) {
 
 func (cr *ConsoleReporter) ReportIteration(iteration int) {
 	fmt.Printf("%v %v / %v\n", cr.blue("Iteration:"), iteration+1, cr.ct.Iterations)
-	fmt.Printf("%v%v\n", cr.blue("<="),
+	fmt.Printf("%v %v\n", cr.blue("Prompt:"),
 		strings.Replace(cr.ct.Prompt, "\n", cr.blueNewline, -1))
+	if len(cr.ct.Memory) > 0 {
+		fmt.Printf("%v %v\n", cr.blue("Memory:"),
+			strings.Replace(cr.ct.Memory, "\n", cr.blueNewline, -1))
+	}
+	if len(cr.ct.AuthorsNote) > 0 {
+		fmt.Printf("%v %v\n", cr.blue("Author's Note:"),
+			strings.Replace(cr.ct.AuthorsNote, "\n", cr.blueNewline, -1))
+	}
 }
 
 func (cr *ConsoleReporter) ReportGeneration(resp string) {
@@ -141,6 +149,14 @@ func (ct ContentTest) CreateTextReporter(path string) (textReporter TextReporter
 	handleWrite(textReporter.fileHandle, paramsReport+"\n")
 	handleWrite(textReporter.fileHandle, "=== Prompt ========================================\n")
 	handleWrite(textReporter.fileHandle, ct.Prompt)
+	if len(ct.Memory) > 0 {
+		handleWrite(textReporter.fileHandle, "\n=== Memory ========================================\n")
+		handleWrite(textReporter.fileHandle, ct.Memory)
+	}
+	if len(ct.AuthorsNote) > 0 {
+		handleWrite(textReporter.fileHandle, "\n=== Author's Note =================================\n")
+		handleWrite(textReporter.fileHandle, ct.Memory)
+	}
 	return textReporter
 }
 

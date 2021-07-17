@@ -105,6 +105,14 @@ type Scenario struct {
 	Tokenizer       *gpt_bpe.GPTEncoder
 }
 
+type ContextReport struct {
+	Label           string               `json:"label"`
+	InsertionPos    int                  `json:"insertion_pos"`
+	TokenCount      int                  `json:"token_count"`
+	MatchIndexes    []map[string][][]int `json:"matches"`
+	Forced          bool                 `json:"forced"`
+}
+
 func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries ContextEntries) {
 	beginIdx := len(contexts)
 	for loreIdx := range scenario.Lorebook.Entries {

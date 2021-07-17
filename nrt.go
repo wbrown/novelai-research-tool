@@ -18,6 +18,8 @@ type PermutationsSpec struct {
 	Model                  []string  `json:"model"`
 	Prefix                 []string  `json:"prefix"`
 	PromptFilename         []string  `json:"prompt_filename"`
+	Memory                 []string  `json:"memory"`
+	AuthorsNote            []string  `json:"authors_note"`
 	Temperature            []float64 `json:"temperature"`
 	MaxLength              []uint    `json:"max_length"`
 	MinLength              []uint    `json:"min_length"`
@@ -33,7 +35,7 @@ type ContentTest struct {
 	OutputPrefix   string                        `json:"output_prefix"`
 	PromptFilename string                        `json:"prompt_filename"`
 	Memory         string                        `json:"memory"`
-	AuthorsNote    string                        `json:"authors_note""`
+	AuthorsNote    string                        `json:"authors_note"`
 	MaxTokens      int                           `json:"max_tokens"`
 	Iterations     int                           `json:"iterations"`
 	Generations    int                           `json:"generations"`
@@ -47,22 +49,29 @@ type ContentTest struct {
 }
 
 type EncodedIterationResult struct {
-	Prompt    string   `json:"prompt""`
-	Responses []string `json:"responses""`
+	Prompt      string                        `json:"prompt""`
+	Memory      string                        `json:"memory"`
+	AuthorsNote string                        `json:"authors_note"`
+	Requests    []novelai_api.NaiGenerateResp `json:"requests"`
 }
 
 type IterationResult struct {
-	Parameters novelai_api.NaiGenerateParams `json:"settings"`
-	Prompt     string                        `json:"prompt"`
-	Result     string                        `json:"result"`
-	Responses  []string                      `json:"responses"`
-	Encoded    EncodedIterationResult        `json:"encoded"`
+	Parameters  novelai_api.NaiGenerateParams `json:"settings"`
+	Prompt      string                        `json:"prompt"`
+	Memory      string                        `json:"memory"`
+	AuthorsNote string                        `json:"authors_note"`
+	Result      string                        `json:"result"`
+	Responses   []string                      `json:"responses"`
+	Activations []scenario.ContextReport      `json:"context_report"`
+	Encoded     EncodedIterationResult        `json:"encoded"`
 }
 
 func (ct *ContentTest) performGenerations(generations int, input string,
 	report *ConsoleReporter) (results IterationResult) {
 	context := input
 	results.Prompt = input
+	results.Memory = ct.Memory
+	results.AuthorsNote = ct.AuthorsNote
 	results.Parameters = ct.Parameters
 	throttle := time.NewTimer(1100 * time.Millisecond)
 	for generation := 0; generation < generations; generation++ {
@@ -72,7 +81,7 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 			results.Encoded.Prompt = resp.EncodedRequest
 		}
 		results.Responses = append(results.Responses, resp.Response)
-		results.Encoded.Responses = append(results.Encoded.Responses, resp.EncodedResponse)
+		results.Encoded.Requests = append(results.Encoded.Requests, resp)
 		report.ReportGeneration(resp.Response)
 		context = context + resp.Response
 		<-throttle.C
@@ -82,8 +91,10 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	return results
 }
 
-func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) (tests []ContentTest) {
-	permutations := []novelai_api.NaiGenerateParams{ct.Parameters}
+func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []ContentTest {
+	templateTest := ct
+	templateTest.Parameters = ct.Parameters
+	permutations := []ContentTest{templateTest}
 	// Loop over the fields in `Permutations` type.
 	fields := reflect.TypeOf(spec)
 	for field := 0; field < fields.NumField(); field++ {
@@ -93,31 +104,60 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) (tests
 		fieldValues := reflect.ValueOf(spec).Field(field)
 		if fieldValues.Len() > 1 {
 			// Loop over the values in the field to permute on.
-			newPermutations := make([]novelai_api.NaiGenerateParams, 0)
+			newPermutations := make([]ContentTest, 0)
 			// Loop over each permutation we already have existing.
 			for permutationTargetIdx := range permutations {
 				// Create a new permutation for each value in the field.
 				for valIdx := 0; valIdx < fieldValues.Len(); valIdx++ {
 					value := fieldValues.Index(valIdx)
 					permutation := permutations[permutationTargetIdx]
-					targetField, _ := reflect.TypeOf(permutation).FieldByName(fieldName)
-					reflect.ValueOf(&permutation).Elem().Field(targetField.Index[0]).Set(
-						value)
-					if len(permutation.Label) != 0 {
-						permutation.Label += ","
+					targetField, _ := reflect.TypeOf(permutation.Parameters).FieldByName(fieldName)
+					var fieldValueRepr string
+					fmt.Printf("Value: %s", value)
+					switch fieldName {
+					case "Memory":
+						permutation.Memory = fmt.Sprintf("%s", value)
+						fieldValueRepr = fmt.Sprintf("#%d", valIdx)
+					case "AuthorsNote":
+						permutation.AuthorsNote = fmt.Sprintf("%s", value)
+						fieldValueRepr = fmt.Sprintf("#%d", valIdx)
+					case "PromptFilename":
+						permutation.PromptFilename = fmt.Sprintf("%v", value)
+						permutation.PromptPath = filepath.Join(permutation.WorkingDir,
+							permutation.PromptFilename)
+						if _, err := os.Stat(permutation.PromptPath); os.IsNotExist(err) {
+							log.Printf("nrt: Prompt file `%s` does not exist!\n", ct.PromptPath)
+							os.Exit(1)
+						}
+						fieldValueRepr = fmt.Sprintf("%s", value)
+						permutation.loadPrompt(permutation.PromptPath)
+					case "Prefix":
+						// The only model that has `prefix`es is `6B-v3`, and we
+						// don't want to do unnecessary work, so:
+						//   If we are trying to create a permutation that has a
+						//   `prefix` that is *not* `vanilla`, and we're permuting
+						//   for a `model` with a value *other* than `6B-v3`, drop.
+						if value.String() != "vanilla" && permutation.Parameters.Model != "6B-v3" {
+							continue
+						}
+						fallthrough
+					default:
+						reflect.ValueOf(&permutation.Parameters).Elem().Field(targetField.Index[0]).Set(
+							value)
+						fieldValueRepr = strings.Replace(
+							strings.Replace(
+								filepath.Base(fmt.Sprintf("%v",
+									value)), "-", "_", -1),
+							".", "_", -1)
 					}
-					permutation.Label += fieldName + "=" + strings.Replace(
-						strings.Replace(
-							filepath.Base(fmt.Sprintf("%v",
-								value)), "-", "_", -1),
-						".", "_", -1)
-					// The only model that has `prefix`es is `6B-v3`, and we
-					// don't want to do unnecessary work, so:
-					//   If we are trying to create a permutation that has a
-					//   `prefix` that is *not* `vanilla`, and we're permuting
-					//   for a `model` with a value *other* than `6B-v3`, drop.
+					// Update our label to reflect the field value we just permuted on.
+					if len(permutation.Parameters.Label) != 0 {
+						permutation.Parameters.Label += ","
+					}
+					permutation.Parameters.Label += fieldName + "=" + fieldValueRepr
+
 					if fieldName == "Prefix" && value.String() != "vanilla" &&
-						permutation.Model != "6B-v3" {
+						permutation.Parameters.Model != "6B-v3" {
 						continue
 					}
 					newPermutations = append(newPermutations, permutation)
@@ -126,23 +166,7 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) (tests
 			permutations = newPermutations
 		}
 	}
-	for permutationIdx := range permutations {
-		newTest := ct
-		newTest.Parameters = permutations[permutationIdx]
-		// Pull up any `PromptFilename` values from the Parameters,
-		// to the test and do setup.
-		if len(newTest.Parameters.PromptFilename) > 0 {
-			newTest.PromptFilename = newTest.Parameters.PromptFilename
-			newTest.PromptPath = filepath.Join(newTest.WorkingDir, newTest.PromptFilename)
-			if _, err := os.Stat(ct.PromptPath); os.IsNotExist(err) {
-				log.Printf("nrt: Prompt file `%v` does not exist!\n", ct.PromptPath)
-				os.Exit(1)
-			}
-			newTest.loadPrompt(newTest.PromptPath)
-		}
-		tests = append(tests, newTest)
-	}
-	return tests
+	return permutations
 }
 
 func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
@@ -159,7 +183,7 @@ func (ct *ContentTest) generateOutputPath() string {
 			ct.OutputPrefix,
 			ct.Parameters.Label + ",TS=" +
 				time.Now().Format("2006-01-02T1504")},
-				"-"))
+			"-"))
 }
 
 func (ct *ContentTest) loadPrompt(path string) {
