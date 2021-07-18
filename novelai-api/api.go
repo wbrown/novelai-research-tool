@@ -165,10 +165,11 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 	for tries := 0; tries < 3; tries++ {
 		var err error
 		resp, err = cl.Do(req)
-		if err == nil {
+		if err == nil && resp.StatusCode == 201 {
 			break
+		} else {
+			log.Printf("API: StatusCode: %d, %v\n", resp.StatusCode, err)
 		}
-		log.Println(err)
 		time.Sleep(3)
 	}
 	body, err := ioutil.ReadAll(resp.Body)
