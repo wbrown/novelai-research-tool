@@ -106,11 +106,11 @@ type Scenario struct {
 }
 
 type ContextReport struct {
-	Label           string               `json:"label"`
-	InsertionPos    int                  `json:"insertion_pos"`
-	TokenCount      int                  `json:"token_count"`
-	MatchIndexes    []map[string][][]int `json:"matches"`
-	Forced          bool                 `json:"forced"`
+	Label        string               `json:"label"`
+	InsertionPos int                  `json:"insertion_pos"`
+	TokenCount   int                  `json:"token_count"`
+	MatchIndexes []map[string][][]int `json:"matches"`
+	Forced       bool                 `json:"forced"`
 }
 
 func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries ContextEntries) {
@@ -314,8 +314,13 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 		var after []string
 		if ctxInsertion < 0 {
 			ctxInsertion += 1
-			before = newContexts[0 : len(newContexts)+ctxInsertion]
-			after = newContexts[len(newContexts)+ctxInsertion:]
+			if len(newContexts)+ctxInsertion >= 0 {
+				before = newContexts[0 : len(newContexts)+ctxInsertion]
+				after = newContexts[len(newContexts)+ctxInsertion:]
+			} else {
+				before = []string{}
+				after = newContexts[0:]
+			}
 		} else {
 			before = newContexts[0:ctxInsertion]
 			after = newContexts[ctxInsertion:]

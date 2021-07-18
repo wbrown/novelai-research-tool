@@ -1,8 +1,10 @@
 {
   "prompt_filename": "white_samurai.txt",
-  "output_prefix": "white_samurai/white_samruai",
+  "output_prefix": "white_samurai/white_samurai",
+  "memory": "I’m Daniel Blackthorn, a soldier who fought in the American Civil War, on the Confederate side. When the South lost the War of Northern aggression, I went westward, and participated in the Indian Wars. Eventually, I ended up in San Francisco, and went overseas to Japan during the Edo Period. I was hired to train the soldiers of the Japanese daimyos in rifle warfare and skirmishing tactics. I’d been there long enough and had a knack for languages to become nearly fluent in Japanese. I trained in the samurai arts of the katana, and the code of Bushido. I am known as the White Samurai, and my red hair and pale skin is viewed with near superstitious awe.",
+  "authors_note": "[ Genre: historical fiction; Location: Japan; Era: Edo Period; Year: 1867 AD; style: poetic, detailed, sensual ]",
   "iterations": 10,
-  "generations": 22,
+  "generations": 75,
   "parameters": {
     "model": "6B-v3",
     "prefix": "vanilla",
@@ -30,6 +32,15 @@
         0.70
       ],
       "prefix": [
+        "vanilla",
+        "style_arthurconandoyle",
+        "style_edgarallanpoe",
+        "style_hplovecraft",
+        "style_shridanlefanu",
+        "style_julesverne",
+        "theme_19thcenturyromance",
+        "theme_actionarcheology",
+        "theme_airships",
         "theme_ai",
         "theme_darkfantasy",
         "theme_dragons",
