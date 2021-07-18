@@ -1,0 +1,38 @@
+{
+  "prompt_filename": "need_help.txt",
+  "memory": "I'm seeing a counselor named Dr. Michael Szozas about an issue that I'm having. Dr. Szozas is really smart, kind, and so attractive! He has hazel eyes, glasses, wear a comfortable cardigan, slacks, and he's really tall!",
+  "authors_note": "[Period: Modern Day]\n[Year: 2020 AD]\n[Style: Stream of consciousness, intelligent, funny]",
+  "output_prefix": "need_help_output/need_help",
+  "max_tokens": 2048,
+  "iterations": 10,
+  "generations": 10,
+  "parameters": {
+    "model": "6B-v3",
+    "prefix": "vanilla",
+    "temperature": 0.55,
+    "max_length": 40,
+    "min_length": 40,
+    "top_k": 140,
+    "top_p": 0.9,
+    "tail_free_sampling": 1,
+    "repetition_penalty": 3.5,
+    "repetition_penalty_range": 1024,
+    "repetition_penalty_slope": 6.57,
+    "bad_words_ids": [],
+    "ban_brackets": true,
+    "use_cache": false,
+    "use_string": false,
+    "return_full_text": false
+  },
+  "permutations": [
+    {
+      "model": [
+        "2.7B"
+      ],
+      "prefix": [
+        "vanilla",
+        "style_arthurconandoyle"
+      ]
+    }
+  ]
+}

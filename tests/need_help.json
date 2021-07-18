@@ -26,6 +26,10 @@
   },
   "permutations": [
     {
+      "model": [
+        "2.7B",
+        "6B-v3"
+      ],
       "temperature": [
         0.45,
         0.50,
@@ -39,9 +43,9 @@
       ]
     },
     {
-      "model": [
-        "2.7B",
-        "6B-v3"
+      "temperature": [
+        0.55,
+        0.65
       ],
       "prefix": [
         "vanilla",

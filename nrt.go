@@ -102,7 +102,7 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 		// values in there.
 		fieldName := fields.FieldByIndex([]int{field}).Name
 		fieldValues := reflect.ValueOf(spec).Field(field)
-		if fieldValues.Len() > 1 {
+		if fieldValues.Len() > 0 {
 			// Loop over the values in the field to permute on.
 			newPermutations := make([]ContentTest, 0)
 			// Loop over each permutation we already have existing.
@@ -113,7 +113,6 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 					permutation := permutations[permutationTargetIdx]
 					targetField, _ := reflect.TypeOf(permutation.Parameters).FieldByName(fieldName)
 					var fieldValueRepr string
-					fmt.Printf("Value: %s", value)
 					switch fieldName {
 					case "Memory":
 						permutation.Memory = fmt.Sprintf("%s", value)
@@ -131,16 +130,6 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 						}
 						fieldValueRepr = fmt.Sprintf("%s", value)
 						permutation.loadPrompt(permutation.PromptPath)
-					case "Prefix":
-						// The only model that has `prefix`es is `6B-v3`, and we
-						// don't want to do unnecessary work, so:
-						//   If we are trying to create a permutation that has a
-						//   `prefix` that is *not* `vanilla`, and we're permuting
-						//   for a `model` with a value *other* than `6B-v3`, drop.
-						if value.String() != "vanilla" && permutation.Parameters.Model != "6B-v3" {
-							continue
-						}
-						fallthrough
 					default:
 						reflect.ValueOf(&permutation.Parameters).Elem().Field(targetField.Index[0]).Set(
 							value)
@@ -155,7 +144,6 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 						permutation.Parameters.Label += ","
 					}
 					permutation.Parameters.Label += fieldName + "=" + fieldValueRepr
-
 					if fieldName == "Prefix" && value.String() != "vanilla" &&
 						permutation.Parameters.Model != "6B-v3" {
 						continue
@@ -166,7 +154,16 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 			permutations = newPermutations
 		}
 	}
-	return permutations
+	filteredPermutations := make([]ContentTest, 0)
+	for permutationIdx := range(permutations) {
+		permutation := permutations[permutationIdx]
+		if permutation.Parameters.Model != "6B-v3" &&
+			permutation.Parameters.Prefix != "vanilla" {
+			continue
+		}
+		filteredPermutations = append(filteredPermutations, permutation)
+	}
+	return filteredPermutations
 }
 
 func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
@@ -210,14 +207,12 @@ func (ct ContentTest) Perform() {
 	}
 }
 
-func GenerateTestsFromFile(path string) (tests []ContentTest) {
+func LoadSpecFromFile(path string) (test ContentTest) {
 	configBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Printf("nrt: Error loading JSON specification file `%s`: %v", path, err)
 		os.Exit(1)
 	}
-	var test ContentTest
-	test.API = novelai_api.NewNovelAiAPI()
 	err = json.Unmarshal(configBytes, &test)
 	if err != nil {
 		log.Printf("nrt: Error loading JSON specification file `%s`: %v", path, err)
@@ -235,5 +230,11 @@ func GenerateTestsFromFile(path string) (tests []ContentTest) {
 	test.loadPrompt(test.PromptPath)
 	test.Scenario = scenario.ScenarioFromSpec(test.Prompt, test.Memory,
 		test.AuthorsNote)
+	return test
+}
+
+func GenerateTestsFromFile(path string) (tests []ContentTest) {
+	test := LoadSpecFromFile(path)
+	test.API = novelai_api.NewNovelAiAPI()
 	return test.GeneratePermutations()
 }

@@ -13,7 +13,7 @@ import (
 func handleWrite(f *os.File, s string) {
 	_, err := f.WriteString(s)
 	if err != nil {
-		log.Printf("reporter: Error writing string: `%s`: %s", err)
+		log.Printf("reporter: Error writing string: `%s`: %s", s, err)
 		os.Exit(1)
 	}
 }
