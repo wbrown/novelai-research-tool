@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -34,6 +35,8 @@ func getAccessToken(access_key string) (accessToken string) {
 	req, _ := http.NewRequest("POST", "https://api.novelai.net/user/login",
 		bytes.NewBuffer(encoded))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent",
+		"nrt/0.1 ("+runtime.GOOS+"; "+runtime.GOARCH+")")
 	resp, err := cl.Do(req)
 	if err != nil {
 		log.Printf("auth: Error performing HTTP request: %v", err)
