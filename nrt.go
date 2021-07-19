@@ -91,18 +91,48 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	return results
 }
 
+func (ct ContentTest) FieldsSame(fields []string, other ContentTest) bool {
+	ctFields := reflect.TypeOf(ct.Parameters)
+	for fieldIdx := range fields {
+		fieldName := fields[fieldIdx]
+		switch fieldName {
+		case "Memory":
+			if ct.Memory != other.Memory {
+				return false
+			}
+		case "AuthorsNote":
+			if ct.AuthorsNote != other.AuthorsNote {
+				return false
+			}
+		case "PromptFilename":
+			if ct.PromptFilename != other.PromptFilename {
+				return false
+			}
+		}
+		field, _ := ctFields.FieldByName(fieldName)
+		ctVal := reflect.ValueOf(ct.Parameters).Field(field.Index[0])
+		otherVal := reflect.ValueOf(other.Parameters).Field(field.Index[0])
+		if fmt.Sprintf("%v", ctVal) != fmt.Sprintf("%v", otherVal) {
+			return false
+		}
+	}
+	return true
+}
+
 func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []ContentTest {
 	templateTest := ct
 	templateTest.Parameters = ct.Parameters
 	permutations := []ContentTest{templateTest}
 	// Loop over the fields in `Permutations` type.
 	fields := reflect.TypeOf(spec)
+	fieldNames := make([]string, 0)
 	for field := 0; field < fields.NumField(); field++ {
 		// For each field, check the field contents and determine if there's any
 		// values in there.
 		fieldName := fields.FieldByIndex([]int{field}).Name
 		fieldValues := reflect.ValueOf(spec).Field(field)
 		if fieldValues.Len() > 0 {
+			fieldNames = append(fieldNames, fieldName)
 			// Loop over the values in the field to permute on.
 			newPermutations := make([]ContentTest, 0)
 			// Loop over each permutation we already have existing.
@@ -154,14 +184,25 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 			permutations = newPermutations
 		}
 	}
-	filteredPermutations := make([]ContentTest, 0)
-	for permutationIdx := range(permutations) {
+	filteredPermutations := []ContentTest{ct}
+	for permutationIdx := range permutations {
 		permutation := permutations[permutationIdx]
 		if permutation.Parameters.Model != "6B-v3" &&
 			permutation.Parameters.Prefix != "vanilla" {
 			continue
 		}
-		filteredPermutations = append(filteredPermutations, permutation)
+		// Deduplicate based on fields we've permuted on.
+		same := false
+		for filteredIdx := range filteredPermutations {
+			filteredPermutation := filteredPermutations[filteredIdx]
+			if permutation.FieldsSame(fieldNames, filteredPermutation) {
+				same = true
+				break
+			}
+		}
+		if !same {
+			filteredPermutations = append(filteredPermutations, permutation)
+		}
 	}
 	return filteredPermutations
 }
