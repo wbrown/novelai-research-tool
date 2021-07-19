@@ -1,0 +1,44 @@
+{
+  "prompt_filename": "white_samurai.txt",
+  "output_prefix": "white_samurai_tags/white_samurai_tags",
+  "memory": "I’m Daniel Blackthorn, a soldier who fought in the American Civil War, on the Confederate side. When the South lost the War of Northern aggression, I went westward, and participated in the Indian Wars. Eventually, I ended up in San Francisco, and went overseas to Japan during the Edo Period. I was hired to train the soldiers of the Japanese daimyos in rifle warfare and skirmishing tactics. I’d been there long enough and had a knack for languages to become nearly fluent in Japanese. I trained in the samurai arts of the katana, and the code of Bushido. I am known as the White Samurai, and my red hair and pale skin is viewed with near superstitious awe.",
+  "authors_note": "[ Genre: historical fiction; Location: Japan; Era: Edo Period; Year: 1867 AD; style: poetic, detailed, sensual ]",
+  "iterations": 10,
+  "generations": 50,
+  "parameters": {
+    "model": "6B-v3",
+    "prefix": "vanilla",
+    "temperature": 0.55,
+    "max_length": 100,
+    "min_length": 40,
+    "top_k": 140,
+    "top_p": 0.9,
+    "tail_free_sampling": 1,
+    "repetition_penalty": 3.5,
+    "repetition_penalty_range": 1024,
+    "repetition_penalty_slope": 6.57,
+    "bad_words_ids": [],
+    "ban_brackets": true,
+    "use_cache": false,
+    "use_string": false,
+    "return_full_text": false
+  },
+  "permutations": [
+    {
+      "authors_note": [
+        "[ Genre: historical fiction; Location: Japan; Era: Edo; Year: 1867 AD; style: poetic, detailed, sensual ]",
+        "[ Genre: historical fiction ] [ Location: Kyoto, Japan ] [ Era: Edo; year: 1867 AD ] [ style: poetic, detailed, sensual ]",
+        "[ Genre: historical fiction ]\n[ Location: Kyoto, Japan ]\n[ Era: Edo; year: 1867 AD ]\n[ style: poetic, detailed, sensual ]",
+        " Genre: historical fiction\n Location: Kyoto, Japan\n Era: Edo; year: 1867 AD\n style: poetic, detailed, sensual",
+       "[ Genre: Historical Fiction; Location: Japan; Era: Edo; Year: 1867 AD; style: poetic, detailed, sensual ]",
+       "[ Genre: Historical Fiction ] [ Location: Kyoto, Japan ] [ Era: Edo; year: 1867 AD ] [ style: poetic, detailed, sensual ]",
+       "[ Genre: Historical Fiction ]\n[ Location: Kyoto, Japan ]\n[ Era: Edo; year: 1867 AD ]\n[ style: poetic, detailed, sensual ]",
+       " Genre: Historical Fiction\n Location: Kyoto, Japan\n Era: Edo; year: 1867 AD\n style: poetic, detailed, sensual"
+      ],
+      "memory": [
+        "I’m Daniel Blackthorn, a soldier who fought in the American Civil War, on the Confederate side. When the South lost the War of Northern aggression, I went westward, and participated in the Indian Wars. Eventually, I ended up in San Francisco, and went overseas to Japan during the Edo Period. I was hired to train the soldiers of the Japanese daimyos in rifle warfare and skirmishing tactics. I’d been there long enough and had a knack for languages to become nearly fluent in Japanese. I trained in the samurai arts of the katana, and the code of Bushido. I am known as the White Samurai, and my red hair and pale skin is viewed with near superstitious awe.",
+        "[ I’m Daniel Blackthorn, a soldier who fought in the American Civil War, on the Confederate side. When the South lost the War of Northern aggression, I went westward, and participated in the Indian Wars. Eventually, I ended up in San Francisco, and went overseas to Japan during the Edo Period. I was hired to train the soldiers of the Japanese daimyos in rifle warfare and skirmishing tactics. I’d been there long enough and had a knack for languages to become nearly fluent in Japanese. I trained in the samurai arts of the katana, and the code of Bushido. I am known as the White Samurai, and my red hair and pale skin is viewed with near superstitious awe. ]"
+      ]
+    }
+  ]
+}

@@ -67,7 +67,7 @@ type IterationResult struct {
 }
 
 func (ct *ContentTest) performGenerations(generations int, input string,
-	report *ConsoleReporter) (results IterationResult) {
+	reporters *Reporters) (results IterationResult) {
 	context := input
 	results.Prompt = input
 	results.Memory = ct.Memory
@@ -82,7 +82,7 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 		}
 		results.Responses = append(results.Responses, resp.Response)
 		results.Encoded.Requests = append(results.Encoded.Requests, resp)
-		report.ReportGeneration(resp.Response)
+		reporters.ReportGeneration(resp.Response)
 		context = context + resp.Response
 		<-throttle.C
 		throttle = time.NewTimer(1100 * time.Millisecond)
@@ -270,16 +270,12 @@ func (ct *ContentTest) loadPrompt(path string) {
 
 func (ct ContentTest) Perform() {
 	ct.loadPrompt(ct.PromptPath)
-	consoleReport := ct.CreateConsoleReporter()
-	textReport := ct.CreateTextReporter(ct.generateOutputPath() + ".txt")
-	defer textReport.close()
-	jsonReport := CreateJSONReporter(ct.generateOutputPath() + ".json")
-	defer jsonReport.close()
+	reporters := ct.MakeReporters()
+	defer reporters.close()
 	for iteration := 0; iteration < ct.Iterations; iteration++ {
-		consoleReport.ReportIteration(iteration)
-		responses := ct.performGenerations(ct.Generations, ct.Prompt, &consoleReport)
-		textReport.write(responses.Result)
-		jsonReport.write(&responses)
+		reporters.ReportIteration(iteration)
+		responses := ct.performGenerations(ct.Generations, ct.Prompt, &reporters)
+		reporters.SerializeIteration(&responses)
 	}
 }
 

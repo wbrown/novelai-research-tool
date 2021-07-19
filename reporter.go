@@ -89,7 +89,7 @@ func CreateJSONReporter(path string) (reportWriter JSONReporter) {
 	return reportWriter
 }
 
-func (reportWriter *JSONReporter) write(result *IterationResult) {
+func (reportWriter *JSONReporter) SerializeIteration(result *IterationResult) {
 	if reportWriter.iteration != 0 {
 		handleWrite(reportWriter.fileHandle, ",\n")
 	}
@@ -116,7 +116,6 @@ func (reportWriter *JSONReporter) close() {
 type TextReporter struct {
 	fileHandle *os.File
 	ct         *ContentTest
-	iteration  int
 }
 
 func (ct ContentTest) CreateTextReporter(path string) (textReporter TextReporter) {
@@ -160,14 +159,54 @@ func (ct ContentTest) CreateTextReporter(path string) (textReporter TextReporter
 	return textReporter
 }
 
-func (tr *TextReporter) write(resp string) {
-	tr.iteration += 1
+func (tr *TextReporter) ReportIteration(iteration int) {
 	handleWrite(tr.fileHandle,
-		fmt.Sprintf("\n\n=== Iteration %-5v ==============================\n", tr.iteration))
+		fmt.Sprintf("\n\n=== Iteration %-5v ==============================\n", iteration))
+	tr.fileHandle.Sync()
+}
+
+func (tr *TextReporter) ReportGeneration(resp string) {
 	handleWrite(tr.fileHandle, resp)
 	tr.fileHandle.Sync()
 }
 
 func (tr *TextReporter) close() {
 	tr.fileHandle.Close()
+}
+
+type Reporters struct {
+	JSON *JSONReporter
+	Text *TextReporter
+	Console *ConsoleReporter
+}
+
+func (reporters Reporters) close() {
+	reporters.JSON.close()
+	reporters.Text.close()
+}
+
+func (reporters Reporters) ReportIteration(iteration int) {
+	reporters.Console.ReportIteration(iteration)
+	reporters.Text.ReportIteration(iteration)
+}
+
+func (reporters Reporters) ReportGeneration(resp string) {
+	reporters.Console.ReportGeneration(resp)
+	reporters.Text.ReportGeneration(resp)
+}
+
+func (reporters Reporters) SerializeIteration(result *IterationResult) {
+	reporters.JSON.SerializeIteration(result)
+}
+
+func (ct ContentTest) MakeReporters() Reporters {
+	consoleReport := ct.CreateConsoleReporter()
+	outputPath := ct.generateOutputPath()
+	textReport := ct.CreateTextReporter( outputPath + ".txt")
+	jsonReport := CreateJSONReporter( outputPath + ".json")
+	return Reporters{
+		&jsonReport,
+		&textReport,
+		&consoleReport,
+	}
 }
