@@ -155,7 +155,7 @@ func (ct ContentTest) CreateTextReporter(path string) (textReporter TextReporter
 	}
 	if len(ct.AuthorsNote) > 0 {
 		handleWrite(textReporter.fileHandle, "\n=== Author's Note =================================\n")
-		handleWrite(textReporter.fileHandle, ct.Memory)
+		handleWrite(textReporter.fileHandle, ct.AuthorsNote)
 	}
 	return textReporter
 }
