@@ -1,14 +1,12 @@
 {
   "scenarioVersion": 0,
-  "title": "A Laboratory Assistant (1st, Interviewee POV)",
+  "title": "A Laboratory Assistant (1st) (Template)",
   "description": "You're in need of a laboratory assistant and interview one.",
-  "prompt": "I was browsing the advertisements looking for a job, as I'd just finished my higher education and post-doc, when one advertisement caught my attention.\nNobel Prize Winner In Need Of A Lab Assistant:\n* Must be attractive\n* Must be intelligent, holding at least a graduate degree\n* Sense of humor required\nI can't help but crush immediately on him, when I realize it's the guy that won the Nobel Prize for implementing ansible communications, paving the way for interstellar journeys by enabling faster-than-light communications via twinned quantum states. I'd read some of his papers on the topic, and it's like listening to a Mozart symphony as the ideas unfold in my head.\nFeeling a bit trepid, I muster up my courage, and submit my photos and resume along with the papers I'd written as backup material. Apparently he had so many applicants that he has an agency filtering through it. By some miracle, I got a call that he'd like to see me.\nHe lives on top of the space elevator that lifts humanity to the stars. Maybe I'll help him, and maybe one day I'll go on an interstellar journey?\nI didn't know how I was supposed to dress? What am I supposed to say to the smartest man ever? But I decide to dress to the nines, and shoot for the moon, and maybe just be myself?\nAfter the long journey, I arrive at a non-descript door, and push the button, \"Come in!\" calls his voice. It's so lovely, warm and welcoming that I can't help but feel fuzzy.  I step in, and I see him, and I'm stopped dead in my tracks; I see the most handsome man I've ever seen, that causes my heart to jump, and my breath to catch. He gives me a broad grin, extends his hand, and I recognize him as Dr. ",
-  "tags": [
-    "template"
-  ],
+  "prompt": "I'm Daniel, and I'm a successful inventor and scientist who won the Nobel Prize for implementing ansible communications, paving the way for interstellar journeys by enabling faster-than-light communications via twinned quantum states. I am wealthy and I have my own private laboratory and home near the top of the space elevator. But I've come to realize that I'd like companionship. So being the pragmatic guy I am, I posted an advertisement:\nNobel Prize Winner In Need Of A Lab Assistant:\n* Must be a pretty female\n* Must be intelligent, holding at least a graduate degree\n* Willing to service all my needs, intellectual and sexual\n* Sense of humor required\nI got quite a few inquiries, resumes, and photos, so I arranged to have an agency filter them for me. It’s finally time for me to meet the first candidate in a hybrid of a first blind date and interview, and I'm looking forward to it. I'm seated on my couch in my lab, admiring the view of near-orbital spacer, when I hear a knock, to which I respond, “Come in!” It could be any of these women: Sophia, Mariko, Anastasia, Wendy, Julia, Penny, Ashleigh, Catherine, and Mariko.\nIn steps the most beautiful woman I've ever seen, causing my breath to catch for a moment, and I recognize her as the woman named ",
+  "tags": [],
   "context": [
     {
-      "text": "[I'm a post-doctoral researcher. A Nobel Prize winning scientist who invented the ansible has put an advertisement up that specified the following requirements:\n* Must be attractive\n* Must be intelligent, holding at least a graduate degree\n* Sense of humor required]",
+      "text": "[I'm Daniel, a genius inventor and Nobel Prize-winning scientist interviewing a pretty woman to be my lab assistant and sex toy. The advertisement had specified the following requirements:\n* Must be a pretty female\n* Must be intelligent, holding at least a graduate degree\n* Willing to service all my needs, intellectual and sexual\n* Sense of humor required]",
       "contextConfig": {
         "prefix": "",
         "suffix": "\n",
@@ -22,7 +20,7 @@
       }
     },
     {
-      "text": "[  Author: Sylvia Day; Tags: smooth jazz; Genre: Sci-fi; style: detailed, lyrical, poetic ]",
+      "text": "[ Author: Sylvia Day; Tags: ; Genre: Sci-Fi; Style: detailed, lyrical, poetic, Tone: smooth jazz ]",
       "contextConfig": {
         "prefix": "",
         "suffix": "\n",
@@ -40,18 +38,18 @@
   "placeholders": [],
   "settings": {
     "parameters": {
-      "temperature": 0.6,
+      "temperature": 0.55,
       "max_length": 60,
-      "min_length": 20,
-      "top_k": 0,
-      "top_p": 2,
-      "tail_free_sampling": 0.652,
-      "repetition_penalty": 2.4,
-      "repetition_penalty_range": 1168,
-      "repetition_penalty_slope": 3.33,
+      "min_length": 40,
+      "top_k": 140,
+      "top_p": 0.9,
+      "tail_free_sampling": 1,
+      "repetition_penalty": 4.0,
+      "repetition_penalty_range": 1024,
+      "repetition_penalty_slope": 6.57,
       "bad_words_ids": []
     },
-    "trimResponses": false,
+    "trimResponses": true,
     "banBrackets": true,
     "prefix": "vanilla"
   },
@@ -71,11 +69,10 @@
           "maximumTrimType": "sentence",
           "insertionPosition": -1
         },
-        "lastUpdatedAt": 1625105410806,
+        "lastUpdatedAt": 1624832751150,
         "displayName": "Sophia",
         "keys": [
-          "Sophia",
-          "dress to the nines"
+          "Sophia"
         ],
         "searchRange": 1000,
         "enabled": true,
@@ -96,14 +93,13 @@
           "maximumTrimType": "sentence",
           "insertionPosition": -1
         },
-        "lastUpdatedAt": 1625105401418,
+        "lastUpdatedAt": 1624750262234,
         "displayName": "Mariko",
         "keys": [
-          "Mariko",
-          "dress to the nines"
+          "Mariko"
         ],
         "searchRange": 1000,
-        "enabled": false,
+        "enabled": true,
         "forceActivation": false,
         "keyRelative": false,
         "nonStoryActivatable": false
@@ -121,11 +117,10 @@
           "maximumTrimType": "sentence",
           "insertionPosition": -1
         },
-        "lastUpdatedAt": 1625105414183,
+        "lastUpdatedAt": 1624750375414,
         "displayName": "Catherine",
         "keys": [
-          "Catherine",
-          "dress to the nines"
+          "Catherine"
         ],
         "searchRange": 1000,
         "enabled": true,
@@ -146,11 +141,10 @@
           "maximumTrimType": "sentence",
           "insertionPosition": -1
         },
-        "lastUpdatedAt": 1625105395821,
+        "lastUpdatedAt": 1624750282354,
         "displayName": "Anastasia",
         "keys": [
-          "Anastasia",
-          "dress to the nines"
+          "Anastasia"
         ],
         "searchRange": 1000,
         "enabled": true,
@@ -171,14 +165,13 @@
           "maximumTrimType": "sentence",
           "insertionPosition": -1
         },
-        "lastUpdatedAt": 1625105404733,
+        "lastUpdatedAt": 1624750321744,
         "displayName": "Wendy",
         "keys": [
-          "Wendy",
-          "dress to the nines"
+          "Wendy"
         ],
         "searchRange": 1000,
-        "enabled": false,
+        "enabled": true,
         "forceActivation": false,
         "keyRelative": false,
         "nonStoryActivatable": false
@@ -196,14 +189,13 @@
           "maximumTrimType": "sentence",
           "insertionPosition": -1
         },
-        "lastUpdatedAt": 1625105407766,
+        "lastUpdatedAt": 1624750348870,
         "displayName": "Julia",
         "keys": [
-          "Julia",
-          "dress to the nines"
+          "Julia"
         ],
         "searchRange": 1000,
-        "enabled": false,
+        "enabled": true,
         "forceActivation": false,
         "keyRelative": false,
         "nonStoryActivatable": false
@@ -221,11 +213,10 @@
           "maximumTrimType": "sentence",
           "insertionPosition": -1
         },
-        "lastUpdatedAt": 1625105417087,
+        "lastUpdatedAt": 1624750303384,
         "displayName": "Ashleigh",
         "keys": [
-          "Ashleigh",
-          "dress to the nines"
+          "Ashleigh"
         ],
         "searchRange": 1000,
         "enabled": true,
@@ -246,115 +237,10 @@
           "maximumTrimType": "sentence",
           "insertionPosition": -1
         },
-        "lastUpdatedAt": 1625105398225,
+        "lastUpdatedAt": 1624748068096,
         "displayName": "Penny",
         "keys": [
-          "Penny",
-          "dress to the nines"
-        ],
-        "searchRange": 1000,
-        "enabled": false,
-        "forceActivation": false,
-        "keyRelative": false,
-        "nonStoryActivatable": false
-      },
-      {
-        "text": "Dr. Daniel Scott's hair is black and falls over his forehead in soft waves. His eyes are a deep shade of brown that seem to glow in the light, shining with his formidable intellect. Daniel's jawline is square, strong, and masculine; his nose is straight and thin, with a slight upturn. The rest of his features are sharply defined with a hint of a smile, giving him a very charming and likable face. Dr. Scott wears a white lab coat, which is open to reveal a black shirt underneath. His pants are tight fitting, neatly pressed, and his shoes are polished.",
-        "contextConfig": {
-          "prefix": "",
-          "suffix": "\n",
-          "tokenBudget": 2048,
-          "reservedTokens": 0,
-          "budgetPriority": 400,
-          "trimDirection": "trimBottom",
-          "insertionType": "newline",
-          "maximumTrimType": "sentence",
-          "insertionPosition": -1
-        },
-        "lastUpdatedAt": 1625164257278,
-        "displayName": "Daniel Scott",
-        "keys": [
-          "Daniel",
-          "Scott",
-          "calls his voice"
-        ],
-        "searchRange": 1000,
-        "enabled": true,
-        "forceActivation": false,
-        "keyRelative": false,
-        "nonStoryActivatable": false
-      },
-      {
-        "text": "Dr. Martin Davies is a very tall man, easily surpassing six and a half feet  with slightly narrow shoulders, and a slim waist. His height is exaggerated by a pair of black, leather-clad boots. Martin's hair is pale blond, and falls in waves past his ears. His skin is smooth and even; his eyes are a brilliant green that spark at me with his formidable intellect. And, oh, his smile is dazzling, with a dimple on either cheek that makes your heart melt. Dressed in a black suit, with a white shirt and a red tie, Dr. Davies is dressed for success. And he smells divine.",
-        "contextConfig": {
-          "prefix": "",
-          "suffix": "\n",
-          "tokenBudget": 2048,
-          "reservedTokens": 0,
-          "budgetPriority": 400,
-          "trimDirection": "trimBottom",
-          "insertionType": "newline",
-          "maximumTrimType": "sentence",
-          "insertionPosition": -1
-        },
-        "lastUpdatedAt": 1625164249069,
-        "displayName": "Martin Davies",
-        "keys": [
-          "Martin",
-          "Davies",
-          "calls his voice"
-        ],
-        "searchRange": 1000,
-        "enabled": true,
-        "forceActivation": false,
-        "keyRelative": false,
-        "nonStoryActivatable": false
-      },
-      {
-        "text": "Dr. Eric Powell is a well-built and muscular six foot four; with a trim and athletic build, with the proportions of a Greek god. His face is chiseled and refined, with a strong jaw, a sharp nose and striking green eyes. Eric's hair is a deep auburn, and falls over his forehead in soft waves. His skin is a golden tan, with just a hint of sunburn, making him look almost Mediterranean. Dr. Powell's lips are full and pouty, and his teeth are perfectly white, and sparkle when he smiles. His hands are large, and rough, and calloused, and they grip mine with a firm and unbreakable strength. Eric's clothes are tailored and stylish, with a hint of sophistication, with a crisp, white shirt and a dark grey jacket, his pants are tight fitting, and neatly pressed. His shoes are polished and gleaming. Dr. Eric Powell's body language is open and friendly, with a relaxed and easy stance. He seems taller than he actually is, and I find myself unconsciously leaning towards him. When he speaks, I can hear the musical quality of his voice, something like a baritone saxophone, low and mellow.",
-        "contextConfig": {
-          "prefix": "",
-          "suffix": "\n",
-          "tokenBudget": 2048,
-          "reservedTokens": 0,
-          "budgetPriority": 400,
-          "trimDirection": "trimBottom",
-          "insertionType": "newline",
-          "maximumTrimType": "sentence",
-          "insertionPosition": -1
-        },
-        "lastUpdatedAt": 1625164635175,
-        "displayName": "Eric Powell",
-        "keys": [
-          "Eric",
-          "Powell",
-          "calls his voice"
-        ],
-        "searchRange": 1000,
-        "enabled": true,
-        "forceActivation": false,
-        "keyRelative": false,
-        "nonStoryActivatable": false
-      },
-      {
-        "text": "Dr. Paul Duncan's voice is soothing, rich, and melodious, with a slight quaver in his voice. His eyes are a deep shade of blue that seem to sparkle in the light, shining with his formidable intellect. Dr. Duncan's jawline is square, strong, and masculine; his nose is straight and thin, with a slight upturn. The rest of his features are sharply defined with a hint of a smile, giving him a very charming and likable face. Paul's black hair falls over his forehead in soft waves that partially conceal is deep brown eyes that seem to glow in the light, shining with his formidable intellect.  Dressed in a white lab coat, which is open to reveal a comfortable cardigan underneath, showing off a dark gray shirt, with a large patch pocket, and two more on each sleeve. A pair of khaki pants completes his outfit, with along with a pair of rugged boots, making him look like a classic scientist.",
-        "contextConfig": {
-          "prefix": "",
-          "suffix": "\n",
-          "tokenBudget": 2048,
-          "reservedTokens": 0,
-          "budgetPriority": 400,
-          "trimDirection": "trimBottom",
-          "insertionType": "newline",
-          "maximumTrimType": "sentence",
-          "insertionPosition": -1
-        },
-        "lastUpdatedAt": 1625165200996,
-        "displayName": "Paul Duncan",
-        "keys": [
-          "Duncan",
-          "Paul",
-          "calls his voice"
+          "Penny"
         ],
         "searchRange": 1000,
         "enabled": true,

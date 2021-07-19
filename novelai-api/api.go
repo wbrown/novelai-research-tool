@@ -205,8 +205,8 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 	const oldRange = 1 - 8.0
 	const newRange = 1 - 1.525
 	if params.Model != "2.7B" {
-		*params.Parameters.RepetitionPenalty =
-			((*params.Parameters.RepetitionPenalty-1)*newRange)/oldRange + 1
+		scaledRepPen := ((*params.Parameters.RepetitionPenalty-1)*newRange)/oldRange + 1
+		params.Parameters.RepetitionPenalty = &scaledRepPen
 	}
 	if *params.Parameters.BanBrackets {
 		newBadWords := append(BannedBrackets(),
