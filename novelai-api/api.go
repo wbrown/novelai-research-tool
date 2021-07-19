@@ -170,7 +170,7 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 		} else {
 			log.Printf("API: StatusCode: %d, %v\n", resp.StatusCode, err)
 		}
-		time.Sleep(3)
+		time.Sleep(5 * time.Second)
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
