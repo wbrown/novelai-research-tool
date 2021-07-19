@@ -15,55 +15,62 @@ import (
 )
 
 type PermutationsSpec struct {
-	Model                  []string  `json:"model"`
-	Prefix                 []string  `json:"prefix"`
-	PromptFilename         []string  `json:"prompt_filename"`
-	Memory                 []string  `json:"memory"`
-	AuthorsNote            []string  `json:"authors_note"`
-	Temperature            []float64 `json:"temperature"`
-	MaxLength              []uint    `json:"max_length"`
-	MinLength              []uint    `json:"min_length"`
-	TopK                   []uint    `json:"top_k"`
-	TopP                   []float64 `json:"top_p"`
-	TailFreeSampling       []float64 `json:"tail_free_sampling"`
-	RepetitionPenalty      []float64 `json:"repetition_penalty"`
-	RepetitionPenaltyRange []uint    `json:"repetition_penalty_range"`
-	RepetitionPenaltySlope []float64 `json:"repetition_penalty_slope"`
+	Model                  []string   `json:"model"`
+	Prefix                 []string   `json:"prefix"`
+	PromptFilename         []string   `json:"prompt_filename"`
+	Memory                 []string   `json:"memory"`
+	AuthorsNote            []string   `json:"authors_note"`
+	Temperature            []*float64 `json:"temperature"`
+	MaxLength              []*uint    `json:"max_length"`
+	MinLength              []*uint    `json:"min_length"`
+	TopK                   []*uint    `json:"top_k"`
+	TopP                   []*float64 `json:"top_p"`
+	TailFreeSampling       []*float64 `json:"tail_free_sampling"`
+	RepetitionPenalty      []*float64 `json:"repetition_penalty"`
+	RepetitionPenaltyRange []*uint    `json:"repetition_penalty_range"`
+	RepetitionPenaltySlope []*float64 `json:"repetition_penalty_slope"`
 }
 
 type ContentTest struct {
-	OutputPrefix   string                        `json:"output_prefix"`
-	PromptFilename string                        `json:"prompt_filename"`
-	Memory         string                        `json:"memory"`
-	AuthorsNote    string                        `json:"authors_note"`
-	MaxTokens      int                           `json:"max_tokens"`
-	Iterations     int                           `json:"iterations"`
-	Generations    int                           `json:"generations"`
-	Parameters     novelai_api.NaiGenerateParams `json:"parameters"`
-	Permutations   []PermutationsSpec            `json:"permutations"`
-	Prompt         string
-	WorkingDir     string
-	PromptPath     string
-	Scenario       scenario.Scenario
-	API            novelai_api.NovelAiAPI
+	OutputPrefix     string                        `json:"output_prefix"`
+	PromptFilename   string                        `json:"prompt_filename"`
+	ScenarioFilename string                        `json:"scenario_filename"`
+	Memory           string                        `json:"memory"`
+	AuthorsNote      string                        `json:"authors_note"`
+	MaxTokens        int                           `json:"max_tokens"`
+	Iterations       int                           `json:"iterations"`
+	Generations      int                           `json:"generations"`
+	Parameters       novelai_api.NaiGenerateParams `json:"parameters"`
+	Permutations     []PermutationsSpec            `json:"permutations"`
+	Prompt           string
+	WorkingDir       string
+	PromptPath       string
+	ScenarioPath     string
+	Scenario         scenario.Scenario
+	API              novelai_api.NovelAiAPI
+}
+
+type RequestContext struct {
+	Request       novelai_api.NaiGenerateResp    `json:"requests"`
+	ContextReport scenario.ContextReport         `json:"context_report"`
 }
 
 type EncodedIterationResult struct {
-	Prompt      string                        `json:"prompt""`
-	Memory      string                        `json:"memory"`
-	AuthorsNote string                        `json:"authors_note"`
-	Requests    []novelai_api.NaiGenerateResp `json:"requests"`
+	Prompt        string                        `json:"prompt"`
+	Memory        string                        `json:"memory"`
+	AuthorsNote   string                        `json:"authors_note"`
+	Requests      []RequestContext              `json:"requests"`
 }
 
 type IterationResult struct {
-	Parameters  novelai_api.NaiGenerateParams `json:"settings"`
-	Prompt      string                        `json:"prompt"`
-	Memory      string                        `json:"memory"`
-	AuthorsNote string                        `json:"authors_note"`
-	Result      string                        `json:"result"`
-	Responses   []string                      `json:"responses"`
-	Activations []scenario.ContextReport      `json:"context_report"`
-	Encoded     EncodedIterationResult        `json:"encoded"`
+	Parameters    novelai_api.NaiGenerateParams `json:"settings"`
+	Prompt        string                        `json:"prompt"`
+	Memory        string                        `json:"memory"`
+	AuthorsNote   string                        `json:"authors_note"`
+	Result        string                        `json:"result"`
+	Responses     []string                      `json:"responses"`
+	ContextReport scenario.ContextReport        `json:"context_report"`
+	Encoded       EncodedIterationResult        `json:"encoded"`
 }
 
 func (ct *ContentTest) performGenerations(generations int, input string,
@@ -73,15 +80,18 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	results.Memory = ct.Memory
 	results.AuthorsNote = ct.AuthorsNote
 	results.Parameters = ct.Parameters
+	ct.Scenario.SetMemory(ct.Memory)
+	ct.Scenario.SetAuthorsNote(ct.AuthorsNote)
 	throttle := time.NewTimer(1100 * time.Millisecond)
 	for generation := 0; generation < generations; generation++ {
-		submission := ct.Scenario.GenerateContext(context, ct.MaxTokens)
+		submission, ctxReport := ct.Scenario.GenerateContext(context, ct.MaxTokens)
 		resp := ct.API.GenerateWithParams(&submission, ct.Parameters)
 		if generation == 0 {
 			results.Encoded.Prompt = resp.EncodedRequest
 		}
 		results.Responses = append(results.Responses, resp.Response)
-		results.Encoded.Requests = append(results.Encoded.Requests, resp)
+		results.Encoded.Requests = append(results.Encoded.Requests,
+			RequestContext{resp, ctxReport})
 		reporters.ReportGeneration(resp.Response)
 		context = context + resp.Response
 		<-throttle.C
@@ -132,7 +142,12 @@ func (ct ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
 		default:
 			field, _ := ctFields.FieldByName(fieldName)
 			ctVal := reflect.ValueOf(ct.Parameters).Field(field.Index[0])
-			fieldValueRepr = fmt.Sprintf("%v", ctVal)
+			if ctVal.Kind() == reflect.Ptr {
+				fieldValueRepr = fmt.Sprintf("%v", ctVal.Elem())
+			} else {
+				fieldValueRepr = fmt.Sprintf("%v", ctVal)
+			}
+
 		}
 		label += fieldName + "=" + fieldValueRepr
 	}
@@ -163,7 +178,12 @@ func (ct ContentTest) FieldsSame(fields []string, other ContentTest) bool {
 		field, _ := ctFields.FieldByName(fieldName)
 		ctVal := reflect.ValueOf(ct.Parameters).Field(field.Index[0])
 		otherVal := reflect.ValueOf(other.Parameters).Field(field.Index[0])
-		if fmt.Sprintf("%v", ctVal) != fmt.Sprintf("%v", otherVal) {
+		if ctVal.Kind() == reflect.Ptr {
+			if fmt.Sprintf("%v", ctVal.Elem()) !=
+				fmt.Sprintf("%v", otherVal.Elem()) {
+				return false
+			}
+		} else if fmt.Sprintf("%v", ctVal) != fmt.Sprintf("%v", otherVal) {
 			return false
 		}
 	}
@@ -200,16 +220,19 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 						permutation.AuthorsNote = fmt.Sprintf("%s", value)
 					case "PromptFilename":
 						permutation.PromptFilename = fmt.Sprintf("%v", value)
-						permutation.PromptPath = filepath.Join(permutation.WorkingDir,
-							permutation.PromptFilename)
-						if _, err := os.Stat(permutation.PromptPath); os.IsNotExist(err) {
-							log.Printf("nrt: Prompt file `%s` does not exist!\n", ct.PromptPath)
-							os.Exit(1)
+						if len(permutation.PromptFilename) > 0 {
+							permutation.PromptPath = filepath.Join(permutation.WorkingDir,
+								permutation.PromptFilename)
+							if _, err := os.Stat(permutation.PromptPath); os.IsNotExist(err) {
+								log.Printf("nrt: Prompt file `%s` does not exist!\n", ct.PromptPath)
+								os.Exit(1)
+							}
+							permutation.loadPrompt(permutation.PromptPath)
 						}
-						permutation.loadPrompt(permutation.PromptPath)
+					case "Model":
+						permutation.Parameters.Model = value.String()
 					default:
-						reflect.ValueOf(&permutation.Parameters).Elem().Field(targetField.Index[0]).Set(
-							value)
+						reflect.ValueOf(&permutation.Parameters).Elem().Field(targetField.Index[0]).Set(value)
 					}
 					newPermutations = append(newPermutations, permutation)
 				}
@@ -219,6 +242,7 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 	}
 	ct.Parameters.Label = ct.MakeLabel(spec)
 	filteredPermutations := []ContentTest{ct}
+	fmt.Println("PermutationCt:", len(permutations))
 	for permutationIdx := range permutations {
 		permutation := permutations[permutationIdx]
 		if permutation.Parameters.Model != "6B-v3" &&
@@ -235,6 +259,7 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 			}
 		}
 		if !same {
+			permutation.Scenario.Settings.Parameters = permutation.Parameters
 			permutation.Parameters.Label = permutation.MakeLabel(spec)
 			filteredPermutations = append(filteredPermutations, permutation)
 		}
@@ -243,9 +268,24 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 }
 
 func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
-	for specIdx := 0; specIdx < len(ct.Permutations); specIdx++ {
-		tests = append(tests,
-			ct.GeneratePermutationsFromSpec(ct.Permutations[specIdx])...)
+	if len(ct.Permutations) > 0 {
+		for specIdx := 0; specIdx < len(ct.Permutations); specIdx++ {
+			tests = append(tests,
+				ct.GeneratePermutationsFromSpec(ct.Permutations[specIdx])...)
+		}
+	} else {
+		if ct.Parameters.Label == "" {
+			if ct.ScenarioFilename != "" {
+				ct.Parameters.Label = strings.Replace(
+					strings.Replace(
+						filepath.Base(fmt.Sprintf("%v",
+							ct.ScenarioFilename)), "-", "_", -1),
+					".", "_", -1)
+			} else {
+				ct.Parameters.Label = "base"
+			}
+		}
+		tests = append(tests, ct)
 	}
 	return tests
 }
@@ -269,7 +309,7 @@ func (ct *ContentTest) loadPrompt(path string) {
 }
 
 func (ct ContentTest) Perform() {
-	ct.loadPrompt(ct.PromptPath)
+	// ct.loadPrompt(ct.PromptPath)
 	reporters := ct.MakeReporters()
 	defer reporters.close()
 	for iteration := 0; iteration < ct.Iterations; iteration++ {
@@ -293,15 +333,44 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 	if test.MaxTokens == 0 {
 		test.MaxTokens = 2048
 	}
-	test.WorkingDir = filepath.Dir(path)
-	test.PromptPath = filepath.Join(test.WorkingDir, test.PromptFilename)
-	if _, err := os.Stat(test.PromptPath); os.IsNotExist(err) {
-		log.Printf("nrt: Prompt file `%v` does not exist!\n", test.PromptPath)
+	if test.PromptFilename == "" && test.Memory == "" && test.AuthorsNote == "" &&
+		test.ScenarioFilename == "" {
+		log.Println(
+			"nrt: at least one of prompt_filename, memory, authors_note, or scenario_filename must be filled in")
 		os.Exit(1)
 	}
-	test.loadPrompt(test.PromptPath)
-	test.Scenario = scenario.ScenarioFromSpec(test.Prompt, test.Memory,
-		test.AuthorsNote)
+
+	test.WorkingDir = filepath.Dir(path)
+	if test.ScenarioFilename != "" {
+		test.ScenarioPath = filepath.Join(test.WorkingDir, test.ScenarioFilename)
+		if _, err = os.Stat(test.ScenarioPath); os.IsNotExist(err) {
+			log.Printf("nrt: Scenario file `%v` does not exist!\n", test.ScenarioPath)
+			os.Exit(1)
+		}
+		fmt.Printf("ScenarioPath: %v\n", test.ScenarioPath)
+		test.Scenario, err = scenario.ScenarioFromFile(nil, test.ScenarioPath)
+		if err != nil {
+			log.Printf("nrt: Error loading scenario: %v\n", err)
+		}
+		test.Prompt = test.Scenario.Prompt
+		test.Memory = test.Scenario.Context[0].Text
+		test.AuthorsNote = test.Scenario.Context[1].Text
+		test.Parameters.CoerceNullValues(test.Scenario.Settings.Parameters)
+	}
+
+	if test.PromptFilename != "" {
+		test.PromptPath = filepath.Join(test.WorkingDir, test.PromptFilename)
+		if _, err := os.Stat(test.PromptPath); os.IsNotExist(err) {
+			log.Printf("nrt: Prompt file `%v` does not exist!\n", test.PromptPath)
+			os.Exit(1)
+		}
+		test.loadPrompt(test.PromptPath)
+		if test.ScenarioFilename == "" {
+			test.Scenario = scenario.ScenarioFromSpec(test.Prompt, test.Memory,
+				test.AuthorsNote)
+			test.Scenario.Settings.Parameters.CoerceNullValues(test.Parameters)
+		}
+	}
 	return test
 }
 

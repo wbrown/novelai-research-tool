@@ -21,6 +21,7 @@ type ContextConfig struct {
 	InsertionType     string `json:"insertionType"`
 	MaximumTrimType   string `json:"maximumTrimType"`
 	InsertionPosition int    `json:"insertionPosition"`
+	Force             bool   `json:"forced"`
 }
 
 type ContextEntry struct {
@@ -88,8 +89,9 @@ type Lorebook struct {
 
 type ScenarioSettings struct {
 	Parameters    novelai_api.NaiGenerateParams
-	TrimResponses bool `json:"trimResponses"`
-	BanBrackets   bool `json:"banBrackets"`
+	TrimResponses bool   `json:"trimResponses"`
+	BanBrackets   bool   `json:"banBrackets"`
+	Prefix        string `json:"prefix"`
 }
 
 type Scenario struct {
@@ -105,13 +107,16 @@ type Scenario struct {
 	Tokenizer       *gpt_bpe.GPTEncoder
 }
 
-type ContextReport struct {
-	Label        string               `json:"label"`
-	InsertionPos int                  `json:"insertion_pos"`
-	TokenCount   int                  `json:"token_count"`
-	MatchIndexes []map[string][][]int `json:"matches"`
-	Forced       bool                 `json:"forced"`
+type ContextReportEntry struct {
+	Label          string               `json:"label"`
+	InsertionPos   int                  `json:"insertion_pos"`
+	TokenCount     int                  `json:"token_count"`
+	TokensInserted int                  `json:"tokens_inserted"`
+	MatchIndexes   []map[string][][]int `json:"matches"`
+	Forced         bool                 `json:"forced"`
 }
+
+type ContextReport []ContextReportEntry
 
 func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries ContextEntries) {
 	beginIdx := len(contexts)
@@ -271,13 +276,14 @@ func (ctx *ContextEntry) ResolveTrim(tokenizer *gpt_bpe.GPTEncoder, budget int) 
 	return trimmedTokens
 }
 
-func (scenario Scenario) GenerateContext(story string, budget int) (newContext string) {
+func (scenario Scenario) GenerateContext(story string, budget int) (newContext string,
+	ctxReport ContextReport) {
 	storyEntry := scenario.createStoryContext(story)
 	contexts := ContextEntries{storyEntry}
 	lorebookContexts := scenario.ResolveLorebook(contexts)
 	contexts = append(contexts, scenario.Context...)
 	contexts = append(contexts, lorebookContexts...)
-	budget -= int(scenario.Settings.Parameters.MaxLength)
+	budget -= int(*scenario.Settings.Parameters.MaxLength)
 	reservations := 0
 	reservedContexts := getReservedContexts(contexts)
 	for ctxIdx := range reservedContexts {
@@ -293,6 +299,7 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 		}
 	}
 	sort.Sort(sort.Reverse(contexts))
+	contextReport := make(ContextReport, 0)
 	newContexts := make([]string, 0)
 	for ctxIdx := range contexts {
 		ctx := contexts[ctxIdx]
@@ -310,6 +317,18 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 		reservations -= reserved
 		contextText := strings.Split(scenario.Tokenizer.Decode(trimmedTokens), "\n")
 		ctxInsertion := ctx.ContextCfg.InsertionPosition
+		if numTokens == 0 {
+			continue
+		} else {
+			contextReport = append(contextReport, ContextReportEntry{
+				Label:          ctx.Label,
+				InsertionPos:   ctx.ContextCfg.InsertionPosition,
+				TokenCount:     len(*ctx.Tokens),
+				TokensInserted: numTokens,
+				MatchIndexes:   ctx.MatchIndexes,
+				Forced:         ctx.ContextCfg.Force,
+			})
+		}
 		var before []string
 		var after []string
 		if ctxInsertion < 0 {
@@ -350,7 +369,17 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 			fmt.Printf("resolvedText: %v\n", newContexts[ctxTextIdx])
 		} */
 	}
-	return strings.Join(newContexts, "\n")
+	return strings.Join(newContexts, "\n"), contextReport
+}
+
+func (scenario *Scenario) SetMemory(memory string) {
+	scenario.Context[0].Text = memory
+	scenario.Context[0].Tokens = scenario.Tokenizer.Encode(&memory)
+}
+
+func (scenario *Scenario) SetAuthorsNote(an string) {
+	scenario.Context[1].Text = an
+	scenario.Context[1].Tokens = scenario.Tokenizer.Encode(&an)
 }
 
 func ScenarioFromSpec(prompt string, memory string, an string) (scenario Scenario) {
@@ -428,5 +457,6 @@ func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scen
 		}
 		scenario.Lorebook.Entries[loreIdx] = loreEntry
 	}
+	scenario.Settings.Parameters.CoerceDefaults()
 	return scenario, err
 }

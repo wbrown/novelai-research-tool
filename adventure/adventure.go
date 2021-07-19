@@ -37,7 +37,7 @@ func NewAdventure() (adventure Adventure) {
 	adventure.Parameters = parameters
 	adventure.API = novelai_api.NewNovelAiAPI()
 	adventure.Encoder = gpt_bpe.NewEncoder()
-	adventure.MaxTokens = 1024 - parameters.MaxLength
+	adventure.MaxTokens = 1024 - *parameters.MaxLength
 	return adventure
 }
 

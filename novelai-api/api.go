@@ -51,23 +51,23 @@ type NaiGenerateHTTPResp struct {
 }
 
 type NaiGenerateParams struct {
-	Label                  string     `json:"label"`
-	Model                  string     `json:"model"`
-	Prefix                 string     `json:"prefix"`
-	Temperature            float64    `json:"temperature"`
-	MaxLength              uint       `json:"max_length"`
-	MinLength              uint       `json:"min_length"`
-	TopK                   uint       `json:"top_k"`
-	TopP                   float64    `json:"top_p"`
-	TailFreeSampling       float64    `json:"tail_free_sampling"`
-	RepetitionPenalty      float64    `json:"repetition_penalty"`
-	RepetitionPenaltyRange uint       `json:"repetition_penalty_range"`
-	RepetitionPenaltySlope float64    `json:"repetition_penalty_slope"`
-	BadWordsIds            [][]uint16 `json:"bad_words_ids"`
-	BanBrackets            bool       `json:"ban_brackets"`
-	UseCache               bool       `json:"use_cache"`
-	UseString              bool       `json:"use_string"`
-	ReturnFullText         bool       `json:"return_full_text"`
+	Label                  string      `json:"label"`
+	Model                  string      `json:"model"`
+	Prefix                 string      `json:"prefix"`
+	Temperature            *float64    `json:"temperature"`
+	MaxLength              *uint       `json:"max_length"`
+	MinLength              *uint       `json:"min_length"`
+	TopK                   *uint       `json:"top_k"`
+	TopP                   *float64    `json:"top_p"`
+	TailFreeSampling       *float64    `json:"tail_free_sampling"`
+	RepetitionPenalty      *float64    `json:"repetition_penalty"`
+	RepetitionPenaltyRange *uint       `json:"repetition_penalty_range"`
+	RepetitionPenaltySlope *float64    `json:"repetition_penalty_slope"`
+	BadWordsIds            *[][]uint16 `json:"bad_words_ids"`
+	BanBrackets            *bool       `json:"ban_brackets"`
+	UseCache               bool        `json:"use_cache"`
+	UseString              bool        `json:"use_string"`
+	ReturnFullText         bool        `json:"return_full_text"`
 }
 
 type NaiGenerateResp struct {
@@ -103,21 +103,82 @@ func BannedBrackets() [][]uint16 {
 		{17202}, {8162}}
 }
 
+func (ngp *NaiGenerateParams) CoerceNullValues(other NaiGenerateParams) {
+	if ngp.Label == "" {
+		ngp.Label = other.Label
+	}
+	if ngp.Model == "" {
+		ngp.Model = other.Model
+	}
+	if ngp.Prefix == "" {
+		ngp.Prefix = other.Prefix
+	}
+	if ngp.Temperature == nil {
+		ngp.Temperature = other.Temperature
+	}
+	if ngp.MaxLength == nil {
+		ngp.MaxLength = other.MaxLength
+	}
+	if ngp.MinLength == nil {
+		ngp.MinLength = other.MinLength
+	}
+	if ngp.TopK == nil {
+		ngp.TopK = other.TopK
+	}
+	if ngp.TopP == nil {
+		ngp.TopP = other.TopP
+	}
+	if ngp.TailFreeSampling == nil {
+		ngp.TailFreeSampling = other.TailFreeSampling
+	}
+	if ngp.RepetitionPenalty == nil {
+		ngp.RepetitionPenalty = other.RepetitionPenalty
+	}
+	if ngp.RepetitionPenaltyRange == nil {
+		ngp.RepetitionPenaltyRange = other.RepetitionPenaltyRange
+	}
+	if ngp.RepetitionPenaltySlope == nil {
+		ngp.RepetitionPenaltySlope = other.RepetitionPenaltySlope
+	}
+	if ngp.BanBrackets == nil {
+		ngp.BanBrackets = other.BanBrackets
+	}
+	if ngp.BadWordsIds == nil {
+		ngp.BadWordsIds = other.BadWordsIds
+	}
+}
+
+func (ngp *NaiGenerateParams) CoerceDefaults() {
+	defaults := NewGenerateParams()
+	ngp.CoerceNullValues(defaults)
+}
+
 func NewGenerateParams() NaiGenerateParams {
+	temperature := 0.55
+	maxLength := uint(40)
+	minLength := uint(40)
+	topK := uint(140)
+	topP := 0.9
+	tfs := 1.0
+	repPen := 3.5
+	repPenRange := uint(1024)
+	repPenSlope := 6.57
+	banBrackets := true
+	badWordsIds := make([][]uint16, 0)
 	return NaiGenerateParams{
 		Model:                  "6B-v3",
 		Prefix:                 "vanilla",
-		Temperature:            0.55,
-		MaxLength:              40,
-		MinLength:              40,
-		TopK:                   140,
-		TopP:                   0.9,
-		TailFreeSampling:       1,
-		RepetitionPenalty:      3.5,
-		RepetitionPenaltyRange: 1024,
-		RepetitionPenaltySlope: 6.57,
-		BadWordsIds:            [][]uint16{},
-		BanBrackets:            true,
+		Temperature:            &temperature,
+		MaxLength:              &maxLength,
+		MinLength:              &minLength,
+		TopK:                   &topK,
+		TopP:                   &topP,
+		TailFreeSampling:       &tfs,
+		RepetitionPenalty:      &repPen,
+		RepetitionPenaltyRange: &repPenRange,
+		RepetitionPenaltySlope: &repPenSlope,
+		BadWordsIds:            &badWordsIds,
+		BanBrackets:            &banBrackets,
 		UseCache:               false,
 		UseString:              false,
 		ReturnFullText:         false,
@@ -144,12 +205,13 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 	const oldRange = 1 - 8.0
 	const newRange = 1 - 1.525
 	if params.Model != "2.7B" {
-		params.Parameters.RepetitionPenalty =
-			((params.Parameters.RepetitionPenalty-1)*newRange)/oldRange + 1
+		*params.Parameters.RepetitionPenalty =
+			((*params.Parameters.RepetitionPenalty-1)*newRange)/oldRange + 1
 	}
-	if params.Parameters.BanBrackets {
-		params.Parameters.BadWordsIds = append(BannedBrackets(),
-			params.Parameters.BadWordsIds...)
+	if *params.Parameters.BanBrackets {
+		newBadWords := append(BannedBrackets(),
+			*params.Parameters.BadWordsIds...)
+		params.Parameters.BadWordsIds = &newBadWords
 	}
 	cl := http.DefaultClient
 	encoded, _ := json.Marshal(params)
@@ -160,9 +222,9 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+keys.AccessToken)
 
-	// Retry up to 3 times.
+	// Retry up to 10 times.
 	var resp *http.Response
-	for tries := 0; tries < 3; tries++ {
+	for tries := 0; tries < 10; tries++ {
 		var err error
 		resp, err = cl.Do(req)
 		if err == nil && resp.StatusCode == 201 {
@@ -170,7 +232,7 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 		} else {
 			log.Printf("API: StatusCode: %d, %v\n", resp.StatusCode, err)
 		}
-		time.Sleep(5 * time.Second)
+		time.Sleep(31 * time.Second)
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
