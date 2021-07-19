@@ -91,6 +91,54 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	return results
 }
 
+func (ct ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
+	fieldNames := make([]string, 0)
+	fields := reflect.TypeOf(spec)
+	for field := 0; field < fields.NumField(); field++ {
+		fieldName := fields.FieldByIndex([]int{field}).Name
+		fieldValues := reflect.ValueOf(spec).Field(field)
+		if fieldValues.Len() > 0 {
+			fieldNames = append(fieldNames, fieldName)
+		}
+	}
+	ctFields := reflect.TypeOf(ct.Parameters)
+	for fieldIdx := range fieldNames {
+		if len(label) != 0 {
+			label += ","
+		}
+		fieldName := fieldNames[fieldIdx]
+		fieldValueRepr := "#0"
+		switch fieldName {
+		case "Memory":
+			for memoryIdx := range spec.Memory {
+				if spec.Memory[memoryIdx] == ct.Memory {
+					fieldValueRepr = fmt.Sprintf("#%d", memoryIdx+1)
+					break
+				}
+			}
+		case "AuthorsNote":
+			for authIdx := range spec.AuthorsNote {
+				if spec.AuthorsNote[authIdx] == ct.AuthorsNote {
+					fieldValueRepr = fmt.Sprintf("#%d", authIdx+1)
+					break
+				}
+			}
+		case "PromptFilename":
+			fieldValueRepr = strings.Replace(
+				strings.Replace(
+					filepath.Base(fmt.Sprintf("%v",
+						ct.PromptFilename)), "-", "_", -1),
+				".", "_", -1)
+		default:
+			field, _ := ctFields.FieldByName(fieldName)
+			ctVal := reflect.ValueOf(ct.Parameters).Field(field.Index[0])
+			fieldValueRepr = fmt.Sprintf("%v", ctVal)
+		}
+		label += fieldName + "=" + fieldValueRepr
+	}
+	return label
+}
+
 func (ct ContentTest) FieldsSame(fields []string, other ContentTest) bool {
 	ctFields := reflect.TypeOf(ct.Parameters)
 	for fieldIdx := range fields {
@@ -145,14 +193,11 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 					value := fieldValues.Index(valIdx)
 					permutation := permutations[permutationTargetIdx]
 					targetField, _ := reflect.TypeOf(permutation.Parameters).FieldByName(fieldName)
-					var fieldValueRepr string
 					switch fieldName {
 					case "Memory":
 						permutation.Memory = fmt.Sprintf("%s", value)
-						fieldValueRepr = fmt.Sprintf("#%d", valIdx)
 					case "AuthorsNote":
 						permutation.AuthorsNote = fmt.Sprintf("%s", value)
-						fieldValueRepr = fmt.Sprintf("#%d", valIdx)
 					case "PromptFilename":
 						permutation.PromptFilename = fmt.Sprintf("%v", value)
 						permutation.PromptPath = filepath.Join(permutation.WorkingDir,
@@ -161,30 +206,19 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 							log.Printf("nrt: Prompt file `%s` does not exist!\n", ct.PromptPath)
 							os.Exit(1)
 						}
-						fieldValueRepr = fmt.Sprintf("%s", value)
 						permutation.loadPrompt(permutation.PromptPath)
 					default:
 						reflect.ValueOf(&permutation.Parameters).Elem().Field(targetField.Index[0]).Set(
 							value)
-						fieldValueRepr = strings.Replace(
-							strings.Replace(
-								filepath.Base(fmt.Sprintf("%v",
-									value)), "-", "_", -1),
-							".", "_", -1)
 					}
-					// Update our label to reflect the field value we just permuted on.
-					if len(permutation.Parameters.Label) != 0 {
-						permutation.Parameters.Label += ","
-					}
-					permutation.Parameters.Label += fieldName + "=" + fieldValueRepr
 					newPermutations = append(newPermutations, permutation)
 				}
 			}
 			permutations = newPermutations
 		}
 	}
+	ct.Parameters.Label = ct.MakeLabel(spec)
 	filteredPermutations := []ContentTest{ct}
-	filteredPermutations[0].Parameters.Label = "Base"
 	for permutationIdx := range permutations {
 		permutation := permutations[permutationIdx]
 		if permutation.Parameters.Model != "6B-v3" &&
@@ -201,6 +235,7 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 			}
 		}
 		if !same {
+			permutation.Parameters.Label = permutation.MakeLabel(spec)
 			filteredPermutations = append(filteredPermutations, permutation)
 		}
 	}
