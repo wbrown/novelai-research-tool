@@ -100,14 +100,17 @@ func (ct ContentTest) FieldsSame(fields []string, other ContentTest) bool {
 			if ct.Memory != other.Memory {
 				return false
 			}
+			continue
 		case "AuthorsNote":
 			if ct.AuthorsNote != other.AuthorsNote {
 				return false
 			}
+			continue
 		case "PromptFilename":
 			if ct.PromptFilename != other.PromptFilename {
 				return false
 			}
+			continue
 		}
 		field, _ := ctFields.FieldByName(fieldName)
 		ctVal := reflect.ValueOf(ct.Parameters).Field(field.Index[0])
@@ -174,10 +177,6 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 						permutation.Parameters.Label += ","
 					}
 					permutation.Parameters.Label += fieldName + "=" + fieldValueRepr
-					if fieldName == "Prefix" && value.String() != "vanilla" &&
-						permutation.Parameters.Model != "6B-v3" {
-						continue
-					}
 					newPermutations = append(newPermutations, permutation)
 				}
 			}
@@ -185,6 +184,7 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 		}
 	}
 	filteredPermutations := []ContentTest{ct}
+	filteredPermutations[0].Parameters.Label = "Base"
 	for permutationIdx := range permutations {
 		permutation := permutations[permutationIdx]
 		if permutation.Parameters.Model != "6B-v3" &&
