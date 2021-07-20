@@ -99,7 +99,7 @@ func (encoder GPTEncoder) TrimSentences(tokens *[]uint16, direction TrimDirectio
 		sentence := sentences[idx].Text
 		switch direction {
 		case TrimTop:
-			sentenceIdx = strings.LastIndex(doc.Text[textBegin:textEnd],
+			sentenceIdx = strings.LastIndex(doc.Text[textBegin:],
 				sentence) + textBegin
 			if sentenceIdx > 0 && unicode.IsSpace(rune(doc.Text[sentenceIdx])) {
 				sentenceIdx -= 1
