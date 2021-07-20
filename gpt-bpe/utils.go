@@ -101,7 +101,8 @@ func (encoder GPTEncoder) TrimSentences(tokens *[]uint16, direction TrimDirectio
 		case TrimTop:
 			sentenceIdx = strings.LastIndex(doc.Text[textBegin:],
 				sentence) + textBegin
-			if sentenceIdx > 0 && unicode.IsSpace(rune(doc.Text[sentenceIdx])) {
+			if sentenceIdx > 0 && sentenceIdx < len(doc.Text) &&
+				unicode.IsSpace(rune(doc.Text[sentenceIdx])) {
 				sentenceIdx -= 1
 			}
 			toTokenize := doc.Text[sentenceIdx:]
