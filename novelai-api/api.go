@@ -229,8 +229,10 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 		resp, err = cl.Do(req)
 		if err == nil && resp.StatusCode == 201 {
 			break
-		} else {
+		} else if resp != nil {
 			log.Printf("API: StatusCode: %d, %v\n", resp.StatusCode, err)
+		} else {
+			log.Printf("API: Error: %v\n", err)
 		}
 		time.Sleep(31 * time.Second)
 	}
