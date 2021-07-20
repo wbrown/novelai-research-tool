@@ -18,6 +18,7 @@ type PermutationsSpec struct {
 	Model                  []string   `json:"model"`
 	Prefix                 []string   `json:"prefix"`
 	PromptFilename         []string   `json:"prompt_filename"`
+	Prompt                 []string   `json:"prompt"`
 	Memory                 []string   `json:"memory"`
 	AuthorsNote            []string   `json:"authors_note"`
 	Temperature            []*float64 `json:"temperature"`
@@ -35,6 +36,7 @@ type ContentTest struct {
 	OutputPrefix     string                        `json:"output_prefix"`
 	PromptFilename   string                        `json:"prompt_filename"`
 	ScenarioFilename string                        `json:"scenario_filename"`
+	Prompt           string                        `json:"prompt"`
 	Memory           string                        `json:"memory"`
 	AuthorsNote      string                        `json:"authors_note"`
 	MaxTokens        int                           `json:"max_tokens"`
@@ -42,7 +44,6 @@ type ContentTest struct {
 	Generations      int                           `json:"generations"`
 	Parameters       novelai_api.NaiGenerateParams `json:"parameters"`
 	Permutations     []PermutationsSpec            `json:"permutations"`
-	Prompt           string
 	WorkingDir       string
 	PromptPath       string
 	ScenarioPath     string
@@ -51,15 +52,15 @@ type ContentTest struct {
 }
 
 type RequestContext struct {
-	Request       novelai_api.NaiGenerateResp    `json:"requests"`
-	ContextReport scenario.ContextReport         `json:"context_report"`
+	Request       novelai_api.NaiGenerateResp `json:"requests"`
+	ContextReport scenario.ContextReport      `json:"context_report"`
 }
 
 type EncodedIterationResult struct {
-	Prompt        string                        `json:"prompt"`
-	Memory        string                        `json:"memory"`
-	AuthorsNote   string                        `json:"authors_note"`
-	Requests      []RequestContext              `json:"requests"`
+	Prompt      string           `json:"prompt"`
+	Memory      string           `json:"memory"`
+	AuthorsNote string           `json:"authors_note"`
+	Requests    []RequestContext `json:"requests"`
 }
 
 type IterationResult struct {
@@ -133,6 +134,13 @@ func (ct ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
 					break
 				}
 			}
+		case "Prompt":
+			for promptIdx := range spec.Prompt {
+				if spec.Prompt[promptIdx] == ct.Prompt {
+					fieldValueRepr = fmt.Sprintf("#%d", promptIdx+1)
+					break
+				}
+			}
 		case "PromptFilename":
 			fieldValueRepr = strings.Replace(
 				strings.Replace(
@@ -171,6 +179,11 @@ func (ct ContentTest) FieldsSame(fields []string, other ContentTest) bool {
 			continue
 		case "PromptFilename":
 			if ct.PromptFilename != other.PromptFilename {
+				return false
+			}
+			continue
+		case "Prompt":
+			if ct.Prompt != other.Prompt {
 				return false
 			}
 			continue
@@ -214,6 +227,8 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 					permutation := permutations[permutationTargetIdx]
 					targetField, _ := reflect.TypeOf(permutation.Parameters).FieldByName(fieldName)
 					switch fieldName {
+					case "Prompt":
+						permutation.Prompt = fmt.Sprintf("%s", value)
 					case "Memory":
 						permutation.Memory = fmt.Sprintf("%s", value)
 					case "AuthorsNote":
@@ -332,10 +347,16 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 	if test.MaxTokens == 0 {
 		test.MaxTokens = 2048
 	}
-	if test.PromptFilename == "" && test.Memory == "" && test.AuthorsNote == "" &&
-		test.ScenarioFilename == "" {
-		log.Println(
-			"nrt: at least one of prompt_filename, memory, authors_note, or scenario_filename must be filled in")
+	if test.PromptFilename == "" && test.Prompt == "" && test.Memory == "" &&
+		test.AuthorsNote == "" && test.ScenarioFilename == "" {
+		log.Printf(
+			"nrt: %s %s\n",
+			"at least one of prompt_filename, prompt, memory, authors_note, or",
+			"scenario_filename must be filled in.")
+		os.Exit(1)
+	}
+	if test.PromptFilename != "" && test.Prompt != "" {
+		log.Println("nrt: you cannot have both `prompt_filename` and `prompt` set")
 		os.Exit(1)
 	}
 
@@ -356,7 +377,6 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 		test.AuthorsNote = test.Scenario.Context[1].Text
 		test.Parameters.CoerceNullValues(test.Scenario.Settings.Parameters)
 	}
-
 	if test.PromptFilename != "" {
 		test.PromptPath = filepath.Join(test.WorkingDir, test.PromptFilename)
 		if _, err := os.Stat(test.PromptPath); os.IsNotExist(err) {
@@ -364,12 +384,14 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 			os.Exit(1)
 		}
 		test.loadPrompt(test.PromptPath)
-		if test.ScenarioFilename == "" {
-			test.Scenario = scenario.ScenarioFromSpec(test.Prompt, test.Memory,
-				test.AuthorsNote)
-			test.Scenario.Settings.Parameters.CoerceNullValues(test.Parameters)
-		}
 	}
+	test.Parameters.CoerceDefaults()
+	if test.ScenarioFilename == "" {
+		test.Scenario = scenario.ScenarioFromSpec(test.Prompt, test.Memory,
+			test.AuthorsNote)
+		test.Scenario.Settings.Parameters.CoerceNullValues(test.Parameters)
+	}
+
 	return test
 }
 

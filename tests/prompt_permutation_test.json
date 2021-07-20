@@ -1,0 +1,23 @@
+{
+  "prompt": "I am a soldier killing alien bugs.",
+  "output_prefix": "prompt_permutation_test/prompt_permutation_test",
+  "max_tokens": 2048,
+  "iterations": 10,
+  "generations": 10,
+  "parameters": {
+    "model": "6B-v3",
+    "prefix": "theme_militaryscifi"
+  },
+  "permutations": [
+    {
+      "prompt": [
+        "I am a robotic soldier killing alien bugs.",
+        "I am a bionic soldier killing alien creatures."
+      ],
+      "prefix": [
+        "theme_ai",
+        "theme_mars"
+      ]
+    }
+  ]
+}
