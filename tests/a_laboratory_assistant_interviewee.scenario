@@ -1,0 +1,371 @@
+{
+  "scenarioVersion": 0,
+  "title": "A Laboratory Assistant (1st, Interviewee POV)",
+  "description": "You're in need of a laboratory assistant and interview one.",
+  "prompt": "I was browsing the advertisements looking for a job, as I'd just finished my higher education and post-doc, when one advertisement caught my attention.\nNobel Prize Winner In Need Of A Lab Assistant:\n* Must be attractive\n* Must be intelligent, holding at least a graduate degree\n* Sense of humor required\nI can't help but crush immediately on him, when I realize it's the guy that won the Nobel Prize for implementing ansible communications, paving the way for interstellar journeys by enabling faster-than-light communications via twinned quantum states. I'd read some of his papers on the topic, and it's like listening to a Mozart symphony as the ideas unfold in my head.\nFeeling a bit trepid, I muster up my courage, and submit my photos and resume along with the papers I'd written as backup material. Apparently he had so many applicants that he has an agency filtering through it. By some miracle, I got a call that he'd like to see me.\nHe lives on top of the space elevator that lifts humanity to the stars. Maybe I'll help him, and maybe one day I'll go on an interstellar journey?\nI didn't know how I was supposed to dress? What am I supposed to say to the smartest man ever? But I decide to dress to the nines, and shoot for the moon, and maybe just be myself?\nAfter the long journey, I arrive at a non-descript door, and push the button, \"Come in!\" calls his voice. It's so lovely, warm and welcoming that I can't help but feel fuzzy.  I step in, and I see him, and I'm stopped dead in my tracks; I see the most handsome man I've ever seen, that causes my heart to jump, and my breath to catch. He gives me a broad grin, extends his hand, and I recognize him as Dr. ",
+  "tags": [
+    "template"
+  ],
+  "context": [
+    {
+      "text": "[I'm a post-doctoral researcher. A Nobel Prize winning scientist who invented the ansible has put an advertisement up that specified the following requirements:\n* Must be attractive\n* Must be intelligent, holding at least a graduate degree\n* Sense of humor required]",
+      "contextConfig": {
+        "prefix": "",
+        "suffix": "\n",
+        "tokenBudget": 2048,
+        "reservedTokens": 0,
+        "budgetPriority": 800,
+        "trimDirection": "trimBottom",
+        "insertionType": "newline",
+        "maximumTrimType": "sentence",
+        "insertionPosition": 0
+      }
+    },
+    {
+      "text": "[  Author: Sylvia Day; Tags: smooth jazz; Genre: Sci-fi; style: detailed, lyrical, poetic ]",
+      "contextConfig": {
+        "prefix": "",
+        "suffix": "\n",
+        "tokenBudget": 2048,
+        "reservedTokens": 2048,
+        "budgetPriority": -400,
+        "trimDirection": "trimBottom",
+        "insertionType": "newline",
+        "maximumTrimType": "sentence",
+        "insertionPosition": -4
+      }
+    }
+  ],
+  "ephemeralContext": [],
+  "placeholders": [],
+  "settings": {
+    "parameters": {
+      "temperature": 0.6,
+      "max_length": 60,
+      "min_length": 20,
+      "top_k": 0,
+      "top_p": 2,
+      "tail_free_sampling": 0.652,
+      "repetition_penalty": 2.4,
+      "repetition_penalty_range": 1168,
+      "repetition_penalty_slope": 3.33,
+      "bad_words_ids": []
+    },
+    "trimResponses": false,
+    "banBrackets": true,
+    "prefix": "vanilla"
+  },
+  "lorebook": {
+    "lorebookVersion": 1,
+    "entries": [
+      {
+        "text": "Sophia’s long, black hair, worn in a bun, cascades down over her shoulders. She’s 5’7”, probably a little taller in her stockings; the heels of her zippered shoes accentuate her height, and she holds herself in a proud yet comfortable posture.  She’s very slender, not supermodel thin but slender enough to be very pleasingly feminine, and her well-toned arms and delicate hands confirm her long-time ballet training. Sophia is wearing a knee-length skirt; no stockings, though she has zippers on her shoes; and a tucked-in white shirt, all of it covered by a tailored, navy blue blazer. Sophia is kind, and loves helping with her formidable intellect.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1625105410806,
+        "displayName": "Sophia",
+        "keys": [
+          "Sophia",
+          "dress to the nines"
+        ],
+        "searchRange": 1000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Mariko has a long, thin, pale neck and delicate shoulders; she wears a red robe with gold lining. Her eyes are large, and they seemed to escape from underneath her eyelids every so often in the most alluring way possible.  Mariko has one of those mouths that seems designed for worship; perfect lips outlined in scarlet paint adorned them with sensual perfection — meant for kissing rather than eating. Her hair was a pale sea foam color; wavy to the ends and flowing seductively down her back in a way that makes men envy her or at least feel like they wanted to be her lover. She is small but vivacious, and her figure gives the appearance of one beating out time with the rhythm of her heart, for her chest and her hips were wonderfully sculpted in an hourglass shape. Mariko is a kind soul who is shy and funny, with a sharp wit.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1625105401418,
+        "displayName": "Mariko",
+        "keys": [
+          "Mariko",
+          "dress to the nines"
+        ],
+        "searchRange": 1000,
+        "enabled": false,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Catherine has long, dark brown hair that just barely touches her shoulder blades and is pulled back with a pink headband. She gazes with eyes that are a shocking shade of blue-green that is clear as day. Catherine's skin is flawless porcelain; no wrinkles, scars or blemishes could be found in this woman's skin. A smattering of freckles dust the bridge of her nose and cheeks, yet they only serve to add an innocent charm. My eyes are drawn downwards, to her lush stretch of cleavage that has been pushed up by the open neckline of Catherine's tank-top. Catherine is darkly sensual, seductive, and brilliant.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1625105414183,
+        "displayName": "Catherine",
+        "keys": [
+          "Catherine",
+          "dress to the nines"
+        ],
+        "searchRange": 1000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Anastasia looks so different than all of the other women. Her skin is porcelain-like and her hair, now wet from the rain outside, cascades down like a dark waterfall. Her eyes were so dark and deep that they looked black. Anastasia has a mouth too perfect and sexy, and her total look commands the attention of anyone in the room. With her model-tall body being just shy of six feet, Anastasia carries herself with poise and grace. Her curves are perfectly proportioned, her hips naturally well-rounded; she was beautiful, and other woman looked at her and smiled in jealousy. Anastasia wears heels that clink on the floor, and bring in profile her legs clad in a short skirt. Anastasia is brilliant and vivacious, dark and tempestuous.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1625105395821,
+        "displayName": "Anastasia",
+        "keys": [
+          "Anastasia",
+          "dress to the nines"
+        ],
+        "searchRange": 1000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Wendy is wearing a white blouse, tight jeans, and navy pumps. Her shoulder-length blonde hair is shiny and covers her beautiful face and contrasts with her blue-green eyes and a full, red mouth that she licks nervously. Wendy's curves are in all the right places, and her waist-length golden hair hangs straight down her back towards and over a firm, heavenly ass. Her outfit accentuates her breasts, which look ample, and are revealed by a see-through white silk shirt that looks painted on. Wendy's narrow waist, wide hips, and long, gorgeous legs are also emphasized by her short dark skirt. Wendy is darkly sensual with a razor-sharp intellect.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1625105404733,
+        "displayName": "Wendy",
+        "keys": [
+          "Wendy",
+          "dress to the nines"
+        ],
+        "searchRange": 1000,
+        "enabled": false,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Julia is wearing a tight-fitting blouse that shows off her figure wonderfully, certain to drive any man crazy. Slight makeup lights up her charmingly attractive face. Julia's hair is noticeably longer than it was at the charity event. Her dark red hair is a shiny length, reaching halfway down her back. It has some fine strands come undone, making her look exceptionally sexy and irresistible to men. Further, her hair frames her face perfectly, drawing the man in. Julia is also wearing a skirt that show off her incredibly curvy figure, along with the two most adorable dimples I’ve ever seen. She’s obviously been working out a lot, judging from her toned muscles. Julia is brilliant, mercurial, and loving.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1625105407766,
+        "displayName": "Julia",
+        "keys": [
+          "Julia",
+          "dress to the nines"
+        ],
+        "searchRange": 1000,
+        "enabled": false,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Ashleigh has dark brown hair, a round face with dimples, and dark green eyes that seem to sparkle above a nose that is short with a cute tilt at the end. Her breasts are full and generous, her hips curve out a bit and lead to her attractive and long legs. Ashleigh is wearing slightly baggy black jeans, and a red blouse which is a button down, and she wears a thin, black, lacy, bra that is visible through the almost translucent material and seems to barely contain her breasts. Her shoes are red, wedged heels, and are a few inches high. Ashleigh's fingers are long, and her her nails are painted bright coral with rhinestones on the red ones. Ashleigh's personality shines with her laughter and her intelligence.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1625105417087,
+        "displayName": "Ashleigh",
+        "keys": [
+          "Ashleigh",
+          "dress to the nines"
+        ],
+        "searchRange": 1000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Penny has a willowy tall form, with long dark hair that cascades down over her shoulders. Her figure is a perfect hourglass, but with larger breasts than the viewer might expect — a most welcome surprise. Penny is dressed in an ankle-length dark-blue lab coat with a white shirt and green skirt, all of a conservative cu;  she’s the definition of demure but tantalizing. Her blue eyes spark at me, intense intelligence and warmth gazing at me.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1625105398225,
+        "displayName": "Penny",
+        "keys": [
+          "Penny",
+          "dress to the nines"
+        ],
+        "searchRange": 1000,
+        "enabled": false,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Dr. Daniel Scott's hair is black and falls over his forehead in soft waves. His eyes are a deep shade of brown that seem to glow in the light, shining with his formidable intellect. Daniel's jawline is square, strong, and masculine; his nose is straight and thin, with a slight upturn. The rest of his features are sharply defined with a hint of a smile, giving him a very charming and likable face. Dr. Scott wears a white lab coat, which is open to reveal a black shirt underneath. His pants are tight fitting, neatly pressed, and his shoes are polished.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1625164257278,
+        "displayName": "Daniel Scott",
+        "keys": [
+          "Daniel",
+          "Scott",
+          "calls his voice"
+        ],
+        "searchRange": 1000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Dr. Martin Davies is a very tall man, easily surpassing six and a half feet  with slightly narrow shoulders, and a slim waist. His height is exaggerated by a pair of black, leather-clad boots. Martin's hair is pale blond, and falls in waves past his ears. His skin is smooth and even; his eyes are a brilliant green that spark at me with his formidable intellect. And, oh, his smile is dazzling, with a dimple on either cheek that makes your heart melt. Dressed in a black suit, with a white shirt and a red tie, Dr. Davies is dressed for success. And he smells divine.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1625164249069,
+        "displayName": "Martin Davies",
+        "keys": [
+          "Martin",
+          "Davies",
+          "calls his voice"
+        ],
+        "searchRange": 1000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Dr. Eric Powell is a well-built and muscular six foot four; with a trim and athletic build, with the proportions of a Greek god. His face is chiseled and refined, with a strong jaw, a sharp nose and striking green eyes. Eric's hair is a deep auburn, and falls over his forehead in soft waves. His skin is a golden tan, with just a hint of sunburn, making him look almost Mediterranean. Dr. Powell's lips are full and pouty, and his teeth are perfectly white, and sparkle when he smiles. His hands are large, and rough, and calloused, and they grip mine with a firm and unbreakable strength. Eric's clothes are tailored and stylish, with a hint of sophistication, with a crisp, white shirt and a dark grey jacket, his pants are tight fitting, and neatly pressed. His shoes are polished and gleaming. Dr. Eric Powell's body language is open and friendly, with a relaxed and easy stance. He seems taller than he actually is, and I find myself unconsciously leaning towards him. When he speaks, I can hear the musical quality of his voice, something like a baritone saxophone, low and mellow.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1625164635175,
+        "displayName": "Eric Powell",
+        "keys": [
+          "Eric",
+          "Powell",
+          "calls his voice"
+        ],
+        "searchRange": 1000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Dr. Paul Duncan's voice is soothing, rich, and melodious, with a slight quaver in his voice. His eyes are a deep shade of blue that seem to sparkle in the light, shining with his formidable intellect. Dr. Duncan's jawline is square, strong, and masculine; his nose is straight and thin, with a slight upturn. The rest of his features are sharply defined with a hint of a smile, giving him a very charming and likable face. Paul's black hair falls over his forehead in soft waves that partially conceal is deep brown eyes that seem to glow in the light, shining with his formidable intellect.  Dressed in a white lab coat, which is open to reveal a comfortable cardigan underneath, showing off a dark gray shirt, with a large patch pocket, and two more on each sleeve. A pair of khaki pants completes his outfit, with along with a pair of rugged boots, making him look like a classic scientist.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1625165200996,
+        "displayName": "Paul Duncan",
+        "keys": [
+          "Duncan",
+          "Paul",
+          "calls his voice"
+        ],
+        "searchRange": 1000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      }
+    ],
+    "settings": {
+      "orderByKeyLocations": false
+    }
+  },
+  "author": ""
+}

@@ -1,0 +1,602 @@
+{
+  "scenarioVersion": 1,
+  "title": "The White Samurai (1st)",
+  "description": "American Soldier in the Edo period of Japan",
+  "prompt": "After long service, the memory of my dead wife doesn’t cause a pang in my heart when I see a pretty desirable woman. The Shogun had generously allowed me time off from training his soldiers so that I could find a woman. So now I’m in Kyoto's yūkaku, a Red Light District, looking for an okiya, a Japanese pleasure house, with a pretty girl that I could have fun with. The street is very quiet tonight, and the red lanterns that give the district its names are lit. There aren't many lights on or people out walking at this time of night, so it looks like most of the residents are either home getting ready for bed, or just gone to some other location.  Not too far away from here, there is an old shrine on a hill that overlooks the city, but not to worry about that for now.  This is where I need to be, not to worry about anything else.\nAhead of me, there is a short, narrow alleyway between two buildings. It isn't crowded here, as I've seen no one since coming to this side of town. As I'm walking down this narrow alleyway, I can hear soft music emanating from somewhere inside a building along the way. A light shines through a gap in the door to a house opposite me, and I notice that there are quite a few windows open above it, which means someone is probably playing music and enjoying themselves inside. I look for the sign that might indicate that it’s an okiya where I might find an oiran or yūjo. The kanji characters confirm my suspicion, and I knock politely at the door.",
+  "tags": [
+    "1st",
+    "template"
+  ],
+  "context": [
+    {
+      "text": "I’m Daniel Blackthorn, a soldier who fought in the American Civil War, on the Confederate side. When the South lost the War of Northern aggression, I went westward, and participated in the Indian Wars. Eventually, I ended up in San Francisco, and went overseas to Japan during the Edo Period. I was hired to train the soldiers of the Japanese daimyos in rifle warfare and skirmishing tactics. I’d been there long enough and had a knack for languages to become nearly fluent in Japanese. I trained in the samurai arts of the katana, and the code of Bushido. I am known as the White Samurai, and my red hair and pale skin is viewed with near superstitious awe.",
+      "contextConfig": {
+        "prefix": "",
+        "suffix": "\n",
+        "tokenBudget": 2048,
+        "reservedTokens": 0,
+        "budgetPriority": 800,
+        "trimDirection": "trimBottom",
+        "insertionType": "newline",
+        "maximumTrimType": "sentence",
+        "insertionPosition": 0
+      }
+    },
+    {
+      "text": "[ Genre: historical fiction; Location: Japan; Era: Edo Period; Year: 1867 AD; style: poetic, detailed, sensual ]\n[ My name is Daniel Blackthorn, a former Confederate soldier in the American Civil War training the Shogun's troops. I am in Kyoto's yūkaku, looking for an oiran or yūjo to belong to me on my estate. ]",
+      "contextConfig": {
+        "prefix": "",
+        "suffix": "\n",
+        "tokenBudget": 2048,
+        "reservedTokens": 2048,
+        "budgetPriority": -400,
+        "trimDirection": "trimBottom",
+        "insertionType": "newline",
+        "maximumTrimType": "sentence",
+        "insertionPosition": -4
+      }
+    }
+  ],
+  "ephemeralContext": [],
+  "placeholders": [],
+  "settings": {
+    "parameters": {
+      "temperature": 0.55,
+      "max_length": 64,
+      "min_length": 32,
+      "top_k": 60,
+      "top_p": 0.9,
+      "tail_free_sampling": 1,
+      "repetition_penalty": 2.5,
+      "repetition_penalty_range": 512,
+      "repetition_penalty_slope": 3.33,
+      "bad_words_ids": []
+    },
+    "preset": "",
+    "trimResponses": false,
+    "banBrackets": true,
+    "prefix": "theme_naval"
+  },
+  "lorebook": {
+    "lorebookVersion": 1,
+    "entries": [
+      {
+        "text": "Yusa's hair is chestnut brown and falls past her shoulders, which gives her face a very mature appearance. Her eyebrows are thick and arched, and I love watching her eyes light up when she looks at me. She has full, lush red lips that beg to be kissed, and when she smiles, I can see all the way down her long, straight nose to the tip of her small chin. The corners of her mouth curve up just a little as she blushes, and her skin is so fair it's almost translucent. Her nipples stand out from her breasts like two tiny pink teardrops, making dents in her kimono.\nYusa is quiet and shy, but once she's aroused, she becomes aggressive, aggressive in a totally different way. She has the highest sex drives of all the yūjo.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626752734527,
+        "displayName": "Character: Yusa",
+        "keys": [
+          "Yusa",
+          "Yusa-san"
+        ],
+        "searchRange": 2000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Kataoka-san's eyes are wide and shining, and her skin glows radiantly. She has a small pointed chin, but her cheekbones are high, and her breasts hang proudly under her thin kimono. She wears nothing underneath, and her nipples stand erect under the silk. Her hair is tied up into a complex knot at the back of her head, and her long hair is piled artfully on top of her head. When she blushes, the contrast between her pale cheeks and her crimson lips makes her look even more beautiful than usual.\nHer body is long and lean, and there isn't a spare ounce of fat anywhere. Her hips are narrow and almost perfectly rounded, her legs long and slim, and her knees are so well shaped that they're actually a bit higher than her flat feet. \nShe has a lovely smile and her personality is playful and mischievous, but she also has an edge to her. There's a sense of maturity about her that comes from having experienced a great deal in life.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626752624356,
+        "displayName": "Character: Kataoka",
+        "keys": [
+          "Kataoka",
+          "Kataoka-san"
+        ],
+        "searchRange": 2000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Satsuki has an oval face, with delicate features and a small nose. Her body is slim but well proportioned, and her breasts are round and full enough to make me wonder why she hasn't given birth yet. Her black hair cascades down her back in waves, framing a flawless porcelain white skin and clear blue eyes.  Her feet are slightly crooked, giving her posture a slight hunch, but she makes it work, because her legs are so incredibly long.\nHer personality is a little shy, but when she smiles, her teeth shine bright against perfect white pearly enamel.\nSatsuki is a yūjo.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626752693074,
+        "displayName": "Character: Satsuki",
+        "keys": [
+          "Satsuki",
+          "Satsuki-san"
+        ],
+        "searchRange": 2000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Mizuki’s hair falls softly around her shoulders in lustrous black waves, just brushing the tops of her breasts as she bends at the waist to display them for my viewing pleasure. The rest of her body is stunningly curvaceous, perfectly proportioned with soft golden tan lines accenting her toned muscles. I'm entranced by her hips, which widen into a narrow waist that tapers to delicate feminine ankles.\nMizuki wears a red, short kimono, and it fits her like it's made for her.  It hangs open in front revealing the generous swell of her abdomen, then it covers her chest and skirt up to her knees. The garment is trimmed in white silk so thin that I can see through it easily, but it is very tight against her curves and hugs her every contour.  As I look at her more closely, I notice that she has the most beautifully formed face I've ever seen.  Her nose is straight and slightly aquiline, with full, pouting lips and large eyes rimmed with long lashes. Her cheeks are round, with soft creases radiating out from her mouth and running down to her chin. Her features are framed by thick, wavy locks of deep jet-black hair that fall halfway down her back.\nWhen she smiles at me and shows off the perfect whiteness of her teeth, her personality shines forth and I am immediately captivated. She is funny, smart and beautiful; she must have been born to be the object of desire for men everywhere. And yet... there is something about her that stirs my passion even further.\nMizuki is a high ranking oiran.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626752663729,
+        "displayName": "Character: Mizuki",
+        "keys": [
+          "Mizuki",
+          "Mizuki-san"
+        ],
+        "searchRange": 2000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Oiran are a specific category of high ranking Japanese courtesans. Divided into a number of ranks within this category, oiran were considered – both in social terms and in the entertainment they provided – to be above common prostitutes, known as yūjo, women of pleasure. Though oiran by definition also engaged in prostitution, they were distinguished by their skills in the traditional arts, with the higher-ranking oiran having a degree of choice in which customers they took.\n[Mizuzi is an oiran. Satsuki is a yūjo. Kataoka is a yūjo. Yusa is a yūjo.]",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626752680449,
+        "displayName": "Role: Oiran",
+        "keys": [
+          "Oiran",
+          "courtesan",
+          "prostitute",
+          "yūjo"
+        ],
+        "searchRange": 2000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Yūkaku are legal red-light districts in Japanese history, where both brothels and prostitutes - known collectively as yūjo, woman of pleasure, the higher ranks of which were known as oiran - recognised by the Japanese government operated.\n[Kyoto has a yūkaku.]\n[Mizuzi is an oiran. Satsuki is a yūjo. Kataoka is a yūjo. Yusa is a yūjo.]",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626752726997,
+        "displayName": "Location: Yūkaku",
+        "keys": [
+          "Yūkaku"
+        ],
+        "searchRange": 4000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "The Edo period or Tokugawa period is between 1603 and 1867 in the history of Japan, when Japan was under the rule of the Tokugawa shogunate and the country's 300 regional daimyō. Emerging from the chaos of the Sengoku period, the Edo period was characterized by economic growth, strict social order, isolationist foreign policies, a stable population, \"no more wars\", and popular enjoyment of arts and culture.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626752642789,
+        "displayName": "Setting: Edo Period",
+        "keys": [
+          "Edo",
+          "Tokugawa",
+          "Shogunate",
+          "Shogun"
+        ],
+        "searchRange": 4000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Samurai are the hereditary military nobility and officer caste of Edo Japan. They are the well-paid retainers of the daimyo, the great feudal landholders). They had high prestige and special privileges such as wearing two swords. They cultivated the bushido codes of martial virtues, indifference to pain, and unflinching loyalty, engaging in many local battles. During the Edo era, they became the stewards and chamberlains of the daimyō estates, gaining managerial experience and education. Samurai often had their own lands and servants that they managed.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626752688234,
+        "displayName": "Role: Samurai",
+        "keys": [
+          "Samurai"
+        ],
+        "searchRange": 4000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "The Shogun is the title of the military dictators of Japan during most of the period spanning from 1185 to 1868. Nominally appointed by the Emperor, shoguns are usually the de facto rulers of the country, though during part of the Kamakura period shoguns were themselves figureheads. The office of shogun is in practice hereditary, though over the course of the history of Japan several different clans held the position. Tokugawa Yoshinobu is the Shogun.\n[Tokugawa Yoshinobu is the Shogun.]",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626753429382,
+        "displayName": "Role: Shogun",
+        "keys": [
+          "Shogun"
+        ],
+        "searchRange": 4000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Daimyō are powerful Japanese feudal lords who, from the 10th century onwards rule most of Japan from their vast, hereditary land holdings. They are subordinate to the shōgun and nominally to the emperor and the kuge. They have samurai who are subordinate to them.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626752637859,
+        "displayName": "Role: Daimyo",
+        "keys": [
+          "Daimyō",
+          "daimyo"
+        ],
+        "searchRange": 4000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "The American Civil War was a civil war in the United States fought between northern and Pacific states (\"the Union\" or \"the North\") and southern states that voted to secede and form the Confederate States of America (\"the Confederacy\" or \"the South\"). The war effectively ended on April 9, 1865, when Confederate General Lee surrendered to Union General Grant at Appomattox Court House, after abandoning Petersburg. At the end of the war, much of the South's infrastructure was destroyed, especially its railroads. The Confederacy collapsed, slavery was abolished, and four million enslaved Black people were freed. The war-torn nation then entered the Reconstruction era in a partially successful attempt to rebuild the country and grant civil rights to freed slaves.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626752748157,
+        "displayName": "Background: American Civil War",
+        "keys": [
+          "Civil War"
+        ],
+        "searchRange": 4000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Bushidō, \"the way of the warrior\", is a moral code concerning samurai attitudes, behavior and lifestyle. It is loosely analogous to the European concept of chivalry. Bushidō formalized earlier samurai moral values and ethical code, most commonly stressing a combination of sincerity, frugality, loyalty, martial arts mastery and honour until death. Born from Neo-Confucianism during times of peace in the Edo period and following Confucian texts, while also being influenced by Shinto and Zen Buddhism, it allowed the violent existence of the samurai to be tempered by wisdom, patience and serenity.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626752632736,
+        "displayName": "Concept: Bushido",
+        "keys": [
+          "bushido",
+          "Bushidō"
+        ],
+        "searchRange": 4000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Kyoto is the capital of Edo period Japan. The city’s history has seen the rise and fall of several Japanese shogunates and saw the construction of some of the country’s most important shrines and temples. Kyoto has a yūkaku district, and temples such as the Kyomizu, and the Imperial Palace.\n[ Locations in Kyoto are: yūkaku district, Kyomizu Temple, the Imperial Palace, Shijôgahara, Togetsukyôenji ]",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626754626420,
+        "displayName": "Location: Kyoto",
+        "keys": [
+          "Kyoto"
+        ],
+        "searchRange": 4000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Gaijin is a Japanese word for foreigners and non-Japanese citizens in Japan, specifically non-Asian foreigners such as white and black people. The word is composed of two kanji: gai (\"outside\") and jin (\"person\").",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626752656910,
+        "displayName": "Concept: Gaijin",
+        "keys": [
+          "Gaijin"
+        ],
+        "searchRange": 1000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Kiyomizu Temple or Kiyomizu-dera is one of the most spectacular temples in Japan, situated on the majestic Mount Higashiyama’s slopes overlooking Gion district in Eastern Kyoto. Due to its amazing mountainous backdrop and beautiful Otowa waterfalls on its ground, this Buddhist temple is more often referred to as Otowa-san Kiyomizu-dera, literally meaning ‘the temple of pure water.’\nThe mind-blowing location where the shrine rests itself is its key highlight. A quaint narrow street dotted with numerous restaurants, shops and ryokans leads you to the temple’s enchanting main gate. Occupying an area of about 35,000 square meters, the temple complex of Kiyomizu comprises more than 30 structures. The major draw of the temple is undeniably its main hall, Hondo, where Kannon Bodhisattva – the main deity of the temple – is housed.\n[ Kiyomizu is one of the temples in Kyoto. ]",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626752951173,
+        "displayName": "Location: Kiyomizu Temple",
+        "keys": [
+          "Kiyomizu",
+          "Kiyomizu-dera"
+        ],
+        "searchRange": 3000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "The Palace is situated in the Kyōto-gyoen, a large rectangular enclosure. It also contains the Sentō Imperial Palace gardens and the Kyoto State Guest House. The estate dates from the early Edo period where the residence of high court nobles are grouped close together with the palace and the area walled.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626753332098,
+        "displayName": "Location: Imperial Palace",
+        "keys": [
+          "Palace",
+          "Imperial",
+          "Kyōto-gyoen"
+        ],
+        "searchRange": 4000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Tokugawa Yoshinobu is the 15th Shogun of the Tokugawa Shogunate of Japan, during the Edo Period. He was taught in the literary and martial arts, as well as receiving a solid education in the principles of politics and government. He was instrumental in quelling political unrest in the Kyoto area, and gathered allies to counter the activities of the rebellious Chōshū Domain. He was an instrumental figure in the kōbu gattai political party, which sought a reconciliation between the shogunate and the imperial court.\nIn 1864, Yoshinobu, as commander of the imperial palace's defense, defeated the Chōshū forces in their attempt to capture the imperial palace's Hamaguri Gate, in what is called the Kinmon Incident. \nHe has just become the Shogun, and is performing a massive overhaul of the government, and modernizing the military of the shogunate with gaijin assistance.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626753832633,
+        "displayName": "Character: Tokugawa Yoshinobu",
+        "keys": [
+          "Shogun",
+          "Tokugawa",
+          "Yoshinobu"
+        ],
+        "searchRange": 3000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "The Shijôgahara is a large park located on the north side of the Kamo River, near the center of Kyoto. It is famous for its beauty and tranquility, but also because it has been used as a training ground for martial arts since the 14th century. The Shijôgahara was the site of many duels between samurai, and the grounds were considered to be off-limits to commoners.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626754508864,
+        "displayName": "Location: Shijôgahara",
+        "keys": [
+          "Shijôgahara",
+          "Shijogahara"
+        ],
+        "searchRange": 1000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      },
+      {
+        "text": "Togetsukyôenji is a small Buddhist temple on the west bank of the Kamo River in Kyoto. It is said that it was built by Prince Shotoku, the father of Emperor Tenmu, to commemorate his victory over the Nika Revolt.",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626754556984,
+        "displayName": "Location: Togetsukyôenji",
+        "keys": [
+          "Togetsukyôenji",
+          "Togetsukyoenji"
+        ],
+        "searchRange": 1000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      }
+    ],
+    "settings": {
+      "orderByKeyLocations": false
+    }
+  },
+  "author": "",
+  "storyContextConfig": {
+    "prefix": "",
+    "suffix": "",
+    "tokenBudget": 2048,
+    "reservedTokens": 512,
+    "budgetPriority": 0,
+    "trimDirection": "trimTop",
+    "insertionType": "newline",
+    "maximumTrimType": "sentence",
+    "insertionPosition": -1
+  },
+  "contextDefaults": {
+    "ephemeralDefaults": [
+      {
+        "text": "",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 2048,
+          "budgetPriority": -10000,
+          "trimDirection": "doNotTrim",
+          "insertionType": "newline",
+          "maximumTrimType": "newline",
+          "insertionPosition": -2
+        },
+        "startingStep": 1,
+        "delay": 0,
+        "duration": 1,
+        "repeat": false,
+        "reverse": false
+      }
+    ],
+    "loreDefaults": [
+      {
+        "text": "",
+        "contextConfig": {
+          "prefix": "",
+          "suffix": "\n",
+          "tokenBudget": 2048,
+          "reservedTokens": 0,
+          "budgetPriority": 400,
+          "trimDirection": "trimBottom",
+          "insertionType": "newline",
+          "maximumTrimType": "sentence",
+          "insertionPosition": -1
+        },
+        "lastUpdatedAt": 1626740429945,
+        "displayName": "New Lorebook Entry",
+        "keys": [],
+        "searchRange": 1000,
+        "enabled": true,
+        "forceActivation": false,
+        "keyRelative": false,
+        "nonStoryActivatable": false
+      }
+    ]
+  }
+}
