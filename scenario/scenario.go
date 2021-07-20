@@ -108,12 +108,14 @@ type Scenario struct {
 }
 
 type ContextReportEntry struct {
-	Label          string               `json:"label"`
-	InsertionPos   int                  `json:"insertion_pos"`
-	TokenCount     int                  `json:"token_count"`
-	TokensInserted int                  `json:"tokens_inserted"`
-	MatchIndexes   []map[string][][]int `json:"matches"`
-	Forced         bool                 `json:"forced"`
+	Label             string               `json:"label"`
+	InsertionPos      int                  `json:"insertion_pos"`
+	TokenCount        int                  `json:"token_count"`
+	TokensInserted    int                  `json:"tokens_inserted"`
+	BudgetRemaining   int                  `json:"budget_remaining"`
+	ReservedRemaining int                  `json:"reserved_remaining"`
+	MatchIndexes      []map[string][][]int `json:"matches"`
+	Forced            bool                 `json:"forced"`
 }
 
 type ContextReport []ContextReportEntry
@@ -197,6 +199,7 @@ func (scenario Scenario) createStoryContext(story string) ContextEntry {
 			TrimDirection:     "trimTop",
 			InsertionType:     "newline",
 			MaximumTrimType:   "sentence",
+			Force:             true,
 		},
 		Tokens: scenario.Tokenizer.Encode(&story),
 		Label:  "Story",
@@ -239,35 +242,45 @@ func (ctx *ContextEntry) getMaxTrimType() MaxTrimType {
 	}
 }
 
+func assertThresholdOrEmpty(tokens *[]uint16, ratio float32, target int) {
+	if float32(len(*tokens))*ratio >= float32(target) {
+		*tokens = make([]uint16, 0)
+	}
+}
+
 func (ctx *ContextEntry) ResolveTrim(tokenizer *gpt_bpe.GPTEncoder, budget int) (trimmedTokens *[]uint16) {
-	trimSize := 0
+	target := 0
 	numTokens := len(*ctx.Tokens)
-	projected := budget - numTokens + ctx.ContextCfg.ReservedTokens
+	projected := budget - numTokens
 	if projected > ctx.ContextCfg.TokenBudget {
-		trimSize = ctx.ContextCfg.TokenBudget
+		target = ctx.ContextCfg.TokenBudget
 	} else if projected >= 0 {
 		// We have enough to fit this into the budget.
-		trimSize = numTokens
+		target = numTokens
 	} else {
-		if float32(numTokens)*0.3 <= float32(budget) {
-			trimSize = budget
-		} else {
-			trimSize = 0
-		}
+		target = budget
 	}
 	trimDirection := ctx.getTrimDirection()
 	maxTrimType := ctx.getMaxTrimType()
-	trimmedTokens, _ = tokenizer.TrimNewlines(ctx.Tokens, trimDirection, uint(trimSize))
+
+	// First, try newline trimming.
+	trimmedTokens, _ = tokenizer.TrimNewlines(ctx.Tokens, trimDirection, uint(target))
+	assertThresholdOrEmpty(trimmedTokens, 0.3, target)
+
+	// If that fails, try trimming the sentences.
 	if len(*trimmedTokens) == 0 && maxTrimType >= TrimSentences {
-		trimmedTokens, _ = tokenizer.TrimSentences(ctx.Tokens, trimDirection, uint(trimSize))
+		trimmedTokens, _ = tokenizer.TrimSentences(ctx.Tokens, trimDirection, uint(target))
 	}
+
+	// And if that also fails, trim tokens as a last resort.
+	assertThresholdOrEmpty(trimmedTokens, 0.3, target)
 	if len(*trimmedTokens) == 0 && maxTrimType == TrimTokens {
 		tokens := *ctx.Tokens
 		switch trimDirection {
 		case gpt_bpe.TrimTop:
-			tokens = tokens[numTokens-trimSize:]
+			tokens = tokens[numTokens-target:]
 		case gpt_bpe.TrimBottom:
-			tokens = tokens[:trimSize]
+			tokens = tokens[:target]
 		default:
 			tokens = *trimmedTokens
 		}
@@ -321,12 +334,14 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 			continue
 		} else {
 			contextReport = append(contextReport, ContextReportEntry{
-				Label:          ctx.Label,
-				InsertionPos:   ctx.ContextCfg.InsertionPosition,
-				TokenCount:     len(*ctx.Tokens),
-				TokensInserted: numTokens,
-				MatchIndexes:   ctx.MatchIndexes,
-				Forced:         ctx.ContextCfg.Force,
+				Label:             ctx.Label,
+				InsertionPos:      ctx.ContextCfg.InsertionPosition,
+				TokenCount:        len(*ctx.Tokens),
+				TokensInserted:    numTokens,
+				BudgetRemaining:   budget,
+				ReservedRemaining: reservations,
+				MatchIndexes:      ctx.MatchIndexes,
+				Forced:            ctx.ContextCfg.Force,
 			})
 		}
 		var before []string
@@ -397,6 +412,7 @@ func ScenarioFromSpec(prompt string, memory string, an string) (scenario Scenari
 				TrimDirection:     "trimBottom",
 				InsertionType:     "newline",
 				InsertionPosition: 0,
+				Force:             true,
 			},
 			Tokens: encoder.Encode(&memory),
 			Label:  "Memory",
@@ -411,6 +427,7 @@ func ScenarioFromSpec(prompt string, memory string, an string) (scenario Scenari
 				TrimDirection:     "trimBottom",
 				InsertionType:     "newline",
 				InsertionPosition: -4,
+				Force:             true,
 			},
 			Tokens: encoder.Encode(&an),
 			Label:  "A/N",
@@ -442,11 +459,14 @@ func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scen
 	}
 	scenario.Context[0].Label = "Memory"
 	scenario.Context[0].Index = 1
+	scenario.Context[0].ContextCfg.Force = true
 	scenario.Context[1].Label = "A/N"
 	scenario.Context[1].Index = 2
+	scenario.Context[1].ContextCfg.Force = true
 	for loreIdx := range scenario.Lorebook.Entries {
 		loreEntry := scenario.Lorebook.Entries[loreIdx]
 		loreEntry.Tokens = tokenizer.Encode(&loreEntry.Text)
+		loreEntry.ContextCfg.Force = loreEntry.ForceActivation
 		for keyIdx := range loreEntry.Keys {
 			key := loreEntry.Keys[keyIdx]
 			keyRegex, err := regexp.Compile("(?i)(^|\\W)(" + key + ")($|\\W)")

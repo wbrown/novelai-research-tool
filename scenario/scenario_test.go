@@ -14,6 +14,7 @@ import (
 var encoder gpt_bpe.GPTEncoder
 
 const scenarioPath = "../tests/a_laboratory_assistant.scenario"
+const frankensteinPath = "../tests/frankenstein.scenario"
 
 func AssertEqual(t *testing.T, a interface{}, b interface{}) {
 	if reflect.DeepEqual(a, b) {
@@ -82,13 +83,46 @@ func TestScenario_ResolveLorebook(t *testing.T) {
 	}
 }
 
+func StringifyContextReport(t *testing.T, ctxReport ContextReport) string {
+	if reprBytes, err := json.MarshalIndent(ctxReport, "", "  "); err != nil {
+		t.Errorf("Failed to unmarshal ContextReport to string")
+	} else {
+		return string(reprBytes)
+	}
+	return ""
+}
+
+type GenerateContextTest struct {
+	scenarioPath string
+	budget int
+	expected int
+}
+
+type GenerateContextTests []GenerateContextTest
+
+var generateContextTests = GenerateContextTests{
+	{scenarioPath, 2048, 11},
+	{scenarioPath, 1024, 8},
+	{frankensteinPath, 2048, 3},
+}
+
 func TestScenario_GenerateContext(t *testing.T) {
 	var sc Scenario
 	var err error
-	if sc, err = ScenarioFromFile(&encoder, scenarioPath); err != nil {
-		t.Errorf("Failed to load scenario file: %v", err)
+
+	for testIdx := range generateContextTests {
+		test := generateContextTests[testIdx]
+		if sc, err = ScenarioFromFile(&encoder, test.scenarioPath); err != nil {
+			t.Errorf("Failed to load scenario file: %v", err)
+		} else {
+			_, report := sc.GenerateContext(sc.Prompt, test.budget)
+			if len(report) != test.expected {
+				t.Log(StringifyContextReport(t, report))
+				t.Errorf("%s, budget %d: Expected %d insertions, got %d",
+					test.scenarioPath, test.budget, test.expected, len(report))
+			}
+		}
 	}
-	sc.GenerateContext(sc.Prompt, 2048)
 }
 
 func TestMain(m *testing.M) {
