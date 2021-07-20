@@ -242,7 +242,6 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 	}
 	ct.Parameters.Label = ct.MakeLabel(spec)
 	filteredPermutations := []ContentTest{ct}
-	fmt.Println("PermutationCt:", len(permutations))
 	for permutationIdx := range permutations {
 		permutation := permutations[permutationIdx]
 		if permutation.Parameters.Model != "6B-v3" &&
