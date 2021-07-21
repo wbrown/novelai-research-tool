@@ -111,54 +111,54 @@ func EndOfTextTokens() [][]uint16 {
 		{1279,91,10619,46,9792,13918,91,29}}
 }
 
-func (ngp *NaiGenerateParams) CoerceNullValues(other NaiGenerateParams) {
-	if ngp.Label == "" {
-		ngp.Label = other.Label
+func (params *NaiGenerateParams) CoerceNullValues(other NaiGenerateParams) {
+	if params.Label == "" {
+		params.Label = other.Label
 	}
-	if ngp.Model == "" {
-		ngp.Model = other.Model
+	if params.Model == "" {
+		params.Model = other.Model
 	}
-	if ngp.Prefix == "" {
-		ngp.Prefix = other.Prefix
+	if params.Prefix == "" {
+		params.Prefix = other.Prefix
 	}
-	if ngp.Temperature == nil {
-		ngp.Temperature = other.Temperature
+	if params.Temperature == nil {
+		params.Temperature = other.Temperature
 	}
-	if ngp.MaxLength == nil {
-		ngp.MaxLength = other.MaxLength
+	if params.MaxLength == nil {
+		params.MaxLength = other.MaxLength
 	}
-	if ngp.MinLength == nil {
-		ngp.MinLength = other.MinLength
+	if params.MinLength == nil {
+		params.MinLength = other.MinLength
 	}
-	if ngp.TopK == nil {
-		ngp.TopK = other.TopK
+	if params.TopK == nil {
+		params.TopK = other.TopK
 	}
-	if ngp.TopP == nil {
-		ngp.TopP = other.TopP
+	if params.TopP == nil {
+		params.TopP = other.TopP
 	}
-	if ngp.TailFreeSampling == nil {
-		ngp.TailFreeSampling = other.TailFreeSampling
+	if params.TailFreeSampling == nil {
+		params.TailFreeSampling = other.TailFreeSampling
 	}
-	if ngp.RepetitionPenalty == nil {
-		ngp.RepetitionPenalty = other.RepetitionPenalty
+	if params.RepetitionPenalty == nil {
+		params.RepetitionPenalty = other.RepetitionPenalty
 	}
-	if ngp.RepetitionPenaltyRange == nil {
-		ngp.RepetitionPenaltyRange = other.RepetitionPenaltyRange
+	if params.RepetitionPenaltyRange == nil {
+		params.RepetitionPenaltyRange = other.RepetitionPenaltyRange
 	}
-	if ngp.RepetitionPenaltySlope == nil {
-		ngp.RepetitionPenaltySlope = other.RepetitionPenaltySlope
+	if params.RepetitionPenaltySlope == nil {
+		params.RepetitionPenaltySlope = other.RepetitionPenaltySlope
 	}
-	if ngp.BanBrackets == nil {
-		ngp.BanBrackets = other.BanBrackets
+	if params.BanBrackets == nil {
+		params.BanBrackets = other.BanBrackets
 	}
-	if ngp.BadWordsIds == nil {
-		ngp.BadWordsIds = other.BadWordsIds
+	if params.BadWordsIds == nil {
+		params.BadWordsIds = other.BadWordsIds
 	}
 }
 
-func (ngp *NaiGenerateParams) CoerceDefaults() {
+func (params *NaiGenerateParams) CoerceDefaults() {
 	defaults := NewGenerateParams()
-	ngp.CoerceNullValues(defaults)
+	params.CoerceNullValues(defaults)
 }
 
 func NewGenerateParams() NaiGenerateParams {
@@ -218,18 +218,51 @@ func generateGenRequest(encoded []byte, accessToken string) *http.Request {
 	return req
 }
 
-func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerateHTTPResp) {
-	params.Model = params.Parameters.Model
+func (params *NaiGenerateParams) ResolveSamplingParams() {
+	if params.TopP == nil || *params.TopP == 0 {
+		topP := 1.0
+		params.TopP = &topP
+	}
+	if params.TailFreeSampling == nil || *params.TailFreeSampling == 0 {
+		tailFreeSampling := 1.0
+		params.TailFreeSampling = &tailFreeSampling
+	}
+}
+
+func (params NaiGenerateParams) GetScaledRepPen() float64 {
 	const oldRange = 1 - 8.0
 	const newRange = 1 - 1.525
 	if params.Model != "2.7B" {
-		scaledRepPen := ((*params.Parameters.RepetitionPenalty-1)*newRange)/oldRange + 1
-		params.Parameters.RepetitionPenalty = &scaledRepPen
+		scaledRepPen := ((*params.RepetitionPenalty-1)*newRange)/oldRange + 1
+		return scaledRepPen
 	}
+	return *params.RepetitionPenalty
+}
+
+func (params *NaiGenerateParams) ResolveRepetitionParams() {
+	scaledRepPen := params.GetScaledRepPen()
+	params.RepetitionPenalty = &scaledRepPen
+	if params.RepetitionPenaltySlope != nil &&
+		*params.RepetitionPenaltySlope == 0 {
+		params.RepetitionPenaltySlope = nil
+	}
+	if params.RepetitionPenaltyRange != nil &&
+		*params.RepetitionPenaltyRange == 0 {
+		params.RepetitionPenaltyRange = nil
+	}
+}
+
+func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerateHTTPResp) {
+	params.Model = params.Parameters.Model
 	if *params.Parameters.BanBrackets {
 		newBadWords := append(BannedBrackets(),
 			*params.Parameters.BadWordsIds...)
 		params.Parameters.BadWordsIds = &newBadWords
+	}
+	params.Parameters.ResolveRepetitionParams()
+	params.Parameters.ResolveSamplingParams()
+	if len(*params.Parameters.BadWordsIds) == 0 {
+		params.Parameters.BadWordsIds = nil
 	}
 	cl := http.DefaultClient
 	encoded, _ := json.Marshal(params)
@@ -272,7 +305,7 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenera
 		os.Exit(1)
 	}
 	if len(respDecoded.Error) > 0 {
-		log.Fatal(fmt.Sprintf("API: Server error [%s]: %s",
+		log.Fatal(fmt.Sprintf("API: Server error [%d]: %s",
 			respDecoded.StatusCode, respDecoded.Error))
 	}
 	return respDecoded

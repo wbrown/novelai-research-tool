@@ -60,6 +60,10 @@ func (cr *ConsoleReporter) ReportGeneration(resp string) {
 		strings.Replace(resp, "\n", cr.greenNewline, -1))
 }
 
+func (cr *ConsoleReporter) close() {
+	fmt.Printf("%v\n", cr.blue("== Test Instance Complete =="))
+}
+
 //
 // JSONReporter - takes output of test iterations and serializes to a JSON
 //                file
@@ -183,6 +187,7 @@ type Reporters struct {
 func (reporters Reporters) close() {
 	reporters.JSON.close()
 	reporters.Text.close()
+	reporters.Console.close()
 }
 
 func (reporters Reporters) ReportIteration(iteration int) {

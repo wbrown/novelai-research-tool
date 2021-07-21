@@ -304,13 +304,20 @@ func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
 	return tests
 }
 
+const MaxFileNameLength = 240
+const MaxFileExtensionLength = 5
+
 func (ct *ContentTest) generateOutputPath() string {
+	tsString := ",TS=" + time.Now().Format("2006-01-02T1504")
+	filePrefix := filepath.Base(ct.OutputPrefix)
+	budget := MaxFileNameLength -
+		(len(filePrefix) + len(tsString) + MaxFileExtensionLength)
+	label := ct.Parameters.Label
+	if budget < len(label) {
+		label = label[:budget]
+	}
 	return filepath.Join(ct.WorkingDir,
-		strings.Join([]string{
-			ct.OutputPrefix,
-			ct.Parameters.Label + ",TS=" +
-				time.Now().Format("2006-01-02T1504")},
-			"-"))
+		ct.OutputPrefix+"-"+label+tsString)
 }
 
 func (ct *ContentTest) loadPrompt(path string) {
@@ -347,15 +354,17 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 	if test.MaxTokens == 0 {
 		test.MaxTokens = 2048
 	}
-	if test.PromptFilename == "" && test.Prompt == "" && test.Memory == "" &&
+	if test.OutputPrefix == "" {
+		log.Println("nrt: `output_prefix` must be set to a non-empty string.\n")
+		os.Exit(1)
+	} else if test.PromptFilename == "" && test.Prompt == "" && test.Memory == "" &&
 		test.AuthorsNote == "" && test.ScenarioFilename == "" {
 		log.Printf(
 			"nrt: %s %s\n",
 			"at least one of prompt_filename, prompt, memory, authors_note, or",
 			"scenario_filename must be filled in.")
 		os.Exit(1)
-	}
-	if test.PromptFilename != "" && test.Prompt != "" {
+	} else if test.PromptFilename != "" && test.Prompt != "" {
 		log.Println("nrt: you cannot have both `prompt_filename` and `prompt` set")
 		os.Exit(1)
 	}
