@@ -5,14 +5,15 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/cenkalti/backoff/v4"
 	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"runtime"
-	"time"
 )
 
 type NovelAiAPI struct {
@@ -101,6 +102,13 @@ func BannedBrackets() [][]uint16 {
 		{48874}, {48999}, {49074}, {49082}, {49146}, {49946}, {10221},
 		{4841}, {1427}, {2602, 834}, {29343}, {37405}, {35780}, {2602},
 		{17202}, {8162}}
+}
+
+func EndOfTextTokens() [][]uint16 {
+	return [][]uint16{{27,91,437,1659,5239,91,29},
+		{1279,91,437,1659,5239,91,29},
+		{27,91,10619,46,9792,13918,91,29},
+		{1279,91,10619,46,9792,13918,91,29}}
 }
 
 func (ngp *NaiGenerateParams) CoerceNullValues(other NaiGenerateParams) {
@@ -200,7 +208,17 @@ func NewGenerateMsg(input string) NaiGenerateMsg {
 	}
 }
 
-func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerateHTTPResp) {
+func generateGenRequest(encoded []byte, accessToken string) *http.Request {
+	req, _ := http.NewRequest("POST", "https://api.novelai.net/ai/generate",
+		bytes.NewBuffer(encoded))
+	req.Header.Set("User-Agent",
+		"nrt/0.1 ("+runtime.GOOS+"; "+runtime.GOARCH+")")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	return req
+}
+
+func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerateHTTPResp) {
 	params.Model = params.Parameters.Model
 	const oldRange = 1 - 8.0
 	const newRange = 1 - 1.525
@@ -215,26 +233,33 @@ func naiApiGenerate(keys NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerat
 	}
 	cl := http.DefaultClient
 	encoded, _ := json.Marshal(params)
-	req, _ := http.NewRequest("POST", "https://api.novelai.net/ai/generate",
-		bytes.NewBuffer(encoded))
-	req.Header.Set("User-Agent",
-		"nrt/0.1 ("+runtime.GOOS+"; "+runtime.GOARCH+")")
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+keys.AccessToken)
-
+	req := generateGenRequest(encoded, keys.AccessToken)
 	// Retry up to 10 times.
 	var resp *http.Response
-	for tries := 0; tries < 10; tries++ {
-		var err error
+	doGenerate := func () (err error) {
 		resp, err = cl.Do(req)
 		if err == nil && resp.StatusCode == 201 {
-			break
+			return err
 		} else if resp != nil {
-			log.Printf("API: StatusCode: %d, %v\n", resp.StatusCode, err)
+			body, readErr := ioutil.ReadAll(resp.Body)
+			if readErr != nil {
+				log.Printf("API: Error reading HTTP body of StatusCode: %d, %s\n",
+					resp.StatusCode, readErr)
+				return readErr
+			}
+			errStr := fmt.Sprintf("API: StatusCode: %d, %v, %v\n",
+				resp.StatusCode, err, body)
+			log.Print(errStr)
+			return errors.New(errStr)
 		} else {
 			log.Printf("API: Error: %v\n", err)
 		}
-		time.Sleep(31 * time.Second)
+		return err
+	}
+	err := backoff.Retry(doGenerate, backoff.NewExponentialBackOff())
+	if err != nil {
+		log.Printf("API: Error: %v", err)
+		os.Exit(1)
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -269,7 +294,7 @@ func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGeneratePara
 	resp.EncodedRequest = encodedBytes64
 	msg := NewGenerateMsg(encodedBytes64)
 	msg.Parameters = params
-	apiResp := naiApiGenerate(api.keys, msg)
+	apiResp := naiApiGenerate(&api.keys, msg)
 	if binTokens, err := base64.StdEncoding.DecodeString(apiResp.Output); err != nil {
 		log.Println("ERROR:", err)
 		resp.Error = err
