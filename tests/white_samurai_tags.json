@@ -5,20 +5,93 @@
   "generations": 50,
   "parameters": {
     "model": "6B-v3",
-    "prefix": "theme_naval"
+    "prefix": "theme_naval",
+    "bad_words_ids": [
+      [
+        27,
+        91,
+        437,
+        1659,
+        5239,
+        91,
+        29
+      ],
+      [
+        1279,
+        91,
+        437,
+        1659,
+        5239,
+        91,
+        29
+      ],
+      [
+        27,
+        91,
+        10619,
+        46,
+        9792,
+        13918,
+        91,
+        29
+      ],
+      [
+        1279,
+        91,
+        10619,
+        46,
+        9792,
+        13918,
+        91,
+        29
+      ],
+      [
+        79,
+        415,
+        444
+      ],
+      [
+        31571
+      ],
+      [
+        47,
+        415,
+        444
+      ],
+      [
+        11427,
+        444
+      ],
+      [
+        47,
+        8643,
+        11015
+      ],
+      [
+        350,
+        8643,
+        11015
+      ]
+    ]
   },
   "permutations": [
     {
-      "prefix": [ "vanilla", "theme_naval", "style_shridanlefanu", "theme_19thcenturyromance", "theme_egypt" ],
+      "prefix": [
+        "vanilla",
+        "theme_naval",
+        "style_shridanlefanu",
+        "theme_19thcenturyromance",
+        "theme_egypt"
+      ],
       "authors_note": [
         "[ Genre: historical fiction; Location: Japan; Era: Edo; Year: 1867 AD; style: poetic, detailed, sensual ]",
         "[ Genre: historical fiction ] [ Location: Kyoto, Japan ] [ Era: Edo; year: 1867 AD ] [ style: poetic, detailed, sensual ]",
         "[ Genre: historical fiction ]\n[ Location: Kyoto, Japan ]\n[ Era: Edo; year: 1867 AD ]\n[ style: poetic, detailed, sensual ]",
         " Genre: historical fiction\n Location: Kyoto, Japan\n Era: Edo; year: 1867 AD\n style: poetic, detailed, sensual",
-       "[ Genre: Historical Fiction; Location: Japan; Era: Edo; Year: 1867 AD; style: poetic, detailed, sensual ]",
-       "[ Genre: Historical Fiction ] [ Location: Kyoto, Japan ] [ Era: Edo; year: 1867 AD ] [ style: poetic, detailed, sensual ]",
-       "[ Genre: Historical Fiction ]\n[ Location: Kyoto, Japan ]\n[ Era: Edo; year: 1867 AD ]\n[ style: poetic, detailed, sensual ]",
-       " Genre: Historical Fiction\n Location: Kyoto, Japan\n Era: Edo; year: 1867 AD\n style: poetic, detailed, sensual"
+        "[ Genre: Historical Fiction; Location: Japan; Era: Edo; Year: 1867 AD; style: poetic, detailed, sensual ]",
+        "[ Genre: Historical Fiction ] [ Location: Kyoto, Japan ] [ Era: Edo; year: 1867 AD ] [ style: poetic, detailed, sensual ]",
+        "[ Genre: Historical Fiction ]\n[ Location: Kyoto, Japan ]\n[ Era: Edo; year: 1867 AD ]\n[ style: poetic, detailed, sensual ]",
+        " Genre: Historical Fiction\n Location: Kyoto, Japan\n Era: Edo; year: 1867 AD\n style: poetic, detailed, sensual"
       ]
     }
   ]

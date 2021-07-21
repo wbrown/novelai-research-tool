@@ -9,7 +9,7 @@
   ],
   "context": [
     {
-      "text": "I’m Daniel Blackthorn, a soldier who fought in the American Civil War, on the Confederate side. When the South lost the War of Northern aggression, I went westward, and participated in the Indian Wars. Eventually, I ended up in San Francisco, and went overseas to Japan during the Edo Period. I was hired to train the soldiers of the Japanese daimyos in rifle warfare and skirmishing tactics. I’d been there long enough and had a knack for languages to become nearly fluent in Japanese. I trained in the samurai arts of the katana, and the code of Bushido. I am known as the White Samurai, and my red hair and pale skin is viewed with near superstitious awe.",
+      "text": "I’m Daniel Blackthorn, a male soldier who fought in the American Civil War, on the Confederate side. When the South lost the War of Northern aggression, I went westward, and participated in the Indian Wars. Eventually, I ended up in San Francisco, and went overseas to Japan during the Edo Period. I was hired to and am currently training the soldiers of the Japanese daimyōs in rifle warfare and skirmishing tactics. I’d been there long enough and had a knack for languages to become nearly fluent in Japanese. I trained in the samurai arts of the katana, and the code of Bushido. I am known as the White Samurai, and my red hair and pale skin is viewed with near superstitious awe. I'm looking for an oiran or yūjo to become my woman.",
       "contextConfig": {
         "prefix": "",
         "suffix": "\n",
@@ -23,7 +23,7 @@
       }
     },
     {
-      "text": "[ Genre: historical fiction; Location: Japan; Era: Edo Period; Year: 1867 AD; style: poetic, detailed, sensual ]\n[ My name is Daniel Blackthorn, a former Confederate soldier in the American Civil War training the Shogun's troops. I am in Kyoto's yūkaku, looking for an oiran or yūjo to belong to me on my estate. ]",
+      "text": "[ Genre: historical fiction; Location: Japan; Era: Edo Period; Year: 1867 AD; style: poetic, detailed, sensual ]\n[ My name is Daniel Blackthorn, and I'm a male known as the White Samurai and a former Confederate soldier in the American Civil War training the Shogun's troops. I am in Kyoto's yūkaku, looking for an oiran or yūjo to belong to me on my estate and become my woman and personal sex toy. ]",
       "contextConfig": {
         "prefix": "",
         "suffix": "\n",
@@ -44,12 +44,12 @@
       "temperature": 0.55,
       "max_length": 100,
       "min_length": 32,
-      "top_k": 60,
+      "top_k": 140,
       "top_p": 0.9,
       "tail_free_sampling": 1,
-      "repetition_penalty": 2.5,
-      "repetition_penalty_range": 512,
-      "repetition_penalty_slope": 3.33,
+      "repetition_penalty": 3.5,
+      "repetition_penalty_range": 1024,
+      "repetition_penalty_slope": 6.57,
       "bad_words_ids": []
     },
     "preset": "",
@@ -86,7 +86,7 @@
         "nonStoryActivatable": false
       },
       {
-        "text": "Kataoka-san's eyes are wide and shining, and her skin glows radiantly. She has a small pointed chin, but her cheekbones are high, and her breasts hang proudly under her thin kimono. She wears nothing underneath, and her nipples stand erect under the silk. Her hair is tied up into a complex knot at the back of her head, and her long hair is piled artfully on top of her head. When she blushes, the contrast between her pale cheeks and her crimson lips makes her look even more beautiful than usual.\nHer body is long and lean, and there isn't a spare ounce of fat anywhere. Her hips are narrow and almost perfectly rounded, her legs long and slim, and her knees are so well shaped that they're actually a bit higher than her flat feet. \nShe has a lovely smile and her personality is playful and mischievous, but she also has an edge to her. There's a sense of maturity about her that comes from having experienced a great deal in life.",
+        "text": "Azusa's eyes are wide and shining, and her skin glows radiantly. She has a small pointed chin, but her cheekbones are high, and her breasts hang proudly under her thin kimono. She wears nothing underneath, and her nipples stand erect under the silk. Her hair is tied up into a complex knot at the back of her head, and her long hair is piled artfully on top of her head. When she blushes, the contrast between her pale cheeks and her crimson lips makes her look even more beautiful than usual.\nHer body is long and lean, and there isn't a spare ounce of fat anywhere. Her hips are narrow and almost perfectly rounded, her legs long and slim, and her knees are so well shaped that they're actually a bit higher than her flat feet. \nShe has a lovely smile and her personality is playful and mischievous, but she also has an edge to her. There's a sense of maturity about her that comes from having experienced a great deal in life.",
         "contextConfig": {
           "prefix": "",
           "suffix": "\n",
@@ -99,10 +99,10 @@
           "insertionPosition": -1
         },
         "lastUpdatedAt": 1626752624356,
-        "displayName": "Character: Kataoka",
+        "displayName": "Character: Azusa",
         "keys": [
-          "Kataoka",
-          "Kataoka-san"
+          "Azusa",
+          "Azusa-san"
         ],
         "searchRange": 2000,
         "enabled": true,
@@ -161,7 +161,7 @@
         "nonStoryActivatable": false
       },
       {
-        "text": "Oiran are a specific category of high ranking Japanese courtesans. Divided into a number of ranks within this category, oiran were considered – both in social terms and in the entertainment they provided – to be above common prostitutes, known as yūjo, women of pleasure. Though oiran by definition also engaged in prostitution, they were distinguished by their skills in the traditional arts, with the higher-ranking oiran having a degree of choice in which customers they took.\n[Mizuzi is an oiran. Satsuki is a yūjo. Kataoka is a yūjo. Yusa is a yūjo.]",
+        "text": "Oiran are a specific category of high ranking Japanese courtesans. Divided into a number of ranks within this category, oiran were considered – both in social terms and in the entertainment they provided – to be above common prostitutes, known as yūjo, women of pleasure. Though oiran by definition also engaged in prostitution, they were distinguished by their skills in the traditional arts, with the higher-ranking oiran having a degree of choice in which customers they took. Oiran and yūjo are unmarried.\n[ Mizuki is an oiran. Satsuki is a yūjo. Azusa is a yūjo. Yusa is a yūjo.]",
         "contextConfig": {
           "prefix": "",
           "suffix": "\n",
@@ -177,9 +177,13 @@
         "displayName": "Role: Oiran",
         "keys": [
           "Oiran",
+          "oirans",
           "courtesan",
+          "courtesans",
+          "prostitutes",
           "prostitute",
-          "yūjo"
+          "yūjo",
+          "yūjos"
         ],
         "searchRange": 2000,
         "enabled": true,
@@ -188,7 +192,7 @@
         "nonStoryActivatable": false
       },
       {
-        "text": "Yūkaku are legal red-light districts in Japanese history, where both brothels and prostitutes - known collectively as yūjo, woman of pleasure, the higher ranks of which were known as oiran - recognised by the Japanese government operated.\n[Kyoto has a yūkaku.]\n[Mizuzi is an oiran. Satsuki is a yūjo. Kataoka is a yūjo. Yusa is a yūjo.]",
+        "text": "Yūkaku are legal red-light districts in Japanese history, where both brothels and prostitutes - known collectively as yūjo, woman of pleasure, the higher ranks of which were known as oiran - recognised by the Japanese government operated.\n[ Kyoto has a yūkaku.]\n[ Mizuki is an oiran. Satsuki is a yūjo. Azusa is a yūjo. Yusa is a yūjo.]",
         "contextConfig": {
           "prefix": "",
           "suffix": "\n",
@@ -212,7 +216,7 @@
         "nonStoryActivatable": false
       },
       {
-        "text": "The Edo period or Tokugawa period is between 1603 and 1867 in the history of Japan, when Japan was under the rule of the Tokugawa shogunate and the country's 300 regional daimyō. Emerging from the chaos of the Sengoku period, the Edo period was characterized by economic growth, strict social order, isolationist foreign policies, a stable population, \"no more wars\", and popular enjoyment of arts and culture.",
+        "text": "The Edo period or Tokugawa period began in 1603, where Japan is under the rule of the Tokugawa shogunate and the country's 300 regional daimyō. Emerging from the chaos of the Sengoku period, the Edo period is characterized by economic growth, strict social order, isolationist foreign policies, a stable population, \"no more wars\", and popular enjoyment of arts and culture. It is currently 1867.",
         "contextConfig": {
           "prefix": "",
           "suffix": "\n",
@@ -239,7 +243,7 @@
         "nonStoryActivatable": false
       },
       {
-        "text": "Samurai are the hereditary military nobility and officer caste of Edo Japan. They are the well-paid retainers of the daimyo, the great feudal landholders). They had high prestige and special privileges such as wearing two swords. They cultivated the bushido codes of martial virtues, indifference to pain, and unflinching loyalty, engaging in many local battles. During the Edo era, they became the stewards and chamberlains of the daimyō estates, gaining managerial experience and education. Samurai often had their own lands and servants that they managed.",
+        "text": "Samurai are the hereditary military nobility and officer caste of Edo Japan. They are the well-paid retainers of the daimyō, the great feudal landholders). They had high prestige and special privileges such as wearing two swords. They cultivated the bushido codes of martial virtues, indifference to pain, and unflinching loyalty, engaging in many local battles. During the Edo era, they became the stewards and chamberlains of the daimyō estates, gaining managerial experience and education. Samurai often had their own lands and servants that they managed.",
         "contextConfig": {
           "prefix": "",
           "suffix": "\n",
@@ -287,7 +291,7 @@
         "nonStoryActivatable": false
       },
       {
-        "text": "Daimyō are powerful Japanese feudal lords who, from the 10th century onwards rule most of Japan from their vast, hereditary land holdings. They are subordinate to the shōgun and nominally to the emperor and the kuge. They have samurai who are subordinate to them.",
+        "text": "Daimyō are powerful Japanese feudal lords who, from the 10th century onwards rule most of Japan from their vast, hereditary land holdings. Daimyōs are subordinate to the shōgun and nominally to the emperor and the kuge. They have samurai who are subordinate to them.",
         "contextConfig": {
           "prefix": "",
           "suffix": "\n",
@@ -303,7 +307,9 @@
         "displayName": "Role: Daimyo",
         "keys": [
           "Daimyō",
-          "daimyo"
+          "daimyo",
+          "daimyōs",
+          "daimyos"
         ],
         "searchRange": 4000,
         "enabled": true,
@@ -486,7 +492,7 @@
         "nonStoryActivatable": false
       },
       {
-        "text": "The Shijôgahara is a large park located on the north side of the Kamo River, near the center of Kyoto. It is famous for its beauty and tranquility, but also because it has been used as a training ground for martial arts since the 14th century. The Shijôgahara was the site of many duels between samurai, and the grounds were considered to be off-limits to commoners.",
+        "text": "The Shijôgahara is a large park located on the north side of the Kamo River, near the center of Kyoto. It is famous for its beauty and tranquility, but also because it has been used as a training ground for martial arts since the 14th century. The Shijôgahara is the site of many duels between samurai, and the grounds were considered to be off-limits to commoners.",
         "contextConfig": {
           "prefix": "",
           "suffix": "\n",
