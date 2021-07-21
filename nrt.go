@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -307,16 +308,15 @@ func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
 	return tests
 }
 
-const MaxFileNameLength = 200
+const MaxFilePathLength = 240
 const MaxFileExtensionLength = 5
 
 func (ct *ContentTest) generateOutputPath() string {
 	tsString := ",TS=" + time.Now().Format("2006-01-02T1504")
-	filePrefix := filepath.Base(ct.OutputPrefix)
-	budget := MaxFileNameLength -
-		(len(filePrefix) + len(tsString) + MaxFileExtensionLength)
+	budget := MaxFilePathLength -
+		(len(ct.OutputPrefix) + len(tsString) + MaxFileExtensionLength + 1)
 	label := ct.Parameters.Label
-	if budget < len(label) {
+	if budget < len(label) && runtime.GOOS == "windows" {
 		label = label[:budget]
 	}
 	return filepath.Join(ct.WorkingDir,
