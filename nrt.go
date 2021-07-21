@@ -308,7 +308,7 @@ func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
 	return tests
 }
 
-const MaxFilePathLength = 260
+const MaxFilePathLength = 210
 const MaxFileExtensionLength = 5
 
 func (ct *ContentTest) generateOutputPath() string {
