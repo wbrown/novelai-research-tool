@@ -308,15 +308,22 @@ func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
 	return tests
 }
 
-const MaxFilePathLength = 240
+const MaxFilePathLength = 260
 const MaxFileExtensionLength = 5
 
 func (ct *ContentTest) generateOutputPath() string {
 	tsString := ",TS=" + time.Now().Format("2006-01-02T1504")
 	budget := MaxFilePathLength -
-		(len(ct.OutputPrefix) + len(tsString) + MaxFileExtensionLength + 1)
+		(len(filepath.Join(ct.WorkingDir, ct.OutputPrefix)) +
+			len(tsString) + len(ct.WorkingDir) +
+			MaxFileExtensionLength + 1)
 	label := ct.Parameters.Label
 	if budget < len(label) && runtime.GOOS == "windows" {
+		if budget < 30 {
+			log.Printf("nrt: your working path is too long: %v",
+				ct.WorkingDir )
+			os.Exit(1)
+		}
 		label = label[:budget]
 	}
 	return filepath.Join(ct.WorkingDir,
