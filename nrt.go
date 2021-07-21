@@ -155,8 +155,11 @@ func (ct ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
 			} else {
 				fieldValueRepr = fmt.Sprintf("%v", ctVal)
 			}
-
 		}
+		fieldValueRepr = strings.Replace(
+			strings.Replace(fmt.Sprintf("%v",
+					fieldValueRepr), "-", "_", -1),
+			".", "_", -1)
 		label += fieldName + "=" + fieldValueRepr
 	}
 	return label
@@ -304,7 +307,7 @@ func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
 	return tests
 }
 
-const MaxFileNameLength = 240
+const MaxFileNameLength = 200
 const MaxFileExtensionLength = 5
 
 func (ct *ContentTest) generateOutputPath() string {
@@ -385,6 +388,8 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 		test.Memory = test.Scenario.Context[0].Text
 		test.AuthorsNote = test.Scenario.Context[1].Text
 		test.Parameters.CoerceNullValues(test.Scenario.Settings.Parameters)
+	} else {
+		test.Parameters.CoerceDefaults()
 	}
 	if test.PromptFilename != "" {
 		test.PromptPath = filepath.Join(test.WorkingDir, test.PromptFilename)
@@ -394,7 +399,6 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 		}
 		test.loadPrompt(test.PromptPath)
 	}
-	test.Parameters.CoerceDefaults()
 	if test.ScenarioFilename == "" {
 		test.Scenario = scenario.ScenarioFromSpec(test.Prompt, test.Memory,
 			test.AuthorsNote)
