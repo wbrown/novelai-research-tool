@@ -176,6 +176,7 @@ func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries Conte
 			}
 		}
 		resolvedText := scenario.PlaceholderMap.ReplacePlaceholders(lorebookEntry.Text)
+		label := scenario.PlaceholderMap.ReplacePlaceholders(lorebookEntry.DisplayName)
 		var tokens *[]uint16
 		if resolvedText != lorebookEntry.Text {
 			tokens = scenario.Tokenizer.Encode(&resolvedText)
@@ -188,7 +189,7 @@ func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries Conte
 				Text:         resolvedText,
 				ContextCfg:   lorebookEntry.ContextCfg,
 				Tokens:       tokens,
-				Label:        lorebookEntry.DisplayName,
+				Label:        label,
 				MatchIndexes: indexes,
 				Index:        uint(beginIdx + loreIdx),
 			}
@@ -427,16 +428,28 @@ var placeholderDefRegex = regexp.MustCompile(
 var placeholderTableRegex = regexp.MustCompile(
 	"(?P<var>[\\p{L}|0-9|#|_|\\-]+)\\[(?P<default>[^\\]]+)\\]:(?P<description>[^\\n]+)\n")
 var placeholderVarRegex = regexp.MustCompile(
-	"\\$\\{(?P<var>[\\p{L}|0-9|#|_|-]+)(\\}|\\[[^\\}]+)")
+	"\\$\\{(?P<var>[\\p{L}|0-9|#|_|-]+)(\\}|\\[[^\\}]+\\})")
 
 type Placeholder struct {
 	Variable    string `json:"key"`
 	Defaults    string `json:"defaultValue"`
 	Description string `json:"description"`
-	Value       string
+	Value       string `json:"value"`
 }
 
 type Placeholders map[string]Placeholder
+
+func getPlaceholderTable(text string) (trimmed string, tableBlock string) {
+	trimmed = text
+	if len(text) > 6 && text[0:3] == "%{\n" {
+		blockEnd := strings.Index(text, "\n}\n")
+		if blockEnd != -1 {
+			tableBlock = text[3 : blockEnd+1]
+			trimmed = text[blockEnd+3:]
+		}
+	}
+	return trimmed, tableBlock
+}
 
 func extractPlaceholderDefs(rgx *regexp.Regexp, text string) (variables Placeholders) {
 	variables = make(Placeholders, 0)
@@ -452,25 +465,13 @@ func extractPlaceholderDefs(rgx *regexp.Regexp, text string) (variables Placehol
 	return variables
 }
 
-func DiscoverPlaceholderTable(text string) (variables Placeholders) {
-	var defs Placeholders
-	if text[0:3] == "%{\n" {
-		blockEnd := strings.Index(text, "\n}\n")
-		if blockEnd != -1 {
-			block := text[3 : blockEnd+1]
-			defs = extractPlaceholderDefs(placeholderTableRegex, block)
-		}
-	}
-	return defs
+func DiscoverPlaceholderTable(text string) Placeholders {
+	_, block := getPlaceholderTable(text)
+	return extractPlaceholderDefs(placeholderTableRegex, block)
 }
 
 func (variables Placeholders) ReplacePlaceholders(text string) (replaced string) {
-	if len(text) > 4 && text[0:3] == "%{\n" {
-		blockEnd := strings.Index(text, "\n}\n")
-		if blockEnd != -1 {
-			text = text[blockEnd+3:]
-		}
-	}
+	text, _ = getPlaceholderTable(text)
 	for {
 		match := placeholderVarRegex.FindStringIndex(text)
 		if match == nil {

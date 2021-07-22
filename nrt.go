@@ -16,21 +16,22 @@ import (
 )
 
 type PermutationsSpec struct {
-	Model                  []string   `json:"model"`
-	Prefix                 []string   `json:"prefix"`
-	PromptFilename         []string   `json:"prompt_filename"`
-	Prompt                 []string   `json:"prompt"`
-	Memory                 []string   `json:"memory"`
-	AuthorsNote            []string   `json:"authors_note"`
-	Temperature            []*float64 `json:"temperature"`
-	MaxLength              []*uint    `json:"max_length"`
-	MinLength              []*uint    `json:"min_length"`
-	TopK                   []*uint    `json:"top_k"`
-	TopP                   []*float64 `json:"top_p"`
-	TailFreeSampling       []*float64 `json:"tail_free_sampling"`
-	RepetitionPenalty      []*float64 `json:"repetition_penalty"`
-	RepetitionPenaltyRange []*uint    `json:"repetition_penalty_range"`
-	RepetitionPenaltySlope []*float64 `json:"repetition_penalty_slope"`
+	Model                  []string            `json:"model"`
+	Prefix                 []string            `json:"prefix"`
+	PromptFilename         []string            `json:"prompt_filename"`
+	Prompt                 []string            `json:"prompt"`
+	Memory                 []string            `json:"memory"`
+	AuthorsNote            []string            `json:"authors_note"`
+	Temperature            []*float64          `json:"temperature"`
+	MaxLength              []*uint             `json:"max_length"`
+	MinLength              []*uint             `json:"min_length"`
+	TopK                   []*uint             `json:"top_k"`
+	TopP                   []*float64          `json:"top_p"`
+	TailFreeSampling       []*float64          `json:"tail_free_sampling"`
+	RepetitionPenalty      []*float64          `json:"repetition_penalty"`
+	RepetitionPenaltyRange []*uint             `json:"repetition_penalty_range"`
+	RepetitionPenaltySlope []*float64          `json:"repetition_penalty_slope"`
+	Placeholders           map[string][]string `json:"placeholders"`
 }
 
 type ContentTest struct {
@@ -45,6 +46,7 @@ type ContentTest struct {
 	Generations      int                           `json:"generations"`
 	Parameters       novelai_api.NaiGenerateParams `json:"parameters"`
 	Permutations     []PermutationsSpec            `json:"permutations"`
+	Placeholders     map[string]string             `json:"placeholders"`
 	WorkingDir       string
 	PromptPath       string
 	ScenarioPath     string
@@ -159,7 +161,7 @@ func (ct ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
 		}
 		fieldValueRepr = strings.Replace(
 			strings.Replace(fmt.Sprintf("%v",
-					fieldValueRepr), "-", "_", -1),
+				fieldValueRepr), "-", "_", -1),
 			".", "_", -1)
 		label += fieldName + "=" + fieldValueRepr
 	}
@@ -321,7 +323,7 @@ func (ct *ContentTest) generateOutputPath() string {
 	if budget < len(label) && runtime.GOOS == "windows" {
 		if budget < 30 {
 			log.Printf("nrt: your working path is too long: %v",
-				ct.WorkingDir )
+				ct.WorkingDir)
 			os.Exit(1)
 		}
 		label = label[:budget]

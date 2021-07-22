@@ -2,7 +2,6 @@ package scenario
 
 import (
 	"encoding/json"
-	"fmt"
 	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
 	"io/ioutil"
 	"log"
@@ -21,7 +20,7 @@ func AssertEqual(t *testing.T, a interface{}, b interface{}) {
 	if reflect.DeepEqual(a, b) {
 		return
 	}
-	t.Errorf("Received %v (type %v), expected %v (type %v)",
+	t.Errorf("\nReceived: %v (type %v),\nExpected: %v (type %v)",
 		a, reflect.TypeOf(a), b, reflect.TypeOf(b))
 }
 
@@ -93,35 +92,78 @@ func StringifyContextReport(t *testing.T, ctxReport ContextReport) string {
 	return ""
 }
 
-type GenerateContextTest struct {
-	scenarioPath string
-	budget int
-	expected int
-}
-
-type GenerateContextTests []GenerateContextTest
-
 const phTable = `%{
 1Name[Daniel Blackthorn]:Name
 2HairColor[red]:Hair Color (red, blonde)
 3Skin[pale]:Complexion (dark, light, olive, pale)
 }
-I’m ${1Name}, a male soldier who fought in the American Civil War, on the Confederate side. When the South lost the War of Northern aggression, I went westward, and participated in the Indian Wars. Eventually, I ended up in San Francisco, and went overseas to Japan during the Edo Period. I was hired to and am currently training the soldiers of the Japanese daimyōs in rifle warfare and skirmishing tactics. I’d been there long enough and had a knack for languages to become nearly fluent in Japanese. I trained in the samurai arts of the katana, and the code of Bushido. I am known as the White Samurai, and my ${2HairColor} and ${3Skin} is viewed with near superstitious awe.`
+I’m ${1Name}, a male soldier who fought in the American Civil War, on the Confederate side. When the South lost the War of Northern aggression, I went westward, and participated in the Indian Wars. Eventually, I ended up in San Francisco, and went overseas to Japan during the Edo Period. I was hired to and am currently training the soldiers of the Japanese daimyōs in rifle warfare and skirmishing tactics. I’d been there long enough and had a knack for languages to become nearly fluent in Japanese. I trained in the samurai arts of the katana, and the code of Bushido. I am known as the White Samurai, and my ${2HairColor} and ${3Skin} skin is viewed with near superstitious awe.`
+const phTableExpected = "I’m Daniel Blackthorn, a male soldier who fought in the American Civil War, on the Confederate side. When the South lost the War of Northern aggression, I went westward, and participated in the Indian Wars. Eventually, I ended up in San Francisco, and went overseas to Japan during the Edo Period. I was hired to and am currently training the soldiers of the Japanese daimyōs in rifle warfare and skirmishing tactics. I’d been there long enough and had a knack for languages to become nearly fluent in Japanese. I trained in the samurai arts of the katana, and the code of Bushido. I am known as the White Samurai, and my red and pale skin is viewed with near superstitious awe."
+
+type PlaceholderTest struct {
+	input          string
+	expected       string
+	expectedStruct Placeholders
+}
+
+type PlaceholderTests []PlaceholderTest
+
+var placeholderTests = PlaceholderTests{
+	{"This is a foobar test. ${1Name[Daniel]:Your name?} ${2HerName[Audrey]:Her name?}",
+		"This is a foobar test. Daniel Audrey",
+		Placeholders{
+			"1Name": {"1Name",
+				"Daniel",
+				"Your name?",
+				"Daniel"},
+			"2HerName": {"2HerName",
+				"Audrey",
+				"Her name?",
+				"Audrey"},
+		}},
+	{phTable,
+		phTableExpected,
+		Placeholders{
+			"1Name": {"1Name",
+				"Daniel Blackthorn",
+				"Name",
+				"Daniel Blackthorn"},
+			"2HairColor": {"2HairColor",
+				"red",
+				"Hair Color (red, blonde)",
+				"red"},
+			"3Skin": {"3Skin",
+				"pale",
+				"Complexion (dark, light, olive, pale)",
+				"pale"}}},
+}
 
 func TestScenario_DiscoverPlaceholders(t *testing.T) {
-	DiscoverPlaceholderDefs("This is a foobar test. ${1Name[Daniel]:Your name?} ${2HerName[Audrey]:Her name?}")
-	fmt.Printf("%v\n", phTable)
-	pht := DiscoverPlaceholderTable(phTable)
-	fmt.Printf("%v\n", pht.ReplacePlaceholders(phTable))
+	for testIdx := range placeholderTests {
+		test := placeholderTests[testIdx]
+		defs := DiscoverPlaceholderDefs(test.input)
+		defs.merge(DiscoverPlaceholderTable(test.input))
+		AssertEqual(t, defs, test.expectedStruct)
+	}
 }
 
 func TestScenario_RealizePlaceholderDefs(t *testing.T) {
-	sc := ScenarioFromSpec(phTable, "", "")
-	sc.Settings.Parameters.CoerceDefaults()
-	ctx, report := sc.GenerateContext(sc.Prompt, 1024)
-	fmt.Printf("%v\n", ctx)
-	fmt.Printf("%v\n", StringifyContextReport(t, report))
+	for testIdx := range placeholderTests {
+		test := placeholderTests[testIdx]
+		sc := ScenarioFromSpec(test.input, "", "")
+		sc.Settings.Parameters.CoerceDefaults()
+		ctx, _ := sc.GenerateContext(sc.Prompt, 1024)
+		AssertEqual(t, ctx, test.expected)
+	}
 }
+
+type GenerateContextTest struct {
+	scenarioPath string
+	budget       int
+	expected     int
+}
+
+type GenerateContextTests []GenerateContextTest
 
 var generateContextTests = GenerateContextTests{
 	{scenarioPath, 2048, 11},
