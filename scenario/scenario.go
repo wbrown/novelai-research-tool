@@ -617,6 +617,8 @@ func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scen
 		scenario.Lorebook.Entries[loreIdx] = loreEntry
 	}
 	scenario.Settings.Parameters.CoerceDefaults()
+	scenario.Settings.Parameters.Prefix = scenario.Settings.Prefix
+	*scenario.Settings.Parameters.BanBrackets = scenario.Settings.BanBrackets
 	scenario.PlaceholderMap = scenario.GetPlaceholderDefs()
 	return scenario, err
 }

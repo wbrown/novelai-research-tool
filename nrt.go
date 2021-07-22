@@ -64,6 +64,15 @@ type ContentTest struct {
 	API              novelai_api.NovelAiAPI
 }
 
+func MakeDefaultContentTest() (ct ContentTest) {
+	ct.OutputPrefix = "./"
+	ct.MaxTokens = 2048
+	ct.Iterations = 10
+	ct.Generations = 25
+	ct.WorkingDir = "./"
+	return ct
+}
+
 type ContentTests []ContentTest
 
 type RequestContext struct {
@@ -470,8 +479,42 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 	return test
 }
 
+func MakeTestFromScenario(path string) (test ContentTest) {
+	test = MakeDefaultContentTest()
+	test.ScenarioPath = path
+	if _, err := os.Stat(test.ScenarioPath); os.IsNotExist(err) {
+		log.Printf("nrt: Scenario file `%v` does not exist!\n", test.ScenarioPath)
+		os.Exit(1)
+	}
+	fmt.Printf("ScenarioPath: %v\n", test.ScenarioPath)
+	if sc, err := scenario.ScenarioFromFile(nil, test.ScenarioPath); err != nil {
+		log.Printf("nrt: Error loading scenario: %v\n", err)
+		os.Exit(1)
+	} else {
+		test.Scenario = &sc
+	}
+	test.WorkingDir = filepath.Dir(path)
+	test.OutputPrefix = strings.Replace(filepath.Base(path),".scenario", "", -1)
+	test.Prompt = test.Scenario.Prompt
+	test.Memory = test.Scenario.Context[0].Text
+	test.AuthorsNote = test.Scenario.Context[1].Text
+	test.Scenario.Settings.Parameters.CoerceDefaults()
+	test.Parameters.CoerceNullValues(test.Scenario.Settings.Parameters)
+	test.Parameters.Prefix = test.Scenario.Settings.Prefix
+	*test.Parameters.BanBrackets = test.Scenario.Settings.BanBrackets
+	test.Parameters = test.Scenario.Settings.Parameters
+	return test
+}
+
 func GenerateTestsFromFile(path string) (tests []ContentTest) {
-	test := LoadSpecFromFile(path)
-	test.API = novelai_api.NewNovelAiAPI()
-	return test.GeneratePermutations()
+	if strings.HasSuffix(path, ".scenario") {
+		test := MakeTestFromScenario(path)
+		test.API = novelai_api.NewNovelAiAPI()
+		tests = []ContentTest{test}
+	} else {
+		test := LoadSpecFromFile(path)
+		test.API = novelai_api.NewNovelAiAPI()
+		tests = test.GeneratePermutations()
+	}
+	return tests
 }

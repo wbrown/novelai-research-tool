@@ -70,6 +70,18 @@ There is a test file in `tests/need_help.json` that you can run, by invoking:
 This will generate multiple output files in `tests` after about 30 minutes,
 each containing 10 iterations of 10 generations each.
 
+Scenario Support
+----------------
+You may optionally provide `nrt` with a `.scenario` file directly without writing
+a test specification `.json` file. You just can't control things like permutations,
+or setting variables.
+
+* Windows: `nrt tests/a_laboratory_assistant.scenario`
+* MacOS/Linux: `./nrt tests/a_laboratory_assistant.scenario`
+
+It will produce a `.json` and `.txt` output file in the same directory as the
+`.scenario` file.
+
 Output Processing Tip
 ---------------------
 You can use an utility called [jq](https://stedolan.github.io/jq/) to massage
@@ -118,9 +130,14 @@ Details of `test.json`
 The `nrt` tool accepts a single filename as an argument, the `.json` file
 containing test parameters. They are more or less self-explanatory, but I
 will highlight some specific ones:
+  * `scenario` - `nrt` supports `.scenario` files that you can download from
+     NovelAI!
   * `prompt_filename` - where to get the prompts, this is a `txt` file for 
     easy editing of prompts without having to escape like you would in JSON.
-  * `output_filename` - where you want the JSON output from the generations to
+  * `prompt` - the prompt if you'd rather put it in the JSON itself.
+  * `memory` - NovelAI memory section, as text.
+  * `authors_note` - NovelAI author's note section as text.  
+  * `output_prefix` - where you want the JSON output from the generations to
     go.
   * `iterations` - how many times to run the test, effectively.
   * `generations` - how many times to take the output, concatenate, and re-feed
@@ -143,7 +160,7 @@ itself.
 Most of the fields under `parameters` have a list counterpart under `permutations`.
 
 You may find the current list of variables that may be permuted upon
-(here)[https://github.com/wbrown/novelai-research-tool/blob/main/nrt.go#L16]
+(here)[https://github.com/wbrown/novelai-research-tool/blob/main/nrt.go#L29]
 
 For example, a permutation spec that permutes on model `model` might look like:
 ```json
@@ -185,6 +202,41 @@ Another example is if we wanted to permute on the `temperature` value:
 
 The above will cause 8 tests to be created, covering the `temperature` in `0.1`
 steps from `0.1` to `0.8`.
+
+Placeholder Support
+-------------------
+`nrt` supports NovelAI placeholders both as a way to populate `.scenario`
+with default values, and as a way to permute on them.
+
+The relevant key to use in both the specifications and the `permutations`
+section is `placeholders`:
+
+An example for the specifications settings -- any text in `prompt`, `memory`, or
+`authors_note` will have placeholders evaluated and substituted:
+
+```json
+  "authors_note": "[Period: ${Period}]\n[Year: 2020 AD]\n[Style: Stream of consciousness, intelligent, funny]",
+  "placeholders": {
+    "Period": "In the Past"
+  },
+```
+
+An example of permutation on placeholders; the below example will cause four different permutations to be created:
+
+```json
+  "authors_note": [
+    "[Period: ${Period}]\n[Year: 2020 AD]\n[Style: Stream of consciousness, intelligent, funny]",
+    "[Period: ${Period}; Year: 2020 AD; Style: stream of consciousness, intelligent, funny]"
+  ], 
+  "placeholders": [
+        {
+          "Period": "Modern Day"
+        },
+        {
+          "Period": "Present Times"
+        }
+  ]
+```
 
 Configuration Notes
 -------------------

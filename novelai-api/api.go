@@ -281,7 +281,7 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenera
 				return readErr
 			}
 			errStr := fmt.Sprintf("API: StatusCode: %d, %v, %v\n",
-				resp.StatusCode, err, body)
+				resp.StatusCode, err, string(body))
 			log.Print(errStr)
 			return errors.New(errStr)
 		} else {
