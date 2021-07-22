@@ -95,16 +95,21 @@ type ScenarioSettings struct {
 }
 
 type Scenario struct {
-	ScenarioVersion int              `json:"scenarioVersion""`
-	Title           string           `json:"title"`
-	Author          string           `json:"author"`
-	Description     string           `json:"description"`
-	Prompt          string           `json:"prompt"`
-	Tags            []string         `json:"tags"`
-	Context         []ContextEntry   `json:"context"`
-	Settings        ScenarioSettings `json:"settings"`
-	Lorebook        Lorebook         `json:"lorebook"`
+	ScenarioVersion int                `json:"scenarioVersion""`
+	Title           string             `json:"title"`
+	Author          string             `json:"author"`
+	Description     string             `json:"description"`
+	Prompt          string             `json:"prompt"`
+	Tags            []string           `json:"tags"`
+	Context         []ContextEntry     `json:"context"`
+	Settings        ScenarioSettings   `json:"settings"`
+	Lorebook        Lorebook           `json:"lorebook"`
+	Placeholders    []Placeholder      `json:"placeholders"`
 	Tokenizer       *gpt_bpe.GPTEncoder
+	PlaceholderMap  *Placeholders
+	phTableRegex    *regexp.Regexp
+	phDefRegex      *regexp.Regexp
+	phVarRegex      *regexp.Regexp
 }
 
 type ContextReportEntry struct {
@@ -120,6 +125,14 @@ type ContextReportEntry struct {
 
 type ContextReport []ContextReportEntry
 
+func createLorebookRegexp(key string) *regexp.Regexp {
+	keyRegex, err := regexp.Compile("(?i)(^|\\W)(" + key + ")($|\\W)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return keyRegex
+}
+
 func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries ContextEntries) {
 	beginIdx := len(contexts)
 	for loreIdx := range scenario.Lorebook.Entries {
@@ -132,7 +145,14 @@ func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries Conte
 		indexes := make([]map[string][][]int, 0)
 		searchRange := lorebookEntry.SearchRange
 		for keyIdx := range keysRegex {
-			keyRegex := keysRegex[keyIdx]
+			var keyRegex *regexp.Regexp
+			resolvedKey := scenario.PlaceholderMap.ReplacePlaceholders(keys[keyIdx])
+			if resolvedKey != keys[keyIdx] {
+				keys[keyIdx] = resolvedKey
+				keyRegex = createLorebookRegexp(resolvedKey)
+			} else {
+				keyRegex = keysRegex[keyIdx]
+			}
 			for ctxIdx := range contexts {
 				searchText := contexts[ctxIdx].Text
 				searchLen := len(searchText) - searchRange
@@ -155,11 +175,19 @@ func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries Conte
 				}
 			}
 		}
+		resolvedText := scenario.PlaceholderMap.ReplacePlaceholders(lorebookEntry.Text)
+		var tokens *[]uint16
+		if resolvedText != lorebookEntry.Text {
+			tokens = scenario.Tokenizer.Encode(&resolvedText)
+		} else {
+			tokens = lorebookEntry.Tokens
+		}
+
 		if len(indexes) > 0 || lorebookEntry.ForceActivation {
 			entry := ContextEntry{
-				Text:         lorebookEntry.Text,
+				Text:         resolvedText,
 				ContextCfg:   lorebookEntry.ContextCfg,
-				Tokens:       lorebookEntry.Tokens,
+				Tokens:       tokens,
 				Label:        lorebookEntry.DisplayName,
 				MatchIndexes: indexes,
 				Index:        uint(beginIdx + loreIdx),
@@ -294,6 +322,13 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 	storyEntry := scenario.createStoryContext(story)
 	contexts := ContextEntries{storyEntry}
 	lorebookContexts := scenario.ResolveLorebook(contexts)
+	for ctxIdx := range contexts {
+		resolved := scenario.PlaceholderMap.ReplacePlaceholders(contexts[ctxIdx].Text)
+		if resolved != contexts[ctxIdx].Text {
+			contexts[ctxIdx].Tokens = scenario.Tokenizer.Encode(&resolved)
+			contexts[ctxIdx].Text = resolved
+		}
+	}
 	contexts = append(contexts, scenario.Context...)
 	contexts = append(contexts, lorebookContexts...)
 	budget -= int(*scenario.Settings.Parameters.MaxLength)
@@ -387,6 +422,101 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 	return strings.Join(newContexts, "\n"), contextReport
 }
 
+var placeholderDefRegex = regexp.MustCompile(
+	"\\$\\{(?P<var>[\\p{L}|0-9|_|\\-|#]+)\\[(?P<default>[^\\]]+)\\]:(?P<description>[^\\}]+)\\}")
+var placeholderTableRegex = regexp.MustCompile(
+	"(?P<var>[\\p{L}|0-9|#|_|\\-]+)\\[(?P<default>[^\\]]+)\\]:(?P<description>[^\\n]+)\n")
+var placeholderVarRegex = regexp.MustCompile(
+	"\\$\\{(?P<var>[\\p{L}|0-9|#|_|-]+)(\\}|\\[[^\\}]+)")
+
+type Placeholder struct {
+	Variable    string `json:"key"`
+	Defaults    string `json:"defaultValue"`
+	Description string `json:"description"`
+	Value       string
+}
+
+type Placeholders map[string]Placeholder
+
+func extractPlaceholderDefs(rgx *regexp.Regexp, text string) (variables Placeholders) {
+	variables = make(Placeholders, 0)
+	defs := rgx.FindAllString(text, -1)
+	for defIdx := range defs {
+		fields := rgx.FindStringSubmatch(defs[defIdx])
+		variables[fields[1]] = Placeholder{Variable: fields[1],
+			Defaults:    fields[2],
+			Description: fields[3],
+			Value:       fields[2],
+		}
+	}
+	return variables
+}
+
+func DiscoverPlaceholderTable(text string) (variables Placeholders) {
+	var defs Placeholders
+	if text[0:3] == "%{\n" {
+		blockEnd := strings.Index(text, "\n}\n")
+		if blockEnd != -1 {
+			block := text[3 : blockEnd+1]
+			defs = extractPlaceholderDefs(placeholderTableRegex, block)
+		}
+	}
+	return defs
+}
+
+func (variables Placeholders) ReplacePlaceholders(text string) (replaced string) {
+	if text[0:3] == "%{\n" {
+		blockEnd := strings.Index(text, "\n}\n")
+		if blockEnd != -1 {
+			text = text[blockEnd+3:]
+		}
+	}
+	for {
+		match := placeholderVarRegex.FindStringIndex(text)
+		if match == nil {
+			break
+		}
+		key := placeholderVarRegex.FindStringSubmatch(text[match[0]:match[1]])
+		if placeholder, ok := variables[key[1]]; ok {
+			replaced += text[:match[0]] + placeholder.Value
+		} else {
+			replaced += text[:match[1]]
+		}
+		text = text[match[1]:]
+	}
+	replaced += text
+	return replaced
+}
+
+func DiscoverPlaceholderDefs(text string) Placeholders {
+	return extractPlaceholderDefs(placeholderDefRegex, text)
+}
+
+func (target *Placeholders) merge(source Placeholders) {
+	for k, v := range source {
+		(*target)[k] = v
+	}
+}
+
+func (scenario *Scenario) GetPlaceholderDefs() (defs *Placeholders) {
+	newPlaceholders := make(Placeholders, 0)
+	defs = &newPlaceholders
+	for placeholderIdx := range scenario.Placeholders {
+		placeholder := scenario.Placeholders[placeholderIdx]
+		placeholder.Value = placeholder.Defaults
+		(*defs)[placeholder.Variable] = placeholder
+	}
+	defs.merge(DiscoverPlaceholderTable(scenario.Prompt))
+	defs.merge(DiscoverPlaceholderDefs(scenario.Prompt))
+	for ctxIdx := range scenario.Context {
+		defs.merge(DiscoverPlaceholderDefs(scenario.Context[ctxIdx].Text))
+	}
+	for lbkIdx := range scenario.Lorebook.Entries {
+		defs.merge(DiscoverPlaceholderDefs(scenario.Lorebook.Entries[lbkIdx].Text))
+	}
+	return defs
+}
+
 func (scenario *Scenario) SetMemory(memory string) {
 	scenario.Context[0].Text = memory
 	scenario.Context[0].Tokens = scenario.Tokenizer.Encode(&memory)
@@ -432,6 +562,7 @@ func ScenarioFromSpec(prompt string, memory string, an string) (scenario Scenari
 			Tokens: encoder.Encode(&an),
 			Label:  "A/N",
 			Index:  2}}
+	scenario.PlaceholderMap = scenario.GetPlaceholderDefs()
 	return scenario
 }
 
@@ -469,14 +600,12 @@ func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scen
 		loreEntry.ContextCfg.Force = loreEntry.ForceActivation
 		for keyIdx := range loreEntry.Keys {
 			key := loreEntry.Keys[keyIdx]
-			keyRegex, err := regexp.Compile("(?i)(^|\\W)(" + key + ")($|\\W)")
-			if err != nil {
-				log.Fatal(err)
-			}
+			keyRegex := createLorebookRegexp(key)
 			loreEntry.KeysRegex = append(loreEntry.KeysRegex, keyRegex)
 		}
 		scenario.Lorebook.Entries[loreIdx] = loreEntry
 	}
 	scenario.Settings.Parameters.CoerceDefaults()
+	scenario.PlaceholderMap = scenario.GetPlaceholderDefs()
 	return scenario, err
 }

@@ -2,6 +2,7 @@ package scenario
 
 import (
 	"encoding/json"
+	"fmt"
 	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
 	"io/ioutil"
 	"log"
@@ -99,6 +100,28 @@ type GenerateContextTest struct {
 }
 
 type GenerateContextTests []GenerateContextTest
+
+const phTable = `%{
+1Name[Daniel Blackthorn]:Name
+2HairColor[red]:Hair Color (red, blonde)
+3Skin[pale]:Complexion (dark, light, olive, pale)
+}
+I’m ${1Name}, a male soldier who fought in the American Civil War, on the Confederate side. When the South lost the War of Northern aggression, I went westward, and participated in the Indian Wars. Eventually, I ended up in San Francisco, and went overseas to Japan during the Edo Period. I was hired to and am currently training the soldiers of the Japanese daimyōs in rifle warfare and skirmishing tactics. I’d been there long enough and had a knack for languages to become nearly fluent in Japanese. I trained in the samurai arts of the katana, and the code of Bushido. I am known as the White Samurai, and my ${2HairColor} and ${3Skin} is viewed with near superstitious awe.`
+
+func TestScenario_DiscoverPlaceholders(t *testing.T) {
+	DiscoverPlaceholderDefs("This is a foobar test. ${1Name[Daniel]:Your name?} ${2HerName[Audrey]:Her name?}")
+	fmt.Printf("%v\n", phTable)
+	pht := DiscoverPlaceholderTable(phTable)
+	fmt.Printf("%v\n", pht.ReplacePlaceholders(phTable))
+}
+
+func TestScenario_RealizePlaceholderDefs(t *testing.T) {
+	sc := ScenarioFromSpec(phTable, "", "")
+	sc.Settings.Parameters.CoerceDefaults()
+	ctx, report := sc.GenerateContext(sc.Prompt, 1024)
+	fmt.Printf("%v\n", ctx)
+	fmt.Printf("%v\n", StringifyContextReport(t, report))
+}
 
 var generateContextTests = GenerateContextTests{
 	{scenarioPath, 2048, 11},

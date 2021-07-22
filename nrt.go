@@ -341,6 +341,9 @@ func (ct *ContentTest) loadPrompt(path string) {
 
 func (ct ContentTest) Perform() {
 	// ct.loadPrompt(ct.PromptPath)
+	ct.Prompt = ct.Scenario.PlaceholderMap.ReplacePlaceholders(ct.Prompt)
+	ct.Memory = ct.Scenario.PlaceholderMap.ReplacePlaceholders(ct.Memory)
+	ct.AuthorsNote = ct.Scenario.PlaceholderMap.ReplacePlaceholders(ct.AuthorsNote)
 	reporters := ct.MakeReporters()
 	defer reporters.close()
 	for iteration := 0; iteration < ct.Iterations; iteration++ {
