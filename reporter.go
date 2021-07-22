@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 )
 
@@ -36,8 +37,21 @@ func (ct *ContentTest) CreateConsoleReporter() (ur ConsoleReporter) {
 	ur.blueNewline = ur.blue("\\n") + "\n"
 	ur.green = color.New(color.FgWhite, color.BgGreen).SprintFunc()
 	ur.greenNewline = ur.green("\\n") + "\n"
-	paramReport, _ := json.MarshalIndent(ct.Parameters, "             ", " ")
-	fmt.Printf("%v %v\n", ur.blue("Parameters:"), string(paramReport))
+	fields := reflect.TypeOf(ct.Parameters)
+	fmt.Printf("%v\n", ur.blue("Parameters:"))
+	for field := 0; field < fields.NumField(); field++ {
+		fieldName := fields.FieldByIndex([]int{field}).Name
+		fieldValues := reflect.ValueOf(ct.Parameters).Field(field)
+		if fieldValues.Kind() == reflect.Ptr {
+			fieldValues = fieldValues.Elem()
+		}
+		fmt.Printf("%25v: %v\n", fieldName, fieldValues)
+	}
+	fmt.Printf("%v\n", ur.blue("Placeholders:"))
+	for _, v := range ct.Scenario.PlaceholderMap {
+		fmt.Printf("%25s: \"%s\"\n", v.Variable, v.Value)
+	}
+
 	return ur
 }
 
@@ -141,6 +155,10 @@ func (ct ContentTest) CreateTextReporter(path string) (textReporter TextReporter
 		log.Printf("reporter: Cannot marshal JSON: %v, %v", ct.Parameters, err)
 		os.Exit(1)
 	}
+	phReport := ""
+	for _, v := range ct.Scenario.PlaceholderMap {
+		phReport += fmt.Sprintf("%s:\"%s\"\n", v.Variable, v.Value)
+	}
 	replacer := strings.NewReplacer(
 		"{\n", "",
 		"}", "",
@@ -150,6 +168,8 @@ func (ct ContentTest) CreateTextReporter(path string) (textReporter TextReporter
 	paramsReport := replacer.Replace(string(paramsReportBytes))
 	handleWrite(textReporter.fileHandle, "=== Parameters ====================================\n")
 	handleWrite(textReporter.fileHandle, paramsReport+"\n")
+	handleWrite(textReporter.fileHandle, "=== Placeholders ==================================\n")
+	handleWrite(textReporter.fileHandle, phReport)
 	handleWrite(textReporter.fileHandle, "=== Prompt ========================================\n")
 	handleWrite(textReporter.fileHandle, ct.Prompt)
 	if len(ct.Memory) > 0 {

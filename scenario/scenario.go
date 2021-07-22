@@ -106,10 +106,7 @@ type Scenario struct {
 	Lorebook        Lorebook           `json:"lorebook"`
 	Placeholders    []Placeholder      `json:"placeholders"`
 	Tokenizer       *gpt_bpe.GPTEncoder
-	PlaceholderMap  *Placeholders
-	phTableRegex    *regexp.Regexp
-	phDefRegex      *regexp.Regexp
-	phVarRegex      *regexp.Regexp
+	PlaceholderMap  Placeholders
 }
 
 type ContextReportEntry struct {
@@ -465,6 +462,20 @@ func extractPlaceholderDefs(rgx *regexp.Regexp, text string) (variables Placehol
 	return variables
 }
 
+func (target *Placeholders) UpdateValues(kvs map[string]string) {
+	for k, v := range(kvs) {
+		if entry, ok := (*target)[k]; ok {
+			entry.Value = v
+			(*target)[k] = entry
+		} else {
+			(*target)[k] = Placeholder{
+				Variable: k,
+				Value: v,
+			}
+		}
+	}
+}
+
 func DiscoverPlaceholderTable(text string) Placeholders {
 	_, block := getPlaceholderTable(text)
 	return extractPlaceholderDefs(placeholderTableRegex, block)
@@ -499,13 +510,12 @@ func (target *Placeholders) merge(source Placeholders) {
 	}
 }
 
-func (scenario *Scenario) GetPlaceholderDefs() (defs *Placeholders) {
-	newPlaceholders := make(Placeholders, 0)
-	defs = &newPlaceholders
+func (scenario *Scenario) GetPlaceholderDefs() (defs Placeholders) {
+	defs = make(Placeholders, 0)
 	for placeholderIdx := range scenario.Placeholders {
 		placeholder := scenario.Placeholders[placeholderIdx]
 		placeholder.Value = placeholder.Defaults
-		(*defs)[placeholder.Variable] = placeholder
+		defs[placeholder.Variable] = placeholder
 	}
 	defs.merge(DiscoverPlaceholderTable(scenario.Prompt))
 	defs.merge(DiscoverPlaceholderDefs(scenario.Prompt))

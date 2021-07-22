@@ -15,6 +15,16 @@ import (
 	"time"
 )
 
+type PlaceholderMap map[string]string
+
+func (ph *PlaceholderMap) toMap() (ret map[string]string) {
+	ret = make(map[string]string, 0)
+	for k, v := range *ph {
+		ret[k] = v
+	}
+	return  ret
+}
+
 type PermutationsSpec struct {
 	Model                  []string            `json:"model"`
 	Prefix                 []string            `json:"prefix"`
@@ -22,6 +32,7 @@ type PermutationsSpec struct {
 	Prompt                 []string            `json:"prompt"`
 	Memory                 []string            `json:"memory"`
 	AuthorsNote            []string            `json:"authors_note"`
+	Placeholders           []PlaceholderMap    `json:"placeholders"`
 	Temperature            []*float64          `json:"temperature"`
 	MaxLength              []*uint             `json:"max_length"`
 	MinLength              []*uint             `json:"min_length"`
@@ -31,7 +42,6 @@ type PermutationsSpec struct {
 	RepetitionPenalty      []*float64          `json:"repetition_penalty"`
 	RepetitionPenaltyRange []*uint             `json:"repetition_penalty_range"`
 	RepetitionPenaltySlope []*float64          `json:"repetition_penalty_slope"`
-	Placeholders           map[string][]string `json:"placeholders"`
 }
 
 type ContentTest struct {
@@ -46,13 +56,15 @@ type ContentTest struct {
 	Generations      int                           `json:"generations"`
 	Parameters       novelai_api.NaiGenerateParams `json:"parameters"`
 	Permutations     []PermutationsSpec            `json:"permutations"`
-	Placeholders     map[string]string             `json:"placeholders"`
+	Placeholders     PlaceholderMap                `json:"placeholders"`
 	WorkingDir       string
 	PromptPath       string
 	ScenarioPath     string
-	Scenario         scenario.Scenario
+	Scenario         *scenario.Scenario
 	API              novelai_api.NovelAiAPI
 }
+
+type ContentTests []ContentTest
 
 type RequestContext struct {
 	Request       novelai_api.NaiGenerateResp `json:"requests"`
@@ -123,6 +135,13 @@ func (ct ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
 		fieldName := fieldNames[fieldIdx]
 		fieldValueRepr := "#0"
 		switch fieldName {
+		case "Placeholders":
+			for placeholderIdx := range spec.Placeholders {
+				if reflect.DeepEqual(spec.Placeholders[placeholderIdx], ct.Placeholders) {
+					fieldValueRepr = fmt.Sprintf("#%d", placeholderIdx+1)
+					break
+				}
+			}
 		case "Memory":
 			for memoryIdx := range spec.Memory {
 				if spec.Memory[memoryIdx] == ct.Memory {
@@ -173,6 +192,11 @@ func (ct ContentTest) FieldsSame(fields []string, other ContentTest) bool {
 	for fieldIdx := range fields {
 		fieldName := fields[fieldIdx]
 		switch fieldName {
+		case "Placeholders":
+			if !reflect.DeepEqual(ct.Placeholders, other.Placeholders) {
+				return false
+			}
+			continue
 		case "Memory":
 			if ct.Memory != other.Memory {
 				return false
@@ -209,10 +233,56 @@ func (ct ContentTest) FieldsSame(fields []string, other ContentTest) bool {
 	return true
 }
 
-func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []ContentTest {
+func resolvePermutation(origPermutation ContentTest,
+	fieldName string, fieldValues *reflect.Value) ContentTests {
+	newPermutations := make(ContentTests, 0)
+	for valIdx := 0; valIdx < fieldValues.Len(); valIdx++ {
+		permutation := origPermutation
+		value := fieldValues.Index(valIdx)
+		targetField, _ := reflect.TypeOf(permutation.Parameters).FieldByName(fieldName)
+		switch fieldName {
+		case "Placeholders":
+			newPlaceholders := make(PlaceholderMap, 0)
+			fromPlaceholders := value.Interface().(PlaceholderMap)
+			for k, v := range permutation.Placeholders {
+				newPlaceholders[k] = v
+			}
+			for k, v := range fromPlaceholders {
+				newPlaceholders[k] = v
+			}
+			permutation.Placeholders = newPlaceholders
+		case "Prompt":
+			permutation.Prompt = fmt.Sprintf("%s", value)
+		case "Memory":
+			permutation.Memory = fmt.Sprintf("%s", value)
+		case "AuthorsNote":
+			permutation.AuthorsNote = fmt.Sprintf("%s", value)
+		case "PromptFilename":
+			permutation.PromptFilename = fmt.Sprintf("%v", value)
+			if len(permutation.PromptFilename) > 0 {
+				permutation.PromptPath = filepath.Join(permutation.WorkingDir,
+					permutation.PromptFilename)
+				if _, err := os.Stat(permutation.PromptPath); os.IsNotExist(err) {
+					log.Printf("nrt: Prompt file `%s` does not exist!\n",
+						permutation.PromptPath)
+					os.Exit(1)
+				}
+				permutation.loadPrompt(permutation.PromptPath)
+			}
+		case "Model":
+			permutation.Parameters.Model = value.String()
+		default:
+			reflect.ValueOf(&permutation.Parameters).Elem().Field(targetField.Index[0]).Set(value)
+		}
+		newPermutations = append(newPermutations, permutation)
+	}
+	return newPermutations
+}
+
+func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) ContentTests {
 	templateTest := ct
 	templateTest.Parameters = ct.Parameters
-	permutations := []ContentTest{templateTest}
+	permutations := ContentTests{templateTest}
 	// Loop over the fields in `Permutations` type.
 	fields := reflect.TypeOf(spec)
 	fieldNames := make([]string, 0)
@@ -224,39 +294,16 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) []Cont
 		if fieldValues.Len() > 0 {
 			fieldNames = append(fieldNames, fieldName)
 			// Loop over the values in the field to permute on.
-			newPermutations := make([]ContentTest, 0)
+			newPermutations := make(ContentTests, 0)
 			// Loop over each permutation we already have existing.
 			for permutationTargetIdx := range permutations {
 				// Create a new permutation for each value in the field.
-				for valIdx := 0; valIdx < fieldValues.Len(); valIdx++ {
-					value := fieldValues.Index(valIdx)
-					permutation := permutations[permutationTargetIdx]
-					targetField, _ := reflect.TypeOf(permutation.Parameters).FieldByName(fieldName)
-					switch fieldName {
-					case "Prompt":
-						permutation.Prompt = fmt.Sprintf("%s", value)
-					case "Memory":
-						permutation.Memory = fmt.Sprintf("%s", value)
-					case "AuthorsNote":
-						permutation.AuthorsNote = fmt.Sprintf("%s", value)
-					case "PromptFilename":
-						permutation.PromptFilename = fmt.Sprintf("%v", value)
-						if len(permutation.PromptFilename) > 0 {
-							permutation.PromptPath = filepath.Join(permutation.WorkingDir,
-								permutation.PromptFilename)
-							if _, err := os.Stat(permutation.PromptPath); os.IsNotExist(err) {
-								log.Printf("nrt: Prompt file `%s` does not exist!\n", ct.PromptPath)
-								os.Exit(1)
-							}
-							permutation.loadPrompt(permutation.PromptPath)
-						}
-					case "Model":
-						permutation.Parameters.Model = value.String()
-					default:
-						reflect.ValueOf(&permutation.Parameters).Elem().Field(targetField.Index[0]).Set(value)
-					}
-					newPermutations = append(newPermutations, permutation)
-				}
+				permutation := permutations[permutationTargetIdx]
+				permScen := *permutation.Scenario
+				permScen.PlaceholderMap = permScen.PlaceholderMap
+				permutation.Scenario = &permScen
+				newPermutations = append(newPermutations,
+					resolvePermutation(permutation, fieldName, &fieldValues)...)
 			}
 			permutations = newPermutations
 		}
@@ -343,6 +390,7 @@ func (ct *ContentTest) loadPrompt(path string) {
 
 func (ct ContentTest) Perform() {
 	// ct.loadPrompt(ct.PromptPath)
+	ct.Scenario.PlaceholderMap.UpdateValues(ct.Placeholders.toMap())
 	ct.Prompt = ct.Scenario.PlaceholderMap.ReplacePlaceholders(ct.Prompt)
 	ct.Memory = ct.Scenario.PlaceholderMap.ReplacePlaceholders(ct.Memory)
 	ct.AuthorsNote = ct.Scenario.PlaceholderMap.ReplacePlaceholders(ct.AuthorsNote)
@@ -392,9 +440,11 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 			os.Exit(1)
 		}
 		fmt.Printf("ScenarioPath: %v\n", test.ScenarioPath)
-		test.Scenario, err = scenario.ScenarioFromFile(nil, test.ScenarioPath)
-		if err != nil {
+		if scenario, err := scenario.ScenarioFromFile(nil, test.ScenarioPath); err != nil {
 			log.Printf("nrt: Error loading scenario: %v\n", err)
+			os.Exit(1)
+		} else {
+			test.Scenario = &scenario
 		}
 		test.Prompt = test.Scenario.Prompt
 		test.Memory = test.Scenario.Context[0].Text
@@ -412,11 +462,11 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 		test.loadPrompt(test.PromptPath)
 	}
 	if test.ScenarioFilename == "" {
-		test.Scenario = scenario.ScenarioFromSpec(test.Prompt, test.Memory,
-			test.AuthorsNote)
+		scenarioSpec := scenario.ScenarioFromSpec(test.Prompt, test.Memory,
+				test.AuthorsNote)
+		test.Scenario = &scenarioSpec
 		test.Scenario.Settings.Parameters.CoerceNullValues(test.Parameters)
 	}
-
 	return test
 }
 
