@@ -465,7 +465,7 @@ func DiscoverPlaceholderTable(text string) (variables Placeholders) {
 }
 
 func (variables Placeholders) ReplacePlaceholders(text string) (replaced string) {
-	if text[0:3] == "%{\n" {
+	if len(text) > 4 && text[0:3] == "%{\n" {
 		blockEnd := strings.Index(text, "\n}\n")
 		if blockEnd != -1 {
 			text = text[blockEnd+3:]
