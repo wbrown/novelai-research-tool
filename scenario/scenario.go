@@ -421,11 +421,11 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 }
 
 var placeholderDefRegex = regexp.MustCompile(
-	"\\$\\{(?P<var>[\\p{L}|0-9|_|\\-|#]+)\\[(?P<default>[^\\]]+)\\]:(?P<description>[^\\}]+)\\}")
+	"\\$\\{(?P<var>[\\p{L}|0-9|_|\\-|#|(|)]+)\\[(?P<default>[^\\]]+)\\]:(?P<description>[^\\}]+)\\}")
 var placeholderTableRegex = regexp.MustCompile(
-	"(?P<var>[\\p{L}|0-9|#|_|\\-]+)\\[(?P<default>[^\\]]+)\\]:(?P<description>[^\\n]+)\n")
+	"(?P<var>[\\p{L}|0-9|#|_|\\-|(|)]+)\\[(?P<default>[^\\]]+)\\]:(?P<description>[^\\n]+)\n")
 var placeholderVarRegex = regexp.MustCompile(
-	"\\$\\{(?P<var>[\\p{L}|0-9|#|_|-]+)(\\}|\\[[^\\}]+\\})")
+	"\\$\\{(?P<var>[\\p{L}|0-9|#|_|\\-|(|)]+)(\\}|\\[[^\\}]+\\})")
 
 type Placeholder struct {
 	Variable    string `json:"key"`
