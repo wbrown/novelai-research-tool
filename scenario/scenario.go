@@ -27,7 +27,7 @@ type ContextConfig struct {
 type ContextEntry struct {
 	Text         string        `json:"text"`
 	ContextCfg   ContextConfig `json:"contextConfig"`
-	Tokens       *[]uint16
+	Tokens       *gpt_bpe.Tokens
 	Label        string
 	MatchIndexes []map[string][][]int
 	Index        uint
@@ -73,7 +73,7 @@ type LorebookEntry struct {
 	ForceActivation     bool          `json:"forceActivation"`
 	KeyRelative         bool          `json:"keyRelative"`
 	NonStoryActivatable bool          `json:"nonStoryActivatable"`
-	Tokens              *[]uint16
+	Tokens              *gpt_bpe.Tokens
 	KeysRegex           []*regexp.Regexp
 }
 
@@ -105,7 +105,6 @@ type Scenario struct {
 	Settings        ScenarioSettings   `json:"settings"`
 	Lorebook        Lorebook           `json:"lorebook"`
 	Placeholders    []Placeholder      `json:"placeholders"`
-	Tokenizer       *gpt_bpe.GPTEncoder
 	PlaceholderMap  Placeholders
 }
 
@@ -174,9 +173,9 @@ func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries Conte
 		}
 		resolvedText := scenario.PlaceholderMap.ReplacePlaceholders(lorebookEntry.Text)
 		label := scenario.PlaceholderMap.ReplacePlaceholders(lorebookEntry.DisplayName)
-		var tokens *[]uint16
+		var tokens *gpt_bpe.Tokens
 		if resolvedText != lorebookEntry.Text {
-			tokens = scenario.Tokenizer.Encode(&resolvedText)
+			tokens = gpt_bpe.Encoder.Encode(&resolvedText)
 		} else {
 			tokens = lorebookEntry.Tokens
 		}
@@ -227,7 +226,7 @@ func (scenario Scenario) createStoryContext(story string) ContextEntry {
 			MaximumTrimType:   "sentence",
 			Force:             true,
 		},
-		Tokens: scenario.Tokenizer.Encode(&story),
+		Tokens: gpt_bpe.Encoder.Encode(&story),
 		Label:  "Story",
 		Index:  0,
 	}
@@ -268,13 +267,13 @@ func (ctx *ContextEntry) getMaxTrimType() MaxTrimType {
 	}
 }
 
-func assertThresholdOrEmpty(tokens *[]uint16, ratio float32, target int) {
+func assertThresholdOrEmpty(tokens *gpt_bpe.Tokens, ratio float32, target int) {
 	if float32(len(*tokens))*ratio >= float32(target) {
-		*tokens = make([]uint16, 0)
+		*tokens = make(gpt_bpe.Tokens, 0)
 	}
 }
 
-func (ctx *ContextEntry) ResolveTrim(tokenizer *gpt_bpe.GPTEncoder, budget int) (trimmedTokens *[]uint16) {
+func (ctx *ContextEntry) ResolveTrim(budget int) (trimmedTokens *gpt_bpe.Tokens) {
 	target := 0
 	numTokens := len(*ctx.Tokens)
 	projected := budget - numTokens
@@ -290,12 +289,14 @@ func (ctx *ContextEntry) ResolveTrim(tokenizer *gpt_bpe.GPTEncoder, budget int) 
 	maxTrimType := ctx.getMaxTrimType()
 
 	// First, try newline trimming.
-	trimmedTokens, _ = tokenizer.TrimNewlines(ctx.Tokens, trimDirection, uint(target))
+	trimmedTokens, _ = gpt_bpe.Encoder.TrimNewlines(ctx.Tokens,
+		trimDirection, uint(target))
 	assertThresholdOrEmpty(trimmedTokens, 0.3, target)
 
 	// If that fails, try trimming the sentences.
 	if len(*trimmedTokens) == 0 && maxTrimType >= TrimSentences {
-		trimmedTokens, _ = tokenizer.TrimSentences(ctx.Tokens, trimDirection, uint(target))
+		trimmedTokens, _ = gpt_bpe.Encoder.TrimSentences(ctx.Tokens,
+			trimDirection, uint(target))
 	}
 
 	// And if that also fails, trim tokens as a last resort.
@@ -323,7 +324,7 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 	for ctxIdx := range contexts {
 		resolved := scenario.PlaceholderMap.ReplacePlaceholders(contexts[ctxIdx].Text)
 		if resolved != contexts[ctxIdx].Text {
-			contexts[ctxIdx].Tokens = scenario.Tokenizer.Encode(&resolved)
+			contexts[ctxIdx].Tokens = gpt_bpe.Encoder.Encode(&resolved)
 			contexts[ctxIdx].Text = resolved
 		}
 	}
@@ -357,11 +358,11 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 				reserved = len(*ctx.Tokens)
 			}
 		}
-		trimmedTokens := ctx.ResolveTrim(scenario.Tokenizer, budget+reserved)
+		trimmedTokens := ctx.ResolveTrim(budget+reserved)
 		numTokens := len(*trimmedTokens)
 		budget -= numTokens - reserved
 		reservations -= reserved
-		contextText := strings.Split(scenario.Tokenizer.Decode(trimmedTokens), "\n")
+		contextText := strings.Split(gpt_bpe.Encoder.Decode(trimmedTokens), "\n")
 		ctxInsertion := ctx.ContextCfg.InsertionPosition
 		if numTokens == 0 {
 			continue
@@ -530,17 +531,15 @@ func (scenario *Scenario) GetPlaceholderDefs() (defs Placeholders) {
 
 func (scenario *Scenario) SetMemory(memory string) {
 	scenario.Context[0].Text = memory
-	scenario.Context[0].Tokens = scenario.Tokenizer.Encode(&memory)
+	scenario.Context[0].Tokens = gpt_bpe.Encoder.Encode(&memory)
 }
 
 func (scenario *Scenario) SetAuthorsNote(an string) {
 	scenario.Context[1].Text = an
-	scenario.Context[1].Tokens = scenario.Tokenizer.Encode(&an)
+	scenario.Context[1].Tokens = gpt_bpe.Encoder.Encode(&an)
 }
 
 func ScenarioFromSpec(prompt string, memory string, an string) (scenario Scenario) {
-	encoder := gpt_bpe.NewEncoder()
-	scenario.Tokenizer = &encoder
 	scenario.Prompt = prompt
 	scenario.Context = ContextEntries{
 		{Text: memory,
@@ -555,7 +554,7 @@ func ScenarioFromSpec(prompt string, memory string, an string) (scenario Scenari
 				InsertionPosition: 0,
 				Force:             true,
 			},
-			Tokens: encoder.Encode(&memory),
+			Tokens: gpt_bpe.Encoder.Encode(&memory),
 			Label:  "Memory",
 			Index:  1},
 		{Text: an,
@@ -570,7 +569,7 @@ func ScenarioFromSpec(prompt string, memory string, an string) (scenario Scenari
 				InsertionPosition: -4,
 				Force:             true,
 			},
-			Tokens: encoder.Encode(&an),
+			Tokens: gpt_bpe.Encoder.Encode(&an),
 			Label:  "A/N",
 			Index:  2}}
 	scenario.PlaceholderMap = scenario.GetPlaceholderDefs()
@@ -583,7 +582,6 @@ func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scen
 		encoder := gpt_bpe.NewEncoder()
 		tokenizer = &encoder
 	}
-	scenario.Tokenizer = tokenizer
 	scenarioBytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return scenario, err

@@ -21,9 +21,12 @@ var f embed.FS
 
 const BPE_LRU_SZ = 8192
 
+type Token uint16
+type Tokens []Token
+
 type GPTEncoder struct {
-	encoder    map[string]uint16
-	decoder    map[uint16][]byte
+	encoder    map[string]Token
+	decoder    map[Token][]byte
 	bpe_ranks  map[GPTPair]float64
 	pattern    *regexp.Regexp
 	byteToRune [256]rune
@@ -58,9 +61,9 @@ func (bs BGERanks) Less(i, j int) bool {
 func NewEncoder() GPTEncoder {
 	// Read encoder mappings and also generate reverse mappings.
 	encoderFile, _ := f.ReadFile("encoder.json")
-	encoderTokens := make(map[string]uint16)
+	encoderTokens := make(map[string]Token)
 	json.Unmarshal(encoderFile, &encoderTokens)
-	tokensEncoder := make(map[uint16][]byte)
+	tokensEncoder := make(map[Token][]byte)
 	for text, token := range encoderTokens {
 		tokensEncoder[token] = []byte(text)
 	}
@@ -101,7 +104,7 @@ func NewEncoder() GPTEncoder {
 	}
 	uct := 0
 	var bytesUnicode [256]rune
-	for b := uint16(0); b < 256; b++ {
+	for b := Token(0); b < 256; b++ {
 		if _, ok := bytesUnicodeMap[uint8(b)]; !ok {
 			bytesUnicodeMap[uint8(b)] = rune(256 + uct)
 			unicodeBytes[rune(256+uct)] = uint8(b)
@@ -122,21 +125,68 @@ func NewEncoder() GPTEncoder {
 	}
 }
 
+// insertAt inserts v into s at index i and returns the new slice.
+func insertAt(data []BGERank, i int, v BGERank) []BGERank {
+	if i == len(data) {
+		// Insert at end is the easy case.
+		return append(data, v)
+	}
+
+	// Make space for the inserted element by shifting
+	// values at the insertion index up one index. The call
+	// to append does not allocate memory when cap(data) is
+	// greater ​than len(data).
+	data = append(data[:i+1], data[i:]...)
+
+	// Insert the new element.
+	data[i] = v
+
+	// Return the updated slice.
+	return data
+}
+
+func insertSortedNoDups(data BGERanks, v BGERank) BGERanks {
+	i := sort.Search(len(data), func(i int) bool { return data[i].rank >= v.rank })
+	if i < len(data) && data[i] == v {
+		return data
+	}
+	return insertAt(data, i, v)
+}
+
 func getPairs(word []string) []GPTPair {
-	pairsSet := make(map[GPTPair]bool, 0)
-	pairs := make([]GPTPair, 0)
+	pairsSet := make(map[GPTPair]bool, len(word))
+	pairs := make([]GPTPair, len(word))
+	begin := 1
+	prev := word[0]
+	ct := 0
+	for idx := begin; idx < len(word); idx++ {
+		present := word[idx]
+		pair := GPTPair{prev, present}
+		if _, ok := pairsSet[pair]; !ok {
+			pairs[len(pairsSet)] = pair
+			ct++
+		}
+		pairsSet[pair] = true
+		prev = present
+	}
+	return pairs[0:ct]
+}
+
+func (encoder *GPTEncoder) getRankedPairs(word []string) BGERanks {
+	rankedPairs := make(BGERanks, 0, len(word))
 	begin := 1
 	prev := word[0]
 	for idx := begin; idx < len(word); idx++ {
 		present := word[idx]
 		pair := GPTPair{prev, present}
-		if _, ok := pairsSet[pair]; !ok {
-			pairs = append(pairs, pair)
+		bpe, ok := encoder.bpe_ranks[pair]
+		if !ok {
+			bpe = math.Inf(1)
 		}
-		pairsSet[pair] = true
+		rankedPairs = insertSortedNoDups(rankedPairs, BGERank{bpe, pair})
 		prev = present
 	}
-	return pairs
+	return rankedPairs
 }
 
 func (encoder *GPTEncoder) rankPairs(pairs []GPTPair) BGERanks {
@@ -146,7 +196,7 @@ func (encoder *GPTEncoder) rankPairs(pairs []GPTPair) BGERanks {
 		if !ok {
 			bpe = math.Inf(1)
 		}
-		rankedPairs = append(rankedPairs, BGERank{bpe, pairs[idx]})
+		rankedPairs = insertSortedNoDups(rankedPairs, BGERank{bpe, pairs[idx]})
 	}
 	sort.Sort(rankedPairs)
 	return rankedPairs
@@ -161,10 +211,10 @@ func (encoder *GPTEncoder) minPair(pairs []GPTPair) (retPair GPTPair) {
 }
 
 func (encoder *GPTEncoder) toUnicode(text *string) string {
-	outArr := make([]rune, 0)
 	textBytes := []byte(*text)
+	outArr := make([]rune, len(*text))
 	for idx := range textBytes {
-		outArr = append(outArr, encoder.byteToRune[textBytes[idx]])
+		outArr[idx] = encoder.byteToRune[textBytes[idx]]
 	}
 	return string(outArr)
 }
@@ -178,7 +228,7 @@ func pos(word []string, seek string, i int) int {
 	return -1
 }
 
-func (encoder *GPTEncoder) encodeTokens(tokens *[]string) (encoded []uint16) {
+func (encoder *GPTEncoder) encodeTokens(tokens *[]string) (encoded Tokens) {
 	for idx := range *tokens {
 		encoded = append(encoded, encoder.encoder[(*tokens)[idx]])
 	}
@@ -190,12 +240,12 @@ func (encoder *GPTEncoder) toBPE(text string) []string {
 		return lookup.([]string)
 	}
 	word := strings.Split(text, "")
-	pairs := getPairs(word)
-	if len(pairs) == 0 {
+	rankedPairs := encoder.getRankedPairs(word)
+	if len(rankedPairs) == 0 {
 		return []string{text}
 	}
 	for {
-		bigram := encoder.minPair(pairs)
+		bigram := rankedPairs[0].bigram
 		if _, ok := encoder.bpe_ranks[bigram]; !ok {
 			break
 		}
@@ -222,7 +272,7 @@ func (encoder *GPTEncoder) toBPE(text string) []string {
 		if len(word) == 1 {
 			break
 		} else {
-			pairs = getPairs(word)
+			rankedPairs = encoder.getRankedPairs(word)
 		}
 	}
 	encoder.cache.Add(text, word)
@@ -231,7 +281,7 @@ func (encoder *GPTEncoder) toBPE(text string) []string {
 
 func (encoder *GPTEncoder) SplitWords(text *string) *[]string {
 	splitLines := strings.SplitAfter(*text, "\n")
-	words := make([]string, 0)
+	words := make([]string, 0, len(*text)/3)
 	for lineIdx := 0; lineIdx < len(splitLines); lineIdx++ {
 		line := splitLines[lineIdx]
 		for ; lineIdx < len(splitLines)-1; {
@@ -250,9 +300,9 @@ func (encoder *GPTEncoder) SplitWords(text *string) *[]string {
 	return &words
 }
 
-func (encoder *GPTEncoder) Encode(text *string) *[]uint16 {
+func (encoder *GPTEncoder) Encode(text *string) *Tokens {
 	words := encoder.SplitWords(text)
-	encoded := make([]uint16, 0)
+	encoded := make(Tokens, 0)
 	for idx := range *words {
 		fragment := encoder.toUnicode(&(*words)[idx])
 		token := encoder.toBPE(fragment)
@@ -261,9 +311,9 @@ func (encoder *GPTEncoder) Encode(text *string) *[]uint16 {
 	return &encoded
 }
 
-func (encoder *GPTEncoder) Decode(encoded *[]uint16) (text string) {
-	// First convert our `uint16` tokens into an 8-bit byte array.
-	bs := make([]byte, 0)
+func (encoder *GPTEncoder) Decode(encoded *Tokens) (text string) {
+	// First convert our `Token` tokens into an 8-bit byte array.
+	bs := make([]byte, 0, len(*encoded))
 	for idx := range *encoded {
 		if v, ok := encoder.decoder[(*encoded)[idx]]; ok {
 			for bIdx := range v {
@@ -274,12 +324,16 @@ func (encoder *GPTEncoder) Decode(encoded *[]uint16) (text string) {
 	// Convert our bytearray to string, interpreting as UTF-8 and then to
 	// 32-bit runes.
 	runes := []rune(string(bs))
-	decoded := make([]byte, 0)
+	decoded := make([]byte, len(runes))
 	// Convert our runes into 8-bit bytes using a 256-slot lookup table.
 	for runeIdx := range runes {
-		decoded = append(decoded, encoder.runeToByte[runes[runeIdx]])
+		decoded[runeIdx] = encoder.runeToByte[runes[runeIdx]]
 	}
 	// Decode our final representation into an Unicode string.
 	text = string(decoded)
 	return text
 }
+
+var Encoder = NewEncoder()
+var blankString = ""
+var _ = Encoder.Encode(&blankString)

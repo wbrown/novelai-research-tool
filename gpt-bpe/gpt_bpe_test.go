@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-var encoder GPTEncoder
+var encoder = NewEncoder()
 var corpus string
-var encoded *[]uint16
+var encoded *Tokens
 
 // AssertEqual checks if values are equal
 func AssertEqual(t *testing.T, a interface{}, b interface{}) {
@@ -140,6 +140,16 @@ func BenchmarkGPTEncoder_Decode(b *testing.B) {
 		len(*encoded), tokenNumBytes, duration))
 }
 
+type EncoderTest struct {
+	Input    string
+	Expected Tokens
+}
+
+var EncoderTests = []EncoderTest{
+	{"… …",
+		Tokens{1399, 3926}},
+}
+
 func BenchmarkGPTEncoder_Encode(b *testing.B) {
 	start := time.Now()
 	tokenCt := len(*encoder.Encode(&corpus))
@@ -152,8 +162,13 @@ func TestGPTEncoder_Encode(t *testing.T) {
 	start := time.Now()
 	tokenCt := len(*encoder.Encode(&corpus))
 	duration := time.Since(start)
-	t.Log(fmt.Sprintf("%v bytes into %v tokens over %v\n",
+	t.Log(fmt.Sprintf("%v bytes into %v tokens over %v",
 		len(corpus), tokenCt, duration))
+	for testIdx := range EncoderTests {
+		tokensPtr := *encoder.Encode(&(EncoderTests[testIdx].Input))
+		AssertEqual(t, tokensPtr, EncoderTests[testIdx].Expected)
+	}
+
 }
 
 func TestGPTEncoder_Decode(t *testing.T) {
@@ -162,10 +177,12 @@ func TestGPTEncoder_Decode(t *testing.T) {
 		encoded = corpEncoded
 	}
 	start := time.Now()
-	tokenNumBytes := len(encoder.Decode(encoded))
+	decoded := encoder.Decode(encoded)
 	duration := time.Since(start)
+	tokenNumBytes := len(decoded)
 	t.Log(fmt.Sprintf("%v tokens into %v bytes over %v\n",
 		len(*encoded), tokenNumBytes, duration))
+	AssertEqual(t, corpus, decoded)
 }
 
 func TestGPTDecoder_Decode(t *testing.T) {

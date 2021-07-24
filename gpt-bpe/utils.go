@@ -1,6 +1,8 @@
 package gpt_bpe
 
 import (
+	"bytes"
+	"encoding/binary"
 	"github.com/jdkato/prose/v2"
 	"strings"
 	"unicode"
@@ -14,10 +16,33 @@ const (
 	TrimNone   TrimDirection = iota
 )
 
-func (encoder GPTEncoder) TrimNewlines(tokens *[]uint16, direction TrimDirection,
-	limit uint) (*[]uint16, error) {
+func (tokens *Tokens) ToBin() *[]byte {
+	buf := bytes.NewBuffer(make([]byte, 0))
+	for idx := range *tokens {
+		bs := (*tokens)[idx]
+		binary.Write(buf, binary.LittleEndian, bs)
+	}
+	byt := buf.Bytes()
+	return &byt
+}
+
+func TokensFromBin(bin *[]byte) *Tokens {
+	tokens := make(Tokens, 0)
+	buf := bytes.NewReader(*bin)
+	for {
+		var token Token
+		if err := binary.Read(buf, binary.LittleEndian, &token); err != nil {
+			break
+		}
+		tokens = append(tokens, token)
+	}
+	return &tokens
+}
+
+func (encoder GPTEncoder) TrimNewlines(tokens *Tokens, direction TrimDirection,
+	limit uint) (*Tokens, error) {
 	var err error
-	trimmed := make([]uint16, 0)
+	trimmed := make(Tokens, 0)
 	if uint(len(*tokens)) <= limit {
 		return tokens, err
 	} else if direction == TrimNone {
@@ -35,7 +60,7 @@ func (encoder GPTEncoder) TrimNewlines(tokens *[]uint16, direction TrimDirection
 		end = len(lines)
 		step = 1
 	}
-	accTokens := make([]uint16, 0)
+	accTokens := make(Tokens, 0)
 	for idx = start; idx != end; idx += step {
 		line := lines[idx]
 		switch direction {
@@ -59,10 +84,10 @@ func (encoder GPTEncoder) TrimNewlines(tokens *[]uint16, direction TrimDirection
 	return &accTokens, err
 }
 
-func (encoder GPTEncoder) TrimSentences(tokens *[]uint16, direction TrimDirection,
-	limit uint) (*[]uint16, error) {
+func (encoder GPTEncoder) TrimSentences(tokens *Tokens, direction TrimDirection,
+	limit uint) (*Tokens, error) {
 	var err error
-	trimmed := make([]uint16, 0)
+	trimmed := make(Tokens, 0)
 	if uint(len(*tokens)) <= limit {
 		return tokens, err
 	} else if direction == TrimNone {

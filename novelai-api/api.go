@@ -3,7 +3,6 @@ package novelai_api
 import (
 	"bytes"
 	"encoding/base64"
-	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -22,27 +21,7 @@ type NovelAiAPI struct {
 	encoder gpt_bpe.GPTEncoder
 }
 
-func toBin(tokens *[]uint16) []byte {
-	buf := bytes.NewBuffer(make([]byte, 0))
-	for idx := range *tokens {
-		bs := (*tokens)[idx]
-		binary.Write(buf, binary.LittleEndian, bs)
-	}
-	return buf.Bytes()
-}
 
-func fromBin(bin []byte) *[]uint16 {
-	tokens := make([]uint16, 0)
-	buf := bytes.NewReader(bin)
-	for {
-		var token uint16
-		if err := binary.Read(buf, binary.LittleEndian, &token); err != nil {
-			break
-		}
-		tokens = append(tokens, token)
-	}
-	return &tokens
-}
 
 type NaiGenerateHTTPResp struct {
 	Output     string `json:"output"`
@@ -321,8 +300,8 @@ func NewNovelAiAPI() NovelAiAPI {
 
 func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGenerateParams) (resp NaiGenerateResp) {
 	encoded := api.encoder.Encode(content)
-	encodedBytes := toBin(encoded)
-	encodedBytes64 := base64.StdEncoding.EncodeToString(encodedBytes)
+	encodedBytes := encoded.ToBin()
+	encodedBytes64 := base64.StdEncoding.EncodeToString(*encodedBytes)
 	resp.Request = *content
 	resp.EncodedRequest = encodedBytes64
 	msg := NewGenerateMsg(encodedBytes64)
@@ -333,7 +312,7 @@ func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGeneratePara
 		resp.Error = err
 	} else {
 		resp.EncodedResponse = apiResp.Output
-		resp.Response = api.encoder.Decode(fromBin(binTokens))
+		resp.Response = api.encoder.Decode(gpt_bpe.TokensFromBin(&binTokens))
 	}
 	return resp
 }
