@@ -11,6 +11,7 @@ import (
 
 var encoder = NewEncoder()
 var corpus string
+// var corpus2 string
 var encoded *Tokens
 
 // AssertEqual checks if values are equal
@@ -28,6 +29,12 @@ func TestMain(m *testing.M) {
 	} else {
 		corpus = string(textBytes)
 	}
+
+	/* if textBytes, err := os.ReadFile("resources/enwiki8.html"); err != nil {
+		log.Fatal("Error opening `resources/enwiki8.html")
+	} else {
+		corpus2 = string(textBytes)
+	} */
 	m.Run()
 }
 
@@ -69,6 +76,16 @@ var TrimSentencesTests = []TrimTest{
 }
 
 var TrimNewLinesTests = append(TrimSentencesTests[3:5], TrimSentencesTests[9:11]...)
+
+func TestGPTEncoder_TrimIncompleteSentence(t *testing.T) {
+	testStr := "This is a test. He says, \"This is an unterminated quote. She says, this is actually terminated.\" This is awesome! This is incomplete "
+	expected := "This is a test. He says, \"This is an unterminated quote. She says, this is actually terminated.\" This is awesome!"
+	trimmed, _ := encoder.TrimIncompleteSentence(encoder.Encode(&testStr))
+	output := encoder.Decode(trimmed)
+	if expected != output {
+		t.Error("output != expected; output := ", expected)
+	}
+}
 
 func TestGPTEncoder_TrimNewlines(t *testing.T) {
 	for testIdx := range TrimNewLinesTests {

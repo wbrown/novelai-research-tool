@@ -84,6 +84,34 @@ func (encoder GPTEncoder) TrimNewlines(tokens *Tokens, direction TrimDirection,
 	return &accTokens, err
 }
 
+func (encoder GPTEncoder) TrimIncompleteSentence(tokens *Tokens) (*Tokens, error) {
+	trimmed := make(Tokens, 0)
+	doc, err := prose.NewDocument(encoder.Decode(tokens),
+		prose.WithTagging(false),
+		prose.WithExtraction(false),
+		prose.WithTokenization(false))
+	if err != nil {
+		return &trimmed, err
+	}
+	sentences := doc.Sentences()
+	lastSentence := sentences[len(sentences)-1].Text
+	var last rune
+	for _, r := range lastSentence {
+		if unicode.IsSpace(r) {
+			continue
+		}
+		last = r
+	}
+	var text = doc.Text
+	if !unicode.IsPunct(last) {
+		trimPos := strings.LastIndex(text, lastSentence)
+		text = doc.Text[:trimPos]
+	}
+	text = strings.TrimSpace(text)
+	encoded := encoder.Encode(&text)
+	return encoded, nil
+}
+
 func (encoder GPTEncoder) TrimSentences(tokens *Tokens, direction TrimDirection,
 	limit uint) (*Tokens, error) {
 	var err error

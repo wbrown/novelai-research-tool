@@ -251,7 +251,7 @@ func (encoder *GPTEncoder) toBPE(text string) []string {
 		}
 		first := bigram.left
 		second := bigram.right
-		newWord := make([]string, 0)
+		newWord := make([]string, 0, len(word))
 		for i := 0; i < len(word); {
 			j := pos(word, first, i)
 			if j == -1 {

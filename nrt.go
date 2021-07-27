@@ -110,6 +110,9 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	throttle := time.NewTimer(1100 * time.Millisecond)
 	for generation := 0; generation < generations; generation++ {
 		submission, ctxReport := ct.Scenario.GenerateContext(context, ct.MaxTokens)
+		if generation == generations-1 {
+			ct.Parameters.TrimResponses = true
+		}
 		resp := ct.API.GenerateWithParams(&submission, ct.Parameters)
 		if generation == 0 {
 			results.Encoded.Prompt = resp.EncodedRequest

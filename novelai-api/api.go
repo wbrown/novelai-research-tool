@@ -21,8 +21,6 @@ type NovelAiAPI struct {
 	encoder gpt_bpe.GPTEncoder
 }
 
-
-
 type NaiGenerateHTTPResp struct {
 	Output     string `json:"output"`
 	Error      string `json:"error"`
@@ -48,6 +46,7 @@ type NaiGenerateParams struct {
 	UseCache               bool        `json:"use_cache"`
 	UseString              bool        `json:"use_string"`
 	ReturnFullText         bool        `json:"return_full_text"`
+	TrimResponses          bool        `json:"trim_responses"`
 }
 
 type NaiGenerateResp struct {
@@ -311,8 +310,12 @@ func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGeneratePara
 		log.Println("ERROR:", err)
 		resp.Error = err
 	} else {
+		tokens := gpt_bpe.TokensFromBin(&binTokens)
+		if params.TrimResponses {
+			tokens, err = api.encoder.TrimIncompleteSentence(tokens)
+		}
 		resp.EncodedResponse = apiResp.Output
-		resp.Response = api.encoder.Decode(gpt_bpe.TokensFromBin(&binTokens))
+		resp.Response = api.encoder.Decode(tokens)
 	}
 	return resp
 }
