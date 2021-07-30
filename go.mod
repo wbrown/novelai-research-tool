@@ -11,6 +11,6 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/jdkato/prose/v2 v2.0.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
+	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 )

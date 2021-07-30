@@ -3,6 +3,7 @@ package nrt
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/wbrown/novelai-research-tool/aimodules"
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
 	"github.com/wbrown/novelai-research-tool/scenario"
 	"io/ioutil"
@@ -28,6 +29,7 @@ func (ph *PlaceholderMap) toMap() (ret map[string]string) {
 type PermutationsSpec struct {
 	Model                  []string            `json:"model"`
 	Prefix                 []string            `json:"prefix"`
+	ModuleFilename         []string            `json:"module_filename"`
 	PromptFilename         []string            `json:"prompt_filename"`
 	Prompt                 []string            `json:"prompt"`
 	Memory                 []string            `json:"memory"`
@@ -48,29 +50,56 @@ type ContentTest struct {
 	OutputPrefix     string                        `json:"output_prefix"`
 	PromptFilename   string                        `json:"prompt_filename"`
 	ScenarioFilename string                        `json:"scenario_filename"`
+	ModuleFilename   string                        `json:"module_filename"`
 	Prompt           string                        `json:"prompt"`
 	Memory           string                        `json:"memory"`
 	AuthorsNote      string                        `json:"authors_note"`
-	MaxTokens        int                           `json:"max_tokens"`
-	Iterations       int                           `json:"iterations"`
-	Generations      int                           `json:"generations"`
+	MaxTokens        *int                           `json:"max_tokens"`
+	Iterations       *int                           `json:"iterations"`
+	Generations      *int                           `json:"generations"`
 	Parameters       novelai_api.NaiGenerateParams `json:"parameters"`
 	Permutations     []PermutationsSpec            `json:"permutations"`
 	Placeholders     PlaceholderMap                `json:"placeholders"`
 	WorkingDir       string
 	PromptPath       string
 	ScenarioPath     string
+	ModulePath       string
 	Scenario         *scenario.Scenario
+	AIModule         *aimodules.AIModule
 	API              novelai_api.NovelAiAPI
 }
 
 func MakeDefaultContentTest() (ct ContentTest) {
+	maxTokens := 2048
+	iterations := 10
+	generations := 25
 	ct.OutputPrefix = "./"
-	ct.MaxTokens = 2048
-	ct.Iterations = 10
-	ct.Generations = 25
+	ct.MaxTokens = &maxTokens
+	ct.Iterations = &iterations
+	ct.Generations = &generations
 	ct.WorkingDir = "./"
 	return ct
+}
+
+func (ct *ContentTest) CoerceContentTest(other *ContentTest) {
+	if ct.OutputPrefix == "" {
+		ct.OutputPrefix = other.OutputPrefix
+	}
+	if ct.PromptFilename == "" {
+		ct.PromptFilename = other.PromptFilename
+	}
+	if ct.OutputPrefix == "" {
+		ct.OutputPrefix = other.OutputPrefix
+	}
+	if ct.MaxTokens == nil {
+		ct.MaxTokens = other.MaxTokens
+	}
+	if ct.Iterations == nil {
+		ct.Iterations = other.Iterations
+	}
+	if ct.Generations == nil {
+		ct.Generations = other.Generations
+	}
 }
 
 type ContentTests []ContentTest
@@ -109,7 +138,7 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	ct.Scenario.SetAuthorsNote(ct.AuthorsNote)
 	throttle := time.NewTimer(1100 * time.Millisecond)
 	for generation := 0; generation < generations; generation++ {
-		submission, ctxReport := ct.Scenario.GenerateContext(context, ct.MaxTokens)
+		submission, ctxReport := ct.Scenario.GenerateContext(context, *ct.MaxTokens)
 		if generation == generations-1 {
 			ct.Parameters.TrimResponses = true
 		}
@@ -175,6 +204,12 @@ func (ct ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
 					break
 				}
 			}
+		case "ModuleFilename":
+			fieldValueRepr = strings.Replace(
+				strings.Replace(
+					filepath.Base(fmt.Sprintf("%v",
+						ct.ModuleFilename)), "-", "_", -1),
+				".", "_", -1)
 		case "PromptFilename":
 			fieldValueRepr = strings.Replace(
 				strings.Replace(
@@ -216,6 +251,11 @@ func (ct ContentTest) FieldsSame(fields []string, other ContentTest) bool {
 			continue
 		case "AuthorsNote":
 			if ct.AuthorsNote != other.AuthorsNote {
+				return false
+			}
+			continue
+		case "ModuleFilename":
+			if ct.ModuleFilename != other.ModuleFilename {
 				return false
 			}
 			continue
@@ -280,6 +320,20 @@ func resolvePermutation(origPermutation ContentTest,
 					os.Exit(1)
 				}
 				permutation.loadPrompt(permutation.PromptPath)
+			}
+		case "ModuleFilename":
+			permutation.ModuleFilename = fmt.Sprintf("%v", value)
+			if len(permutation.ModuleFilename) > 0 {
+				permutation.ModulePath = filepath.Join(permutation.WorkingDir,
+					permutation.ModuleFilename)
+				if _, err := os.Stat(permutation.ModulePath); os.IsNotExist(err) {
+					log.Printf("nrt: Module file `%s` does not exist!\n",
+						permutation.ModulePath)
+					os.Exit(1)
+				}
+				aimodule := aimodules.AIModuleFromFile(permutation.ModulePath)
+				permutation.AIModule = &aimodule
+				permutation.Scenario.Settings.Prefix = permutation.AIModule.ToPrefix()
 			}
 		case "Model":
 			permutation.Parameters.Model = value.String()
@@ -408,9 +462,9 @@ func (ct ContentTest) Perform() {
 	ct.AuthorsNote = ct.Scenario.PlaceholderMap.ReplacePlaceholders(ct.AuthorsNote)
 	reporters := ct.MakeReporters()
 	defer reporters.close()
-	for iteration := 0; iteration < ct.Iterations; iteration++ {
+	for iteration := 0; iteration < *ct.Iterations; iteration++ {
 		reporters.ReportIteration(iteration)
-		responses := ct.performGenerations(ct.Generations, ct.Prompt, &reporters)
+		responses := ct.performGenerations(*ct.Generations, ct.Prompt, &reporters)
 		reporters.SerializeIteration(&responses)
 	}
 }
@@ -426,9 +480,6 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 		log.Printf("nrt: Error loading JSON specification file `%s`: %v", path, err)
 		os.Exit(1)
 	}
-	if test.MaxTokens == 0 {
-		test.MaxTokens = 2048
-	}
 	if test.OutputPrefix == "" {
 		log.Println("nrt: `output_prefix` must be set to a non-empty string.\n")
 		os.Exit(1)
@@ -443,7 +494,6 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 		log.Println("nrt: you cannot have both `prompt_filename` and `prompt` set")
 		os.Exit(1)
 	}
-
 	test.WorkingDir = filepath.Dir(path)
 	if test.ScenarioFilename != "" {
 		test.ScenarioPath = filepath.Join(test.WorkingDir, test.ScenarioFilename)
@@ -465,6 +515,18 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 	} else {
 		test.Parameters.CoerceDefaults()
 	}
+	if test.ModuleFilename != "" {
+		test.ModulePath = filepath.Join(test.WorkingDir,
+			test.ModuleFilename)
+		if _, err := os.Stat(test.ModulePath); os.IsNotExist(err) {
+			log.Printf("nrt: Module file `%s` does not exist!\n",
+				test.ModulePath)
+			os.Exit(1)
+		}
+		aimodule := aimodules.AIModuleFromFile(test.ModulePath)
+		test.AIModule = &aimodule
+		test.Parameters.Prefix = test.AIModule.ToPrefix()
+	}
 	if test.PromptFilename != "" {
 		test.PromptPath = filepath.Join(test.WorkingDir, test.PromptFilename)
 		if _, err := os.Stat(test.PromptPath); os.IsNotExist(err) {
@@ -479,6 +541,8 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 		test.Scenario = &scenarioSpec
 		test.Scenario.Settings.Parameters.CoerceNullValues(test.Parameters)
 	}
+	defaultTest := MakeDefaultContentTest()
+	test.CoerceContentTest(&defaultTest)
 	return test
 }
 

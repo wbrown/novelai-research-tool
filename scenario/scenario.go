@@ -3,6 +3,7 @@ package scenario
 import (
 	"encoding/json"
 	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
+	"github.com/wbrown/novelai-research-tool/aimodules"
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
 	"io/ioutil"
 	"log"
@@ -94,18 +95,27 @@ type ScenarioSettings struct {
 	Prefix        string `json:"prefix"`
 }
 
+type ScenarioAIModule struct {
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	RemoteID    string `json:"remoteId"`
+}
+
 type Scenario struct {
-	ScenarioVersion int                `json:"scenarioVersion""`
-	Title           string             `json:"title"`
-	Author          string             `json:"author"`
-	Description     string             `json:"description"`
-	Prompt          string             `json:"prompt"`
-	Tags            []string           `json:"tags"`
-	Context         []ContextEntry     `json:"context"`
-	Settings        ScenarioSettings   `json:"settings"`
-	Lorebook        Lorebook           `json:"lorebook"`
-	Placeholders    []Placeholder      `json:"placeholders"`
-	PlaceholderMap  Placeholders
+	ScenarioVersion  int               `json:"scenarioVersion""`
+	Title            string            `json:"title"`
+	Author           string            `json:"author"`
+	Description      string            `json:"description"`
+	Prompt           string            `json:"prompt"`
+	Tags             []string          `json:"tags"`
+	Context          []ContextEntry    `json:"context"`
+	Settings         ScenarioSettings  `json:"settings"`
+	Lorebook         Lorebook          `json:"lorebook"`
+	Placeholders     []Placeholder     `json:"placeholders"`
+	ScenarioAIModule *ScenarioAIModule `json:"aiModule"`
+	AIModule         *aimodules.AIModule
+	PlaceholderMap   Placeholders
 }
 
 type ContextReportEntry struct {
@@ -358,7 +368,7 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 				reserved = len(*ctx.Tokens)
 			}
 		}
-		trimmedTokens := ctx.ResolveTrim(budget+reserved)
+		trimmedTokens := ctx.ResolveTrim(budget + reserved)
 		numTokens := len(*trimmedTokens)
 		budget -= numTokens - reserved
 		reservations -= reserved
@@ -464,14 +474,14 @@ func extractPlaceholderDefs(rgx *regexp.Regexp, text string) (variables Placehol
 }
 
 func (target *Placeholders) UpdateValues(kvs map[string]string) {
-	for k, v := range(kvs) {
+	for k, v := range kvs {
 		if entry, ok := (*target)[k]; ok {
 			entry.Value = v
 			(*target)[k] = entry
 		} else {
 			(*target)[k] = Placeholder{
 				Variable: k,
-				Value: v,
+				Value:    v,
 			}
 		}
 	}
@@ -614,6 +624,14 @@ func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scen
 		}
 		scenario.Lorebook.Entries[loreIdx] = loreEntry
 	}
+	if scenario.ScenarioAIModule != nil {
+		aimodule := aimodules.AIModuleFromArgs(
+			scenario.ScenarioAIModule.Id,
+			scenario.ScenarioAIModule.Name,
+			scenario.ScenarioAIModule.Description)
+		scenario.AIModule = &aimodule
+	}
+
 	scenario.Settings.Parameters.CoerceDefaults()
 	scenario.Settings.Parameters.Prefix = scenario.Settings.Prefix
 	*scenario.Settings.Parameters.BanBrackets = scenario.Settings.BanBrackets
