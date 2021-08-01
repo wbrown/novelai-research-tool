@@ -2,8 +2,8 @@ package scenario
 
 import (
 	"encoding/json"
-	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
 	"github.com/wbrown/novelai-research-tool/aimodules"
+	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
 	"io/ioutil"
 	"log"
@@ -358,6 +358,10 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 	sort.Sort(sort.Reverse(contexts))
 	contextReport := make(ContextReport, 0)
 	newContexts := make([]string, 0)
+	// Reserve 20 tokens if we're using an AI module.
+	if scenario.Settings.Parameters.Prefix != "vanilla" {
+		budget -= 20
+	}
 	for ctxIdx := range contexts {
 		ctx := contexts[ctxIdx]
 		reserved := 0

@@ -23,27 +23,27 @@ func (ph *PlaceholderMap) toMap() (ret map[string]string) {
 	for k, v := range *ph {
 		ret[k] = v
 	}
-	return  ret
+	return ret
 }
 
 type PermutationsSpec struct {
-	Model                  []string            `json:"model"`
-	Prefix                 []string            `json:"prefix"`
-	ModuleFilename         []string            `json:"module_filename"`
-	PromptFilename         []string            `json:"prompt_filename"`
-	Prompt                 []string            `json:"prompt"`
-	Memory                 []string            `json:"memory"`
-	AuthorsNote            []string            `json:"authors_note"`
-	Placeholders           []PlaceholderMap    `json:"placeholders"`
-	Temperature            []*float64          `json:"temperature"`
-	MaxLength              []*uint             `json:"max_length"`
-	MinLength              []*uint             `json:"min_length"`
-	TopK                   []*uint             `json:"top_k"`
-	TopP                   []*float64          `json:"top_p"`
-	TailFreeSampling       []*float64          `json:"tail_free_sampling"`
-	RepetitionPenalty      []*float64          `json:"repetition_penalty"`
-	RepetitionPenaltyRange []*uint             `json:"repetition_penalty_range"`
-	RepetitionPenaltySlope []*float64          `json:"repetition_penalty_slope"`
+	Model                  []string         `json:"model"`
+	Prefix                 []string         `json:"prefix"`
+	ModuleFilename         []string         `json:"module_filename"`
+	PromptFilename         []string         `json:"prompt_filename"`
+	Prompt                 []string         `json:"prompt"`
+	Memory                 []string         `json:"memory"`
+	AuthorsNote            []string         `json:"authors_note"`
+	Placeholders           []PlaceholderMap `json:"placeholders"`
+	Temperature            []*float64       `json:"temperature"`
+	MaxLength              []*uint          `json:"max_length"`
+	MinLength              []*uint          `json:"min_length"`
+	TopK                   []*uint          `json:"top_k"`
+	TopP                   []*float64       `json:"top_p"`
+	TailFreeSampling       []*float64       `json:"tail_free_sampling"`
+	RepetitionPenalty      []*float64       `json:"repetition_penalty"`
+	RepetitionPenaltyRange []*uint          `json:"repetition_penalty_range"`
+	RepetitionPenaltySlope []*float64       `json:"repetition_penalty_slope"`
 }
 
 type ContentTest struct {
@@ -54,9 +54,9 @@ type ContentTest struct {
 	Prompt           string                        `json:"prompt"`
 	Memory           string                        `json:"memory"`
 	AuthorsNote      string                        `json:"authors_note"`
-	MaxTokens        *int                           `json:"max_tokens"`
-	Iterations       *int                           `json:"iterations"`
-	Generations      *int                           `json:"generations"`
+	MaxTokens        *int                          `json:"max_tokens"`
+	Iterations       *int                          `json:"iterations"`
+	Generations      *int                          `json:"generations"`
 	Parameters       novelai_api.NaiGenerateParams `json:"parameters"`
 	Permutations     []PermutationsSpec            `json:"permutations"`
 	Placeholders     PlaceholderMap                `json:"placeholders"`
@@ -537,7 +537,7 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 	}
 	if test.ScenarioFilename == "" {
 		scenarioSpec := scenario.ScenarioFromSpec(test.Prompt, test.Memory,
-				test.AuthorsNote)
+			test.AuthorsNote)
 		test.Scenario = &scenarioSpec
 		test.Scenario.Settings.Parameters.CoerceNullValues(test.Parameters)
 	}
@@ -561,7 +561,7 @@ func MakeTestFromScenario(path string) (test ContentTest) {
 		test.Scenario = &sc
 	}
 	test.WorkingDir = filepath.Dir(path)
-	test.OutputPrefix = strings.Replace(filepath.Base(path),".scenario", "", -1)
+	test.OutputPrefix = strings.Replace(filepath.Base(path), ".scenario", "", -1)
 	test.Prompt = test.Scenario.Prompt
 	test.Memory = test.Scenario.Context[0].Text
 	test.AuthorsNote = test.Scenario.Context[1].Text
