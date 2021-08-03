@@ -225,10 +225,10 @@ func (ct ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
 				fieldValueRepr = fmt.Sprintf("%v", ctVal)
 			}
 		}
-		fieldValueRepr = strings.Replace(
+		fieldValueRepr = strings.Replace(strings.Replace(
 			strings.Replace(fmt.Sprintf("%v",
 				fieldValueRepr), "-", "_", -1),
-			".", "_", -1)
+			".", "_", -1), ":", "_", -1)
 		label += fieldName + "=" + fieldValueRepr
 	}
 	return label
