@@ -88,13 +88,6 @@ type Lorebook struct {
 	Settings LorebookSettings `json:"settings"`
 }
 
-type ScenarioSettings struct {
-	Parameters    novelai_api.NaiGenerateParams
-	TrimResponses bool   `json:"trimResponses"`
-	BanBrackets   bool   `json:"banBrackets"`
-	Prefix        string `json:"prefix"`
-}
-
 type ScenarioAIModule struct {
 	Id          string `json:"id"`
 	Name        string `json:"name"`
@@ -102,20 +95,27 @@ type ScenarioAIModule struct {
 	RemoteID    string `json:"remoteId"`
 }
 
+type ScenarioSettings struct {
+	Parameters       novelai_api.NaiGenerateParams `json:"parameters"`
+	TrimResponses    bool                          `json:"trimResponses"`
+	BanBrackets      bool                          `json:"banBrackets"`
+	Prefix           string                        `json:"prefix"`
+	ScenarioAIModule *ScenarioAIModule             `json:"aiModule"`
+}
+
 type Scenario struct {
-	ScenarioVersion  int               `json:"scenarioVersion""`
-	Title            string            `json:"title"`
-	Author           string            `json:"author"`
-	Description      string            `json:"description"`
-	Prompt           string            `json:"prompt"`
-	Tags             []string          `json:"tags"`
-	Context          []ContextEntry    `json:"context"`
-	Settings         ScenarioSettings  `json:"settings"`
-	Lorebook         Lorebook          `json:"lorebook"`
-	Placeholders     []Placeholder     `json:"placeholders"`
-	ScenarioAIModule *ScenarioAIModule `json:"aiModule"`
-	AIModule         *aimodules.AIModule
-	PlaceholderMap   Placeholders
+	ScenarioVersion int              `json:"scenarioVersion""`
+	Title           string           `json:"title"`
+	Author          string           `json:"author"`
+	Description     string           `json:"description"`
+	Prompt          string           `json:"prompt"`
+	Tags            []string         `json:"tags"`
+	Context         []ContextEntry   `json:"context"`
+	Settings        ScenarioSettings `json:"settings"`
+	Lorebook        Lorebook         `json:"lorebook"`
+	Placeholders    []Placeholder    `json:"placeholders"`
+	AIModule        *aimodules.AIModule
+	PlaceholderMap  Placeholders
 }
 
 type ContextReportEntry struct {
@@ -628,11 +628,11 @@ func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scen
 		}
 		scenario.Lorebook.Entries[loreIdx] = loreEntry
 	}
-	if scenario.ScenarioAIModule != nil {
+	if scenario.Settings.ScenarioAIModule != nil {
 		aimodule := aimodules.AIModuleFromArgs(
-			scenario.ScenarioAIModule.Id,
-			scenario.ScenarioAIModule.Name,
-			scenario.ScenarioAIModule.Description)
+			scenario.Settings.ScenarioAIModule.Id,
+			scenario.Settings.ScenarioAIModule.Name,
+			scenario.Settings.ScenarioAIModule.Description)
 		scenario.AIModule = &aimodule
 	}
 

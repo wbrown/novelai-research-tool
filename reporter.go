@@ -19,6 +19,30 @@ func handleWrite(f *os.File, s string) {
 	}
 }
 
+func (ct *ContentTest) generateParamRepr() (paramRepr string) {
+	fields := reflect.TypeOf(ct.Parameters)
+	for field := 0; field < fields.NumField(); field++ {
+		var fieldValues reflect.Value
+		fieldName := fields.FieldByIndex([]int{field}).Name
+		if fieldValues.Kind() == reflect.Ptr {
+			fieldValues = fieldValues.Elem()
+		}
+		switch fieldName {
+		case "ModuleFilename":
+			fieldValues = reflect.ValueOf(ct.GetModuleFilename())
+		case "Prefix":
+			fieldValues = reflect.ValueOf(ct.GetPrefixName())
+		default:
+			fieldValues = reflect.ValueOf(ct.Parameters).Field(field)
+			if fieldValues.Kind() == reflect.Ptr {
+				fieldValues = fieldValues.Elem()
+			}
+		}
+		paramRepr += fmt.Sprintf("%25v: %v\n", fieldName, fieldValues)
+	}
+	return paramRepr
+}
+
 //
 // ConsoleReporter - reports on test progress to the console for the user
 //
@@ -37,26 +61,17 @@ func (ct *ContentTest) CreateConsoleReporter() (ur ConsoleReporter) {
 	ur.blueNewline = ur.blue("\\n") + "\n"
 	ur.green = color.New(color.FgWhite, color.BgGreen).SprintFunc()
 	ur.greenNewline = ur.green("\\n") + "\n"
-	fields := reflect.TypeOf(ct.Parameters)
 	fmt.Printf("%v\n", ur.blue("Parameters:"))
-	for field := 0; field < fields.NumField(); field++ {
-		fieldName := fields.FieldByIndex([]int{field}).Name
-		fieldValues := reflect.ValueOf(ct.Parameters).Field(field)
-		if fieldValues.Kind() == reflect.Ptr {
-			fieldValues = fieldValues.Elem()
-		}
-		fmt.Printf("%25v: %v\n", fieldName, fieldValues)
-	}
+	fmt.Printf("%s", ct.generateParamRepr())
 	fmt.Printf("%v\n", ur.blue("Placeholders:"))
 	for _, v := range ct.Scenario.PlaceholderMap {
 		fmt.Printf("%25s: \"%s\"\n", v.Variable, v.Value)
 	}
-
 	return ur
 }
 
 func (cr *ConsoleReporter) ReportIteration(iteration int) {
-	fmt.Printf("%v %v / %v\n", cr.blue("Iteration:"), iteration+1, cr.ct.Iterations)
+	fmt.Printf("%v %v / %v\n", cr.blue("Iteration:"), iteration+1, *cr.ct.Iterations)
 	fmt.Printf("%v %v\n", cr.blue("Prompt:"),
 		strings.Replace(cr.ct.Prompt, "\n", cr.blueNewline, -1))
 	if len(cr.ct.Memory) > 0 {
@@ -150,24 +165,13 @@ func (ct ContentTest) CreateTextReporter(path string) (textReporter TextReporter
 		log.Printf("reporter: Cannot open file for writing: `%s`: %s", path, err)
 		os.Exit(1)
 	}
-	paramsReportBytes, err := json.MarshalIndent(ct.Parameters, "", "")
-	if err != nil {
-		log.Printf("reporter: Cannot marshal JSON: %v, %v", ct.Parameters, err)
-		os.Exit(1)
-	}
+	paramsReport := ct.generateParamRepr()
 	phReport := ""
 	for _, v := range ct.Scenario.PlaceholderMap {
-		phReport += fmt.Sprintf("%s:\"%s\"\n", v.Variable, v.Value)
+		phReport += fmt.Sprintf("%25s:\"%s\"\n", v.Variable, v.Value)
 	}
-	replacer := strings.NewReplacer(
-		"{\n", "",
-		"}", "",
-		",", "",
-		"\"", "",
-	)
-	paramsReport := replacer.Replace(string(paramsReportBytes))
 	handleWrite(textReporter.fileHandle, "=== Parameters ====================================\n")
-	handleWrite(textReporter.fileHandle, paramsReport+"\n")
+	handleWrite(textReporter.fileHandle, paramsReport)
 	handleWrite(textReporter.fileHandle, "=== Placeholders ==================================\n")
 	handleWrite(textReporter.fileHandle, phReport)
 	handleWrite(textReporter.fileHandle, "=== Prompt ========================================\n")

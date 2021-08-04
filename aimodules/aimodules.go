@@ -54,9 +54,11 @@ func (aimodule *AIModule) ToPrefix() string {
 func AIModuleFromArgs(id string, name string, description string) AIModule {
 	idSplit := strings.Split(id, ":")
 	return AIModule{
-		Model:    idSplit[0],
-		PrefixID: idSplit[1],
-		Hash:     idSplit[2],
+		Model:       idSplit[0],
+		PrefixID:    idSplit[1],
+		Hash:        idSplit[2],
+		Name:        name,
+		Description: description,
 	}
 }
 

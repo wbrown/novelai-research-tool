@@ -158,7 +158,40 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	return results
 }
 
-func (ct ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
+func makeFileNameSafe(s string) string {
+	return strings.NewReplacer(
+		"-", "_",
+		".", "_",
+		":", "_",
+		" ", "_").Replace(s)
+}
+
+func (ct *ContentTest) GetModuleFilename() (moduleFile string) {
+	if ct.ModuleFilename != "" {
+		return ct.ModuleFilename
+	} else if ct.Scenario != nil && ct.Scenario.AIModule != nil &&
+		ct.Parameters.Prefix == ct.Scenario.AIModule.ToPrefix() &&
+		ct.ScenarioFilename != "" {
+		return ct.ScenarioFilename
+	} else {
+		return "unknown"
+	}
+}
+
+func (ct *ContentTest) GetPrefixName() (prefixName string) {
+	if ct.Scenario != nil && ct.Scenario.AIModule != nil &&
+		ct.Parameters.Prefix == ct.Scenario.AIModule.ToPrefix() &&
+		len(ct.Scenario.AIModule.Name) != 0 {
+		prefixName = ct.Scenario.AIModule.Name
+	} else if ct.AIModule != nil {
+		prefixName = ct.AIModule.Name
+	} else {
+		prefixName = ct.Parameters.Prefix
+	}
+	return prefixName
+}
+
+func (ct *ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
 	fieldNames := make([]string, 0)
 	fields := reflect.TypeOf(spec)
 	for field := 0; field < fields.NumField(); field++ {
@@ -176,6 +209,8 @@ func (ct ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
 		fieldName := fieldNames[fieldIdx]
 		fieldValueRepr := "#0"
 		switch fieldName {
+		case "Prefix":
+			fieldValueRepr = ct.GetPrefixName()
 		case "Placeholders":
 			for placeholderIdx := range spec.Placeholders {
 				if reflect.DeepEqual(spec.Placeholders[placeholderIdx], ct.Placeholders) {
@@ -205,11 +240,7 @@ func (ct ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
 				}
 			}
 		case "ModuleFilename":
-			fieldValueRepr = strings.Replace(
-				strings.Replace(
-					filepath.Base(fmt.Sprintf("%v",
-						ct.ModuleFilename)), "-", "_", -1),
-				".", "_", -1)
+			fieldValueRepr = ct.GetModuleFilename()
 		case "PromptFilename":
 			fieldValueRepr = strings.Replace(
 				strings.Replace(
@@ -225,10 +256,7 @@ func (ct ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
 				fieldValueRepr = fmt.Sprintf("%v", ctVal)
 			}
 		}
-		fieldValueRepr = strings.Replace(strings.Replace(
-			strings.Replace(fmt.Sprintf("%v",
-				fieldValueRepr), "-", "_", -1),
-			".", "_", -1), ":", "_", -1)
+		fieldValueRepr = makeFileNameSafe(fmt.Sprintf("%v", fieldValueRepr))
 		label += fieldName + "=" + fieldValueRepr
 	}
 	return label
@@ -331,9 +359,14 @@ func resolvePermutation(origPermutation ContentTest,
 						permutation.ModulePath)
 					os.Exit(1)
 				}
-				aimodule := aimodules.AIModuleFromFile(permutation.ModulePath)
-				permutation.AIModule = &aimodule
+				aiModule := aimodules.AIModuleFromFile(permutation.ModulePath)
+				permutation.AIModule = &aiModule
 				permutation.Scenario.Settings.Prefix = permutation.AIModule.ToPrefix()
+				permutation.Scenario.Settings.ScenarioAIModule = &scenario.ScenarioAIModule{
+					Name: aiModule.Name,
+					Id: permutation.Scenario.Settings.Prefix,
+					Description: aiModule.Description,
+				}
 			}
 		case "Model":
 			permutation.Parameters.Model = value.String()
