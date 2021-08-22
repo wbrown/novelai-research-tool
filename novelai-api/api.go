@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 )
 
 type NovelAiAPI struct {
@@ -46,7 +47,8 @@ type NaiGenerateParams struct {
 	UseCache               bool        `json:"use_cache"`
 	UseString              bool        `json:"use_string"`
 	ReturnFullText         bool        `json:"return_full_text"`
-	TrimResponses          bool        `json:"trim_responses"`
+	TrimResponses          *bool        `json:"trim_responses"`
+	TrimSpaces             *bool        `json:"trim_spaces"`
 }
 
 type NaiGenerateResp struct {
@@ -132,6 +134,9 @@ func (params *NaiGenerateParams) CoerceNullValues(other NaiGenerateParams) {
 	if params.BadWordsIds == nil {
 		params.BadWordsIds = other.BadWordsIds
 	}
+	if params.TrimSpaces == nil {
+		params.TrimSpaces = other.TrimSpaces
+	}
 }
 
 func (params *NaiGenerateParams) CoerceDefaults() {
@@ -151,6 +156,7 @@ func NewGenerateParams() NaiGenerateParams {
 	repPenSlope := 6.57
 	banBrackets := true
 	badWordsIds := make([][]uint16, 0)
+	trimSpaces := true
 	return NaiGenerateParams{
 		Model:                  "6B-v3",
 		Prefix:                 "vanilla",
@@ -168,6 +174,7 @@ func NewGenerateParams() NaiGenerateParams {
 		UseCache:               false,
 		UseString:              false,
 		ReturnFullText:         false,
+		TrimSpaces:             &trimSpaces,
 	}
 }
 
@@ -298,6 +305,9 @@ func NewNovelAiAPI() NovelAiAPI {
 }
 
 func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGenerateParams) (resp NaiGenerateResp) {
+	if params.TrimSpaces == nil || *params.TrimSpaces == true {
+		*content = strings.TrimRight(*content, " \t")
+	}
 	encoded := api.encoder.Encode(content)
 	encodedBytes := encoded.ToBin()
 	encodedBytes64 := base64.StdEncoding.EncodeToString(*encodedBytes)
@@ -311,7 +321,7 @@ func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGeneratePara
 		resp.Error = err
 	} else {
 		tokens := gpt_bpe.TokensFromBin(&binTokens)
-		if params.TrimResponses {
+		if params.TrimResponses != nil && *params.TrimResponses == true {
 			tokens, err = api.encoder.TrimIncompleteSentence(tokens)
 		}
 		resp.EncodedResponse = apiResp.Output

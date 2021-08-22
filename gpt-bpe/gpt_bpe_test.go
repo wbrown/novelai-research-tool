@@ -1,6 +1,7 @@
 package gpt_bpe
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
@@ -186,6 +187,18 @@ func TestGPTEncoder_Encode(t *testing.T) {
 		AssertEqual(t, tokensPtr, EncoderTests[testIdx].Expected)
 	}
 
+}
+
+
+func TestGPTEncoder_Decode2(t *testing.T) {
+	encodedCorprus := "NrGIEOQBRzFfAQEBCAE5GeADPCFGAQhdBgFhBkcHXwEBATM5HgGilUYBpAdDEaUheR8iAQEBmgSnbyQpRgHIjaYBiSQYLfoHYwHogg0A0AHsGFUmpgEGAcd0qApjAzwa7hscAeHAYwEGAbYRB3UiAax0PQPjAgoXpgEGAZgE6G2gAWMExy5GAb5szQdGAXUBAR2gAVQBRgG8CdYBYbCgAe4QAxg/NA0AdyoiAZMGOXL8AWlmAQGgFXknNlIGAdADLiciAT4B6lk="
+	if binTokens, err := base64.StdEncoding.DecodeString(encodedCorprus); err != nil {
+		log.Println("ERROR:", err)
+	} else {
+		tokens := TokensFromBin(&binTokens)
+		tokens, err = encoder.TrimIncompleteSentence(tokens)
+		print(encoder.Decode(tokens))
+	}
 }
 
 func TestGPTEncoder_Decode(t *testing.T) {

@@ -140,7 +140,8 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	for generation := 0; generation < generations; generation++ {
 		submission, ctxReport := ct.Scenario.GenerateContext(context, *ct.MaxTokens)
 		if generation == generations-1 {
-			ct.Parameters.TrimResponses = true
+			trimTrue := true
+			ct.Parameters.TrimResponses = &trimTrue
 		}
 		resp := ct.API.GenerateWithParams(&submission, ct.Parameters)
 		if generation == 0 {

@@ -29,6 +29,7 @@ type GPTEncoder struct {
 	decoder    map[Token][]byte
 	bpe_ranks  map[GPTPair]float64
 	pattern    *regexp.Regexp
+	puncPat    *regexp.Regexp
 	byteToRune [256]rune
 	runeToByte map[rune]byte
 	cache      *lru.Cache
@@ -87,6 +88,11 @@ func NewEncoder() GPTEncoder {
 		log.Printf("gpt_bpe: Fatal error compiling regular expression: %v", err)
 		os.Exit(1)
 	}
+	puncPat, err := regexp.Compile("\\p{L}[.!?;]\\p{L}")
+	if err != nil {
+		log.Printf("gpt_bpe: Fatal error compiling regular expression: %v", err)
+		os.Exit(1)
+	}
 	// Build the bytes to unicode tables.
 	bytesUnicodeMap := make(map[byte]rune)
 	unicodeBytes := make(map[rune]byte)
@@ -119,6 +125,7 @@ func NewEncoder() GPTEncoder {
 		tokensEncoder,
 		bpeRanks,
 		pat,
+		puncPat,
 		bytesUnicode,
 		unicodeBytes,
 		cache,
