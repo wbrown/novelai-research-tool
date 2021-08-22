@@ -136,6 +136,7 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	results.Parameters = ct.Parameters
 	ct.Scenario.SetMemory(ct.Memory)
 	ct.Scenario.SetAuthorsNote(ct.AuthorsNote)
+	priorTrim := ct.Parameters.TrimResponses
 	throttle := time.NewTimer(1100 * time.Millisecond)
 	for generation := 0; generation < generations; generation++ {
 		submission, ctxReport := ct.Scenario.GenerateContext(context, *ct.MaxTokens)
@@ -144,6 +145,7 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 			ct.Parameters.TrimResponses = &trimTrue
 		}
 		resp := ct.API.GenerateWithParams(&submission, ct.Parameters)
+		ct.Parameters.TrimResponses = priorTrim
 		if generation == 0 {
 			results.Encoded.Prompt = resp.EncodedRequest
 		}

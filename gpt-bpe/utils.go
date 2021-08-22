@@ -101,11 +101,7 @@ func (encoder GPTEncoder) TrimIncompleteSentence(tokens *Tokens) (*Tokens, error
 	}
 	lastSentence := sentences[len(sentences)-1]
 	var last rune
-	for idx, r := range lastSentence {
-		if unicode.IsPunct(r) {
-			println(idx, string(r))
-			continue
-		}
+	for _, r := range lastSentence {
 		if unicode.IsSpace(r) {
 			continue
 		}
@@ -114,9 +110,14 @@ func (encoder GPTEncoder) TrimIncompleteSentence(tokens *Tokens) (*Tokens, error
 	var text = doc.Text
 	if !unicode.IsPunct(last) {
 		trimPos := strings.LastIndex(text, lastSentence)
-		text = doc.Text[:trimPos-1]
+		if trimPos >= 1 {
+			text = doc.Text[:trimPos-1]
+		}
 	}
 	text = strings.TrimSpace(text)
+	if float32(len(text)) < float32(len(doc.Text)) * 0.8 {
+		return tokens, nil
+	}
 	encoded := encoder.Encode(&text)
 	return encoded, nil
 }
