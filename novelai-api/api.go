@@ -199,7 +199,6 @@ func NewGenerateMsg(input string) NaiGenerateMsg {
 }
 
 func generateGenRequest(encoded []byte, accessToken string, backendURI string) *http.Request {
-	println("GOT: ", backendURI)
 	req, _ := http.NewRequest("POST", backendURI + "/ai/generate",
 		bytes.NewBuffer(encoded))
 	req.Header.Set("User-Agent",
