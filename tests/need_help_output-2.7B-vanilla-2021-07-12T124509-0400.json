@@ -1,0 +1,49 @@
+[{
+  "settings": {
+    "model": "2.7B",
+    "prefix": "vanilla",
+    "temperature": 0.55,
+    "max_length": 40,
+    "min_length": 40,
+    "top_k": 140,
+    "top_p": 0.9,
+    "tail_free_sampling": 1,
+    "repetition_penalty": 3.5,
+    "repetition_penalty_range": 1024,
+    "repetition_penalty_slope": 6.57,
+    "bad_words_ids": [],
+    "ban_brackets": true,
+    "use_cache": false,
+    "use_string": false,
+    "return_full_text": false
+  },
+  "prompt": "I need help. I'm not sure what's going on with me, but it's driving me crazy. After looking through the web, I found a Dr. Michael Szozas, who is a renowned psychiatrist and counselor.  Apparently he specializes in unusual cases. I'm not sure if my situation is unusual or not, and I'm not sure how to determine that, so I emailed him anyway.\r\nDr. Szozas was so nice, and he sounded so smart when he responded. He recommended at least an initial consultation. An appointment was made for Monday at 9am.\r\nI'm nervous when I come up to his office; the entrance is a solid wooden door, and I reach out to knock. Rap rap rap. His voice comes, well-modulated and educated, \"Come on in!\"\r\nI step into his office, and my eyes cast about; the lights are set to a soothing dim level, his walls are filled with books. I am tempted to read the titles, but I mustn't be rude, oh no. So I look at the man that is sitting behind his desk.\r\nThe first thing that strikes me is Dr. Szozas' warm, radiant grin -- with dimples! -- that told me that everything was going to be OK. Then these kind hazel eyes twinkling at me from behind a pair of wire-frame glasses. He rises up, and whoa, he's a tall man with a slender lanky frame that causes me to look up a bit at him. He wears a comfortable looking cardigan, and he has a pair of slacks, ending in some loafers. Dr. Szozas walks towards me, and takes my hand in his -- I immediately notice how large and warm his hand is, his skin soft as it wraps around my fingers, \"I'm glad to see you,\" he says, and he seems to mean it. One could fall in love with someone like him so quickly, with his apparent sincerity and kindness.\r\n\"Please, take a seat on the couch, make yourself comfortable.  State for the record your full name, and why you're here,\" he suggests, and he ambles over to sit in a comfortable armchair.  His hazel eyes fixate upon me, drinking and studying every detail of me as he waits for my response.\r\nI hesitate, and sit down on the couch, and I respond, \"",
+  "result": "My name is Jody.\"  I pause, and add, \"And this is my first time meeting you.\"  He nods, and then continues, \"Yes, I can see that.  Why don't you tell me more about yourself?\"  I think back to my life before I came to college, and I remember all the fun times I had with my friends. I talk about them, and they seem to enjoy hearing about their lives. They laugh at my stories, and I feel good about myself.  I have never been one to brag about anything, but I do know that I'm pretty popular with people.  As I talk, I watch his face carefully, trying to figure out what he's thinking. He listens intently, and even asks questions now and again.  When I finish talking, he sits there for a moment, and then he says, \"So, let me see if I understand correctly. You say that you've been having trouble sleeping lately? That you wake up feeling restless, and you just want to get away from everyone?\"  I nod, and he continues, \"That sounds familiar. What happened last night?\"  I answer, \"Well, I was working late, and I got home early, and I went to bed. I woke up earlier this morning, and I realized that I wasn't tired anymore, and I didn't feel sleepy anymore. I felt... I don't know, numb somehow. I thought that maybe I'd gotten used to being awake all day, and that I'd sleep better at night. But when I woke up, I realized that I was still tired, and I couldn't sleep. And that's when I decided to come meet you.\"  He nods, and says, \"OK, so we'll start with that. Do you mind if I ask some questions?\"  I shake my head, and he continues, \"It might",
+  "responses": [
+    "My name is Jody.\"  I pause, and add, \"And this is my first time meeting you.\"  He nods, and then continues, \"Yes, I can see that",
+    ".  Why don't you tell me more about yourself?\"  I think back to my life before I came to college, and I remember all the fun times I had with my friends.",
+    " I talk about them, and they seem to enjoy hearing about their lives. They laugh at my stories, and I feel good about myself.  I have never been one to brag about anything",
+    ", but I do know that I'm pretty popular with people.  As I talk, I watch his face carefully, trying to figure out what he's thinking. He listens intently, and",
+    " even asks questions now and again.  When I finish talking, he sits there for a moment, and then he says, \"So, let me see if I understand correctly. You say that",
+    " you've been having trouble sleeping lately? That you wake up feeling restless, and you just want to get away from everyone?\"  I nod, and he continues, \"That sounds familiar. What",
+    " happened last night?\"  I answer, \"Well, I was working late, and I got home early, and I went to bed. I woke up earlier this morning, and I realized that",
+    " I wasn't tired anymore, and I didn't feel sleepy anymore. I felt... I don't know, numb somehow. I thought that maybe I'd gotten used to being awake all day, and",
+    " that I'd sleep better at night. But when I woke up, I realized that I was still tired, and I couldn't sleep. And that's when I decided to come meet you.\" ",
+    " He nods, and says, \"OK, so we'll start with that. Do you mind if I ask some questions?\"  I shake my head, and he continues, \"It might"
+  ],
+  "encoded": {
+    "prompt": "KAD5Ag0EDQA6AU0ElwF2BoQCUgH4Az8BXwH2AQsA2wFUAVIBwxP2Af0bDQD1CP0HQAMGAZgPCwA6ARMEAQEvBg0AOw9GbY4hJAELAPwBPgEBAXxW53kiAbh8DQDcANwAwnZTAVp0HwEUIWcKDQA6AU0ElwF2BmMCaAICDD4BFCGJAZcBCwAiAToBTQSXAXYGvwIcAYwTRgELAAsCOgH7XqsCJRsNAMkAxgArGA0ARm2OISQBdQELAiUOCwAiAVMB/jkLAmMRagJTAaobDQCnAu8bewEPBhkBjhC3Rg0AHAQNMXUBnQNJAfkMewFcA0EBDQDJAMYAKABNBK8qagI6AQIF/gEcAdEBLwoaAAYBkCg+AQEBfxLGNFwNCwAiAToBTwz3ARwBkykNAPkv/w//Dw0AXwnhDgoICwBwAwwAOhLREiIBKT0LAG4BhUE/AR8BqgnJAMYAKAC/CJAC0QEvCgsAIgFoAocLFg0iAhoABgGkHYUBhAMcAQEBhJ8PFdkECwDRASIehQENF18B+w4NADoBzAJSZhwBTAQGAQoiCwDbAToB/ARNANYBMwEyVgsA6C2FAg0AfgU6ASQDewEGAUYCRgE+AdIVbQjRAQMbDQDJAMYA0AHNAu0FRgH8IvYBPgEvBg0ARm2OISQBBgC2FgsAcKuCQWEFXwEPFUYJAABhBUYBEQX2AUYB5wh1AfgDHAEzATUdDQCsDAkDSwZLLaEBhwuZAqQCTwV7AfYBpgFtCAEBLhQeAWcZDADHOIA7DQCnAmBB/gELACIB/AFAAAsAUwFSAQEBoxxGAl8BAQHIjywBhJprFkYBCBb2ARwBJAP+AQEBawZ7AasCDQCnAq5DAQGIGv0HYQqMFQsAIgFTAdQBAQEuFB4B+QPzEQsAKB0fAWkCxpxsAQ0ALwYNAEZtjiEkAWorKw32AQsAIgHBCmgC/QMfAdEBYQU6AUENow+/AjQGIgG2FtEB/QM+AQsA0QFIEJEKYwFUAYFrQARoAokkCwBuASgATQTLJRwB/gJZASkCUwFzBAsAIgFTARsJHAFMBlQBDQBZB8oCSQgfATIHXwFSCEwCqwILAogLCwBfAdEBPBAVrCIBT10NAMkAxgABAHQVCwDzAwEB3BY/AQYBS0gLABMDtw2IGg0A3ADcADQjSQEGAaQGFgI4BZ4FCwAiAfEFWQE1A+IDKQJTAQwWCwAiAVMBMxM9A3ECHAFyBh8BAQGIGosM0T8NANwA3AD9GUstoQGHC6MQegFiCfYBCwAqHiIBOSsWA3cOHgH2AWMBUwHMbkkBaAJCCw0AyQDGACgAclkLACIBcgZiAz8BBgFLSAsAIgE6AdcLCwBuAQ==",
+    "responses": [
+      "Ug6eBT4BwQFeBA4C3ADcACgAiToLACIB7wILAG4BTgesAT4BaALNAoACsQxZAQ4C3ADcAAgGEYgLACIBFAN9EQsAbgGxFAsAOgHMAf4CRgE=",
+      "DQDcANwASxREA9YBWQEYBvYBBQIiArcNpQbcANwAKAB8A+ACHAFoArQEbgM6AVkGHAE4EAsAIgE6AbEN3QEGAekEfQY6ASYCXwFoApwJDQA=",
+      "OgEZBiICXgILACIB5AEDBRwBQwv2EiIC/wFYDA0AXwRXGXsBaAJTDwsAIgE6AeYEmgMiAgUODQDcANwAKACnAdcESwISAhwBYQNrASICzQc=",
+      "CwDbAToB0gH4AkYBOgFNBL8JmAtfAZUCDQDcANwAugY6ARkGCwA6ASYJ0QHCB10eCwA/CBwByQ73AYQCUwFSARwODQCnAsuI7QHBBQsAIgE=",
+      "BAPVHnsKDwMiAfUCDQDcANwApwg6AVUVLw0LAFMB3ilkAkkBAQEdCgsAIgEUA1MBcwQLAG4BXAkLAB0F9gH+AmMCOgEpB6QkDQCZA44DRgE=",
+      "WQEdBEsCtwb0FhUrmUAeACgFWQFVHv4BaxAppgsAIgFZAY8C/QIcAYsC2QWmAcoJpQbcANwAKADqSAsAIgFTAX0RCwBuAcgJdhQJFQ0ASwc=",
+      "zguqA9sGpQbcANwAKADQDAsAbgGTFgsAOgF1AeIGswoLACIBOgFwBVMFbwcLACIBOgEYBxwBnA8NADoBlEr+AZELrAEBDQsAIgE6ARsbRgE=",
+      "OgG8CdYBMCcvHQsAIgE6AY4F1gHmBCekLx0NADoBeAvaAzoBRAPWAfgCCwC/iq8dDQA6AQ8HRgEXDzoBDQbTHs0DHAFUA71U3QFWBAsAIgE=",
+      "RgE6AQ0GmQ9VBXsB2wYNAHcDagI6AZRK/gELADoBGxtGAToBdQHfAzAnCwAiAToBwQ3WAZkPDQBLA0YBUgFqAjoB+gscAQIFIgdZAQ4C3AA=",
+      "3AAIBhGICwAiAXMECwBuAXQsCwALAmQBnwSbA18BRgENAF0IWQHQB2MCOgHxBGkCewqlBtwA3AAoAN8zaAKeBAsAIgFTAX0RCwBuAQIE3AQ="
+    ]
+  }
+},

@@ -34,6 +34,8 @@ type NaiGenerateParams struct {
 	Label                  string      `json:"label"`
 	Model                  string      `json:"model"`
 	Prefix                 string      `json:"prefix"`
+	LogitMemory			   string	   `json:"memory"`
+	LogitAuthors		   string	   `json:"authorsnote"`
 	Temperature            *float64    `json:"temperature"`
 	MaxLength              *uint       `json:"max_length"`
 	MinLength              *uint       `json:"min_length"`
@@ -45,6 +47,7 @@ type NaiGenerateParams struct {
 	RepetitionPenaltyRange *uint       `json:"repetition_penalty_range"`
 	RepetitionPenaltySlope *float64    `json:"repetition_penalty_slope"`
 	BadWordsIds            *[][]uint16 `json:"bad_words_ids"`
+	LogitBiasIds           *[][]float32 `json:"logit_bias"`	
 	BanBrackets            *bool       `json:"ban_brackets"`
 	UseCache               bool        `json:"use_cache"`
 	UseString              bool        `json:"use_string"`
@@ -84,6 +87,10 @@ func BannedBrackets() [][]uint16 {
 		{48874}, {48999}, {49074}, {49082}, {49146}, {49946}, {10221},
 		{4841}, {1427}, {2602, 834}, {29343}, {37405}, {35780}, {2602},
 		{17202}, {8162}}
+}
+
+func LogitBias() [][]float32 {
+return [][]float32{ {0,0.0} }
 }
 
 func EndOfTextTokens() [][]uint16 {
@@ -139,6 +146,9 @@ func (params *NaiGenerateParams) CoerceNullValues(other NaiGenerateParams) {
 	if params.BadWordsIds == nil {
 		params.BadWordsIds = other.BadWordsIds
 	}
+	if params.LogitBiasIds == nil {
+		params.LogitBiasIds = other.LogitBiasIds
+	}	
 	if params.TrimSpaces == nil {
 		params.TrimSpaces = other.TrimSpaces
 	}
@@ -161,6 +171,7 @@ func NewGenerateParams() NaiGenerateParams {
 	repPenSlope := 6.57
 	banBrackets := true
 	badWordsIds := make([][]uint16, 0)
+	logitBiasIds := make([][]float32, 1)
 	trimSpaces := true
 	return NaiGenerateParams{
 		Model:                  "6B-v3",
@@ -175,6 +186,7 @@ func NewGenerateParams() NaiGenerateParams {
 		RepetitionPenaltyRange: &repPenRange,
 		RepetitionPenaltySlope: &repPenSlope,
 		BadWordsIds:            &badWordsIds,
+		LogitBiasIds:           &logitBiasIds,		
 		BanBrackets:            &banBrackets,
 		UseCache:               false,
 		UseString:              false,
@@ -253,6 +265,9 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (respD
 	params.Parameters.ResolveSamplingParams()
 	if len(*params.Parameters.BadWordsIds) == 0 {
 		params.Parameters.BadWordsIds = nil
+	}
+		if len(*params.Parameters.LogitBiasIds) == 0 {
+		params.Parameters.LogitBiasIds = nil
 	}
 	cl := http.DefaultClient
 	encoded, _ := json.Marshal(params)
