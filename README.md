@@ -294,7 +294,7 @@ You can find tokens with the tokenizer on the site, remember to include a space 
 
 The format for tokens is: ```json
   "authors_note": [[token id, bias as a float]],
-  ```
+```
 
 The example provided in the folder was designed to create long, run-on sentences by reducing the likelyhood that punctuation tokens will appear.
 
@@ -306,7 +306,8 @@ SAVE - Saves the current story to prompt.txt.
 
 BACK - Goes back to the last input/output, there is a maximum of 65536 entries, it may crash after this point.
 
-EDIT - Edits the last output, this is very wonky and clunky, so be warned.```
+EDIT - Edits the last output, this is very wonky and clunky, so be warned.
+```
 
 Enjoy!
 
