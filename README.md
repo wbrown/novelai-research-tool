@@ -297,9 +297,14 @@ The example provided in the folder was designed to create long, run-on sentences
 The client has four options right now, which are used by typing the word IN FULL CAPITALS as your input.
 
 RETRY - Retries the last input, giving you a new output.
+
 SAVE - Saves the current story to prompt.txt.
+
 BACK - Goes back to the last input/output, there is a maximum of 65536 entries, it may crash after this point.
+
 EDIT - Edits the last output, this is very wonky and clunky, so be warned.
+
+Enjoy!
 
 Adventure Game
 --------------
