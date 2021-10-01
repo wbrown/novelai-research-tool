@@ -292,17 +292,21 @@ Logit biases work by increasing the weights of a token, which increases the chan
 A bias of around -8.0 is as effective of banning the token, and around 1.0 to 3.0 makes it much more likely that it'll appear. 
 You can find tokens with the tokenizer on the site, remember to include a space before the word, the majority of the time, the tokens are different. Words that are split up into multiple tokens are significantly more of a pain to deal with, but increasing the bias of the first part, then reducing it for every token afterwords helps.
 
+The format for tokens is: ```json
+  "authors_note": [[token id, bias as a float]],
+  ```
+
 The example provided in the folder was designed to create long, run-on sentences by reducing the likelyhood that punctuation tokens will appear.
 
 The client has four options right now, which are used by typing the word IN FULL CAPITALS as your input.
 
-RETRY - Retries the last input, giving you a new output.
+```RETRY - Retries the last input, giving you a new output.
 
 SAVE - Saves the current story to prompt.txt.
 
 BACK - Goes back to the last input/output, there is a maximum of 65536 entries, it may crash after this point.
 
-EDIT - Edits the last output, this is very wonky and clunky, so be warned.
+EDIT - Edits the last output, this is very wonky and clunky, so be warned.```
 
 Enjoy!
 
