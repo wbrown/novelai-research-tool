@@ -40,6 +40,7 @@ type PermutationsSpec struct {
 	MinLength              []*uint          `json:"min_length"`
 	TopK                   []*uint          `json:"top_k"`
 	TopP                   []*float64       `json:"top_p"`
+	TopA                   []*float64       `json:"top_a"`
 	TailFreeSampling       []*float64       `json:"tail_free_sampling"`
 	RepetitionPenalty      []*float64       `json:"repetition_penalty"`
 	RepetitionPenaltyRange []*uint          `json:"repetition_penalty_range"`
