@@ -294,7 +294,7 @@ You can find tokens with the tokenizer on the site, remember to include a space 
 
 The format for tokens is: 
 ```
-  "authors_note": [[token id, bias as a float]],
+  "authors_note": [[token id, bias as a float],[token,float],[token,float]],
 ```
 
 The example provided in the folder was designed to create long, run-on sentences by reducing the likelyhood that punctuation tokens will appear.
