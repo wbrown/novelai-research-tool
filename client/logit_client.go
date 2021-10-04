@@ -123,6 +123,13 @@ func (adventure Adventure) start() {
     }	
 		}
 		
+		adventure.Parameters.NextWord = false
+		if line == "NEXT"{
+		adventure.Parameters.NextWord = true
+		fmt.Println("\nEXPECTED NEXT TOKENS...\n")
+		
+		}
+		
 	if line == "EDIT"{
 	send = false
 				
@@ -154,11 +161,13 @@ func (adventure Adventure) start() {
 		}
 
 		if send == true{
-		adventure.Context = adventure.Context + line
+		
+		if adventure.Parameters.NextWord == false{
+		adventure.Context = adventure.Context + line}
 		splittext = adventure.Memory+"\n"+adventure.Context
 		splitamt := float64(len(splittext)) *0.025
 		strlen = len(splittext)-16-int(splitamt)
-		fulltext = splittext[:strlen] + "\n"+adventure.AuthorsNote+"\n" + splittext[strlen:]
+		fulltext = splittext[:strlen] +adventure.AuthorsNote + splittext[strlen:]
 		
 		f, err := os.Create("lastinput.txt")
 		_, err2 := f.WriteString(fulltext)
@@ -207,6 +216,12 @@ func (adventure Adventure) start() {
 			}
 		eos_pos = eos_pos-1
 		}
+		
+		if adventure.Parameters.NextWord == true{
+		fmt.Println(colorWhite+"\nPRESS ENTER TO CONTINUE...\n")
+        fmt.Scanln()		
+		}
+		
         cmd := exec.Command("cmd", "/c", "cls") //Windows example, its tested 
         cmd.Stdout = os.Stdout
         cmd.Run()
@@ -218,8 +233,11 @@ func (adventure Adventure) start() {
 
 		
 		fmt.Println(colorDkGrey+adventure.Memory+"\n"+colorGrey+adventure.Context+colorWhite+output+colorDkGrey+"\n"+adventure.AuthorsNote+colorWhite)
+		
+		if adventure.Parameters.NextWord == false{
 		adventure.LastContext = adventure.Context
-				adventure.Context = adventure.Context + output
+		adventure.Context = adventure.Context + output
+		}
 		}else{
 
 		cmd := exec.Command("cmd", "/c", "cls") //Windows example, its tested 

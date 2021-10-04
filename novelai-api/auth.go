@@ -19,22 +19,20 @@ import (
 type AuthConfig struct {
 	Username string `envconfig:"NAI_USERNAME"`
 	Password string `envconfig:"NAI_PASSWORD"`
-	BackendURI string `envconfig:"NAI_BACKEND"`
 }
 
 type NaiKeys struct {
 	EncryptionKey []byte
 	AccessKey     string
 	AccessToken   string
-	Backend       string
 }
 
-func getAccessToken(access_key string, backendURI string) (accessToken string) {
+func getAccessToken(access_key string) (accessToken string) {
 	cl := http.DefaultClient
 	params := make(map[string]string)
 	params["key"] = access_key
 	encoded, _ := json.Marshal(params)
-	req, _ := http.NewRequest("POST", backendURI + "/user/login",
+	req, _ := http.NewRequest("POST", "https://api.novelai.net/user/login",
 		bytes.NewBuffer(encoded))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent",
@@ -52,7 +50,6 @@ func getAccessToken(access_key string, backendURI string) (accessToken string) {
 		}
 		err = json.Unmarshal(body, &resp_decoded)
 		if err != nil {
-			log.Printf("body: %v", string(body))
 			log.Printf("auth: Error unmarshaling JSON response: %v", err)
 			return accessToken
 		}
@@ -103,13 +100,13 @@ func generateUsernames(email string) (usernames []string) {
 	return usernames
 }
 
-func Auth(email string, password string, backendURI string) (keys NaiKeys) {
+func Auth(email string, password string) (keys NaiKeys) {
 	usernames := generateUsernames(email)
 	for userIdx := range usernames {
 		username := usernames[userIdx]
 		keys = naiGenerateKeys(username, password)
 		log.Printf("auth: authenticating for '%s'\n", username)
-		keys.AccessToken = getAccessToken(keys.AccessKey, backendURI)
+		keys.AccessToken = getAccessToken(keys.AccessKey)
 		if len(keys.AccessToken) == 0 {
 			log.Printf("auth: failed for '%s'\n", username)
 		} else {
@@ -131,11 +128,7 @@ func AuthEnv() NaiKeys {
 			"Please ensure that NAI_USERNAME and NAI_PASSWORD are set in your environment.")
 		os.Exit(1)
 	}
-	if len(authCfg.BackendURI) == 0 {
-		authCfg.BackendURI = "https://api.novelai.net"
-	}
-	auth := Auth(authCfg.Username, authCfg.Password, authCfg.BackendURI)
-	auth.Backend = authCfg.BackendURI
+	auth := Auth(authCfg.Username, authCfg.Password)
 	if len(auth.AccessToken) == 0 {
 		log.Printf("auth: failed to obtain AccessToken!")
 		os.Exit(1)

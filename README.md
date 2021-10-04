@@ -313,6 +313,8 @@ SAVE - Saves the current story to prompt.txt.
 BACK - Goes back to the last input/output, there is a maximum of 65536 entries, it may crash after this point.
 
 EDIT - Edits the last output, this is very wonky and clunky, so be warned.
+
+NEXT - Gives a list of potential next tokens that could appear. This list represents the liklihood of tokens appearing BEFORE logit_bias is applied.
 ```
 
 Enjoy!

@@ -17,7 +17,6 @@ import (
 )
 
 type NovelAiAPI struct {
-	backend string
 	keys    NaiKeys
 	client  *http.Client
 	encoder gpt_bpe.GPTEncoder
@@ -28,6 +27,10 @@ type NaiGenerateHTTPResp struct {
 	Error      string `json:"error"`
 	StatusCode int    `json:"statusCode"`
 	Message    string `json:"message"`
+}
+
+type NextArray struct {
+    Output [][]interface{} `json:"output"`
 }
 
 type NaiGenerateParams struct {
@@ -41,7 +44,7 @@ type NaiGenerateParams struct {
 	MinLength              *uint       `json:"min_length"`
 	TopK                   *uint       `json:"top_k"`
 	TopP                   *float64    `json:"top_p"`
-	TopA                   *float64    `json:"top_a"`
+    TopA                   *float64    `json:"top_a"`
 	TailFreeSampling       *float64    `json:"tail_free_sampling"`
 	RepetitionPenalty      *float64    `json:"repetition_penalty"`
 	RepetitionPenaltyRange *uint       `json:"repetition_penalty_range"`
@@ -54,6 +57,8 @@ type NaiGenerateParams struct {
 	ReturnFullText         bool        `json:"return_full_text"`
 	TrimResponses          *bool        `json:"trim_responses"`
 	TrimSpaces             *bool        `json:"trim_spaces"`
+	NonZeroProbs           bool        `json:"output_nonzero_probs"`
+	NextWord               bool        `json:"next_word"`
 }
 
 type NaiGenerateResp struct {
@@ -119,14 +124,14 @@ func (params *NaiGenerateParams) CoerceNullValues(other NaiGenerateParams) {
 	if params.MinLength == nil {
 		params.MinLength = other.MinLength
 	}
-	if params.TopA == nil {
-		params.TopA = other.TopA
-	}
 	if params.TopK == nil {
 		params.TopK = other.TopK
 	}
 	if params.TopP == nil {
 		params.TopP = other.TopP
+	}
+	if params.TopA == nil {
+		params.TopA = other.TopA
 	}
 	if params.TailFreeSampling == nil {
 		params.TailFreeSampling = other.TailFreeSampling
@@ -160,11 +165,11 @@ func (params *NaiGenerateParams) CoerceDefaults() {
 }
 
 func NewGenerateParams() NaiGenerateParams {
-	temperature := 0.72
+	temperature := 0.55
 	maxLength := uint(40)
-	minLength := uint(1)
-	topK := uint(0)
-	topP := 0.725
+	minLength := uint(40)
+	topK := uint(140)
+	topP := 0.9
 	tfs := 1.0
 	repPen := 3.5
 	repPenRange := uint(1024)
@@ -175,7 +180,7 @@ func NewGenerateParams() NaiGenerateParams {
 	trimSpaces := true
 	return NaiGenerateParams{
 		Model:                  "6B-v3",
-		Prefix:                 "general_crossgenre",
+		Prefix:                 "vanilla",
 		Temperature:            &temperature,
 		MaxLength:              &maxLength,
 		MinLength:              &minLength,
@@ -210,8 +215,8 @@ func NewGenerateMsg(input string) NaiGenerateMsg {
 	}
 }
 
-func generateGenRequest(encoded []byte, accessToken string, backendURI string) *http.Request {
-	req, _ := http.NewRequest("POST", backendURI + "/ai/generate",
+func generateGenRequest(encoded []byte, accessToken string) *http.Request {
+	req, _ := http.NewRequest("POST", "https://api.novelai.net/ai/generate",
 		bytes.NewBuffer(encoded))
 	req.Header.Set("User-Agent",
 		"nrt/0.1 ("+runtime.GOOS+"; "+runtime.GOARCH+")")
@@ -254,7 +259,7 @@ func (params *NaiGenerateParams) ResolveRepetitionParams() {
 	}
 }
 
-func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (respDecoded NaiGenerateHTTPResp) {
+func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerateHTTPResp) {
 	params.Model = params.Parameters.Model
 	if *params.Parameters.BanBrackets {
 		newBadWords := append(BannedBrackets(),
@@ -271,7 +276,7 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (respD
 	}
 	cl := http.DefaultClient
 	encoded, _ := json.Marshal(params)
-	req := generateGenRequest(encoded, keys.AccessToken, backend)
+	req := generateGenRequest(encoded, keys.AccessToken)
 	// Retry up to 10 times.
 	var resp *http.Response
 	doGenerate := func () (err error) {
@@ -304,7 +309,8 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (respD
 		log.Printf("API: Error reading HTTP body: %s", err)
 		os.Exit(1)
 	}
-	err = json.Unmarshal(body, &respDecoded)
+	if params.Parameters.NextWord == false{
+err = json.Unmarshal(body, &respDecoded)
 	if err != nil {
 		log.Printf("API: Error unmarshaling JSON response: %s %s", err, string(body))
 		os.Exit(1)
@@ -313,15 +319,16 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (respD
 		log.Fatal(fmt.Sprintf("API: Server error [%d]: %s",
 			respDecoded.StatusCode, respDecoded.Error))
 	}
+	} else {
+	respDecoded.Output = string(body)
+	}
 	return respDecoded
 }
 
 func NewNovelAiAPI() NovelAiAPI {
-	auth := AuthEnv()
 	return NovelAiAPI{
-		backend: auth.Backend,
-		keys: auth,
-		client: http.DefaultClient,
+		keys:    AuthEnv(),
+		client:  http.DefaultClient,
 		encoder: gpt_bpe.NewEncoder(),
 	}
 }
@@ -330,6 +337,7 @@ func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGeneratePara
 	if params.TrimSpaces == nil || *params.TrimSpaces == true {
 		*content = strings.TrimRight(*content, " \t")
 	}
+	var val NextArray
 	encoded := api.encoder.Encode(content)
 	encodedBytes := encoded.ToBin()
 	encodedBytes64 := base64.StdEncoding.EncodeToString(*encodedBytes)
@@ -337,7 +345,8 @@ func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGeneratePara
 	resp.EncodedRequest = encodedBytes64
 	msg := NewGenerateMsg(encodedBytes64)
 	msg.Parameters = params
-	apiResp := naiApiGenerate(&api.keys, msg, api.backend)
+	apiResp := naiApiGenerate(&api.keys, msg)
+	if params.NextWord == false{
 	if binTokens, err := base64.StdEncoding.DecodeString(apiResp.Output); err != nil {
 		log.Println("ERROR:", err)
 		resp.Error = err
@@ -349,6 +358,21 @@ func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGeneratePara
 		resp.EncodedResponse = apiResp.Output
 		resp.Response = api.encoder.Decode(tokens)
 	}
+	}
+	
+	
+	if params.NextWord == true{
+	err := json.Unmarshal([]byte(apiResp.Output), &val)
+	if err != nil {
+		log.Printf("API: Error unmarshaling JSON NextWord response: %s %s", err, apiResp.Output)
+		fmt.Scanln()
+		os.Exit(1)
+	}
+	
+str := fmt.Sprintf("%v", val)
+fmt.Println("\033[38;5;240m" + str)
+}
+	
 	return resp
 }
 

@@ -1,4 +1,4 @@
-package main
+package aimodules
 
 import (
 	"encoding/json"
