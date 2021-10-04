@@ -317,6 +317,7 @@ EDIT - Edits the last output, this is very wonky and clunky, so be warned.
 NEXT - Gives a list of potential next tokens that could appear. This list represents the liklihood of tokens appearing BEFORE logit_bias is applied.
 ```
 
+Along with this, I've added a grab_logits.exe file, editing the logits.txt file will let you grab the json entry for logit bias much faster.
 Enjoy!
 
 Adventure Game
