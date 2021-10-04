@@ -17,6 +17,7 @@ import (
 )
 
 type NovelAiAPI struct {
+    backend string
 	keys    NaiKeys
 	client  *http.Client
 	encoder gpt_bpe.GPTEncoder
@@ -165,11 +166,11 @@ func (params *NaiGenerateParams) CoerceDefaults() {
 }
 
 func NewGenerateParams() NaiGenerateParams {
-	temperature := 0.55
+	temperature := 0.72
 	maxLength := uint(40)
-	minLength := uint(40)
-	topK := uint(140)
-	topP := 0.9
+	minLength := uint(1)
+	topK := uint(0)
+	topP := 0.725
 	tfs := 1.0
 	repPen := 3.5
 	repPenRange := uint(1024)
@@ -180,7 +181,7 @@ func NewGenerateParams() NaiGenerateParams {
 	trimSpaces := true
 	return NaiGenerateParams{
 		Model:                  "6B-v3",
-		Prefix:                 "vanilla",
+		Prefix:                 "general_crossgenre",
 		Temperature:            &temperature,
 		MaxLength:              &maxLength,
 		MinLength:              &minLength,
@@ -215,8 +216,8 @@ func NewGenerateMsg(input string) NaiGenerateMsg {
 	}
 }
 
-func generateGenRequest(encoded []byte, accessToken string) *http.Request {
-	req, _ := http.NewRequest("POST", "https://api.novelai.net/ai/generate",
+func generateGenRequest(encoded []byte, accessToken string, backendURI string) *http.Request {
+	req, _ := http.NewRequest("POST", backendURI + "/ai/generate",
 		bytes.NewBuffer(encoded))
 	req.Header.Set("User-Agent",
 		"nrt/0.1 ("+runtime.GOOS+"; "+runtime.GOARCH+")")
@@ -259,7 +260,7 @@ func (params *NaiGenerateParams) ResolveRepetitionParams() {
 	}
 }
 
-func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenerateHTTPResp) {
+func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (respDecoded NaiGenerateHTTPResp) {
 	params.Model = params.Parameters.Model
 	if *params.Parameters.BanBrackets {
 		newBadWords := append(BannedBrackets(),
@@ -276,7 +277,7 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg) (respDecoded NaiGenera
 	}
 	cl := http.DefaultClient
 	encoded, _ := json.Marshal(params)
-	req := generateGenRequest(encoded, keys.AccessToken)
+	req := generateGenRequest(encoded, keys.AccessToken, backend)
 	// Retry up to 10 times.
 	var resp *http.Response
 	doGenerate := func () (err error) {
@@ -326,9 +327,11 @@ err = json.Unmarshal(body, &respDecoded)
 }
 
 func NewNovelAiAPI() NovelAiAPI {
+    auth := AuthEnv()
 	return NovelAiAPI{
-		keys:    AuthEnv(),
-		client:  http.DefaultClient,
+		backend: auth.Backend,
+		keys: auth,
+		client: http.DefaultClient,
 		encoder: gpt_bpe.NewEncoder(),
 	}
 }
@@ -345,7 +348,7 @@ func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGeneratePara
 	resp.EncodedRequest = encodedBytes64
 	msg := NewGenerateMsg(encodedBytes64)
 	msg.Parameters = params
-	apiResp := naiApiGenerate(&api.keys, msg)
+	apiResp := naiApiGenerate(&api.keys, msg, api.backend)
 	if params.NextWord == false{
 	if binTokens, err := base64.StdEncoding.DecodeString(apiResp.Output); err != nil {
 		log.Println("ERROR:", err)
