@@ -1,3 +1,3 @@
 go build aimodules.go
-aimodules [YOUR MODULE HERE].module
+aimodules [your module file].module
 pause

@@ -1,4 +1,4 @@
-package aimodules
+package main
 
 import (
 	"encoding/json"
@@ -8,8 +8,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strings"
 	"path/filepath"
+	"strings"
 )
 
 type AIModule struct {
@@ -80,8 +80,7 @@ func AIModuleFromFile(path string) AIModule {
 	return aiModule
 }
 
-
 func main() {
 	binName := filepath.Base(os.Args[1])
 	AIModuleFromFile(binName)
-	}
+}
