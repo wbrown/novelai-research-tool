@@ -171,13 +171,14 @@ func NewGenerateParams() NaiGenerateParams {
 	minLength := uint(1)
 	topK := uint(0)
 	topP := 0.725
+	topA := 1.0
 	tfs := 1.0
 	repPen := 3.5
 	repPenRange := uint(1024)
 	repPenSlope := 6.57
 	banBrackets := true
 	badWordsIds := make([][]uint16, 0)
-	logitBiasIds := make([][]float32, 1)
+	logitBiasIds := make([][]float32, 0)
 	trimSpaces := true
 	return NaiGenerateParams{
 		Model:                  "6B-v3",
@@ -185,6 +186,7 @@ func NewGenerateParams() NaiGenerateParams {
 		Temperature:            &temperature,
 		MaxLength:              &maxLength,
 		MinLength:              &minLength,
+		TopA:                   &topA,
 		TopK:                   &topK,
 		TopP:                   &topP,
 		TailFreeSampling:       &tfs,

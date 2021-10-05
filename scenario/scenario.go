@@ -104,7 +104,7 @@ type ScenarioSettings struct {
 }
 
 type Scenario struct {
-	ScenarioVersion int              `json:"scenarioVersion""`
+	ScenarioVersion int              `json:"scenarioVersion"`
 	Title           string           `json:"title"`
 	Author          string           `json:"author"`
 	Description     string           `json:"description"`
