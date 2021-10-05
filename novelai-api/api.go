@@ -30,27 +30,36 @@ type NaiGenerateHTTPResp struct {
 	Message    string `json:"message"`
 }
 
+type NextArray struct {
+	Output [][]interface{} `json:"output"`
+}
+
 type NaiGenerateParams struct {
-	Label                  string      `json:"label"`
-	Model                  string      `json:"model"`
-	Prefix                 string      `json:"prefix"`
-	Temperature            *float64    `json:"temperature"`
-	MaxLength              *uint       `json:"max_length"`
-	MinLength              *uint       `json:"min_length"`
-	TopK                   *uint       `json:"top_k"`
-	TopP                   *float64    `json:"top_p"`
-	TopA                   *float64    `json:"top_a"`
-	TailFreeSampling       *float64    `json:"tail_free_sampling"`
-	RepetitionPenalty      *float64    `json:"repetition_penalty"`
-	RepetitionPenaltyRange *uint       `json:"repetition_penalty_range"`
-	RepetitionPenaltySlope *float64    `json:"repetition_penalty_slope"`
-	BadWordsIds            *[][]uint16 `json:"bad_words_ids"`
-	BanBrackets            *bool       `json:"ban_brackets"`
-	UseCache               bool        `json:"use_cache"`
-	UseString              bool        `json:"use_string"`
-	ReturnFullText         bool        `json:"return_full_text"`
+	Label                  string       `json:"label"`
+	Model                  string       `json:"model"`
+	Prefix                 string       `json:"prefix"`
+	LogitMemory            string       `json:"memory"`
+	LogitAuthors           string       `json:"authorsnote"`
+	Temperature            *float64     `json:"temperature"`
+	MaxLength              *uint        `json:"max_length"`
+	MinLength              *uint        `json:"min_length"`
+	TopK                   *uint        `json:"top_k"`
+	TopP                   *float64     `json:"top_p"`
+	TopA                   *float64     `json:"top_a"`
+	TailFreeSampling       *float64     `json:"tail_free_sampling"`
+	RepetitionPenalty      *float64     `json:"repetition_penalty"`
+	RepetitionPenaltyRange *uint        `json:"repetition_penalty_range"`
+	RepetitionPenaltySlope *float64     `json:"repetition_penalty_slope"`
+	BadWordsIds            *[][]uint16  `json:"bad_words_ids"`
+	LogitBiasIds           *[][]float32 `json:"logit_bias"`
+	BanBrackets            *bool        `json:"ban_brackets"`
+	UseCache               bool         `json:"use_cache"`
+	UseString              bool         `json:"use_string"`
+	ReturnFullText         bool         `json:"return_full_text"`
 	TrimResponses          *bool        `json:"trim_responses"`
 	TrimSpaces             *bool        `json:"trim_spaces"`
+	NonZeroProbs           bool         `json:"output_nonzero_probs"`
+	NextWord               bool         `json:"next_word"`
 }
 
 type NaiGenerateResp struct {
@@ -86,11 +95,15 @@ func BannedBrackets() [][]uint16 {
 		{17202}, {8162}}
 }
 
+func LogitBias() [][]float32 {
+	return [][]float32{{0, 0.0}}
+}
+
 func EndOfTextTokens() [][]uint16 {
-	return [][]uint16{{27,91,437,1659,5239,91,29},
-		{1279,91,437,1659,5239,91,29},
-		{27,91,10619,46,9792,13918,91,29},
-		{1279,91,10619,46,9792,13918,91,29}}
+	return [][]uint16{{27, 91, 437, 1659, 5239, 91, 29},
+		{1279, 91, 437, 1659, 5239, 91, 29},
+		{27, 91, 10619, 46, 9792, 13918, 91, 29},
+		{1279, 91, 10619, 46, 9792, 13918, 91, 29}}
 }
 
 func (params *NaiGenerateParams) CoerceNullValues(other NaiGenerateParams) {
@@ -112,14 +125,14 @@ func (params *NaiGenerateParams) CoerceNullValues(other NaiGenerateParams) {
 	if params.MinLength == nil {
 		params.MinLength = other.MinLength
 	}
-	if params.TopA == nil {
-		params.TopA = other.TopA
-	}
 	if params.TopK == nil {
 		params.TopK = other.TopK
 	}
 	if params.TopP == nil {
 		params.TopP = other.TopP
+	}
+	if params.TopA == nil {
+		params.TopA = other.TopA
 	}
 	if params.TailFreeSampling == nil {
 		params.TailFreeSampling = other.TailFreeSampling
@@ -138,6 +151,9 @@ func (params *NaiGenerateParams) CoerceNullValues(other NaiGenerateParams) {
 	}
 	if params.BadWordsIds == nil {
 		params.BadWordsIds = other.BadWordsIds
+	}
+	if params.LogitBiasIds == nil {
+		params.LogitBiasIds = other.LogitBiasIds
 	}
 	if params.TrimSpaces == nil {
 		params.TrimSpaces = other.TrimSpaces
@@ -161,6 +177,7 @@ func NewGenerateParams() NaiGenerateParams {
 	repPenSlope := 6.57
 	banBrackets := true
 	badWordsIds := make([][]uint16, 0)
+	logitBiasIds := make([][]float32, 1)
 	trimSpaces := true
 	return NaiGenerateParams{
 		Model:                  "6B-v3",
@@ -175,6 +192,7 @@ func NewGenerateParams() NaiGenerateParams {
 		RepetitionPenaltyRange: &repPenRange,
 		RepetitionPenaltySlope: &repPenSlope,
 		BadWordsIds:            &badWordsIds,
+		LogitBiasIds:           &logitBiasIds,
 		BanBrackets:            &banBrackets,
 		UseCache:               false,
 		UseString:              false,
@@ -199,7 +217,7 @@ func NewGenerateMsg(input string) NaiGenerateMsg {
 }
 
 func generateGenRequest(encoded []byte, accessToken string, backendURI string) *http.Request {
-	req, _ := http.NewRequest("POST", backendURI + "/ai/generate",
+	req, _ := http.NewRequest("POST", backendURI+"/ai/generate",
 		bytes.NewBuffer(encoded))
 	req.Header.Set("User-Agent",
 		"nrt/0.1 ("+runtime.GOOS+"; "+runtime.GOARCH+")")
@@ -254,12 +272,15 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (respD
 	if len(*params.Parameters.BadWordsIds) == 0 {
 		params.Parameters.BadWordsIds = nil
 	}
+	if len(*params.Parameters.LogitBiasIds) == 0 {
+		params.Parameters.LogitBiasIds = nil
+	}
 	cl := http.DefaultClient
 	encoded, _ := json.Marshal(params)
 	req := generateGenRequest(encoded, keys.AccessToken, backend)
 	// Retry up to 10 times.
 	var resp *http.Response
-	doGenerate := func () (err error) {
+	doGenerate := func() (err error) {
 		resp, err = cl.Do(req)
 		if err == nil && resp.StatusCode == 201 {
 			return err
@@ -289,14 +310,18 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (respD
 		log.Printf("API: Error reading HTTP body: %s", err)
 		os.Exit(1)
 	}
-	err = json.Unmarshal(body, &respDecoded)
-	if err != nil {
-		log.Printf("API: Error unmarshaling JSON response: %s %s", err, string(body))
-		os.Exit(1)
-	}
-	if len(respDecoded.Error) > 0 {
-		log.Fatal(fmt.Sprintf("API: Server error [%d]: %s",
-			respDecoded.StatusCode, respDecoded.Error))
+	if params.Parameters.NextWord == false {
+		err = json.Unmarshal(body, &respDecoded)
+		if err != nil {
+			log.Printf("API: Error unmarshaling JSON response: %s %s", err, string(body))
+			os.Exit(1)
+		}
+		if len(respDecoded.Error) > 0 {
+			log.Fatal(fmt.Sprintf("API: Server error [%d]: %s",
+				respDecoded.StatusCode, respDecoded.Error))
+		}
+	} else {
+		respDecoded.Output = string(body)
 	}
 	return respDecoded
 }
@@ -305,8 +330,8 @@ func NewNovelAiAPI() NovelAiAPI {
 	auth := AuthEnv()
 	return NovelAiAPI{
 		backend: auth.Backend,
-		keys: auth,
-		client: http.DefaultClient,
+		keys:    auth,
+		client:  http.DefaultClient,
 		encoder: gpt_bpe.NewEncoder(),
 	}
 }
@@ -315,6 +340,7 @@ func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGeneratePara
 	if params.TrimSpaces == nil || *params.TrimSpaces == true {
 		*content = strings.TrimRight(*content, " \t")
 	}
+	var val NextArray
 	encoded := api.encoder.Encode(content)
 	encodedBytes := encoded.ToBin()
 	encodedBytes64 := base64.StdEncoding.EncodeToString(*encodedBytes)
@@ -323,17 +349,32 @@ func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGeneratePara
 	msg := NewGenerateMsg(encodedBytes64)
 	msg.Parameters = params
 	apiResp := naiApiGenerate(&api.keys, msg, api.backend)
-	if binTokens, err := base64.StdEncoding.DecodeString(apiResp.Output); err != nil {
-		log.Println("ERROR:", err)
-		resp.Error = err
-	} else {
-		tokens := gpt_bpe.TokensFromBin(&binTokens)
-		if params.TrimResponses != nil && *params.TrimResponses == true {
-			tokens, err = api.encoder.TrimIncompleteSentence(tokens)
+	if params.NextWord == false {
+		if binTokens, err := base64.StdEncoding.DecodeString(apiResp.Output); err != nil {
+			log.Println("ERROR:", err)
+			resp.Error = err
+		} else {
+			tokens := gpt_bpe.TokensFromBin(&binTokens)
+			if params.TrimResponses != nil && *params.TrimResponses == true {
+				tokens, err = api.encoder.TrimIncompleteSentence(tokens)
+			}
+			resp.EncodedResponse = apiResp.Output
+			resp.Response = api.encoder.Decode(tokens)
 		}
-		resp.EncodedResponse = apiResp.Output
-		resp.Response = api.encoder.Decode(tokens)
 	}
+
+	if params.NextWord == true {
+		err := json.Unmarshal([]byte(apiResp.Output), &val)
+		if err != nil {
+			log.Printf("API: Error unmarshaling JSON NextWord response: %s %s", err, apiResp.Output)
+			fmt.Scanln()
+			os.Exit(1)
+		}
+
+		str := fmt.Sprintf("%v", val)
+		fmt.Println("\033[38;5;240m" + str)
+	}
+
 	return resp
 }
 

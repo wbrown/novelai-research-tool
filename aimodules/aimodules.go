@@ -1,4 +1,4 @@
-package aimodules
+package main
 
 import (
 	"encoding/json"
@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -77,4 +78,9 @@ func AIModuleFromFile(path string) AIModule {
 		aiModule.Hash = encryptPrefix(aiModule.EncodedData)
 	println(aiModule.ToPrefix())
 	return aiModule
+}
+
+func main() {
+	binName := filepath.Base(os.Args[1])
+	AIModuleFromFile(binName)
 }
