@@ -67,8 +67,6 @@ func start() {
 
 	var output string
 	var fulltext string
-	var splittext string
-	var strlen int
 	var array_context []string
 	var array_output []string
 	for {
@@ -117,27 +115,30 @@ func start() {
 			refresh(ctx.Context, "", ctx)
 		}
 
+		line = strings.TrimSpace(line)
 		ctx.Context = ctx.Context + line
-		fulltext = ""
-		splittext = ctx.Memory + "\n" + ctx.Context
-		splitamt := float64(len(splittext)) * 0.025
-		strlen = len(splittext) - 16 - int(splitamt)
-		fulltext = splittext[:strlen] + ctx.AuthorsNote + splittext[strlen:]
-
+		fulltext = ctx.Memory + "\n" + ctx.Context
+		if len(ctx.AuthorsNote) > 0 {
+			splittext := strings.Split(fulltext, "\n")
+			insertPos := len(splittext)-2
+			if insertPos < 0 {
+				insertPos = 0
+			}
+			rest := append([]string{ctx.AuthorsNote}, splittext[insertPos:]...)
+			splittext = append(splittext[:insertPos], rest...)
+			fulltext = strings.Join(splittext, "\n")
+		}
+		fulltext = strings.TrimRight(fulltext, "\n")
 		writeText("lastinput.txt", fulltext)
 		for {
 			tokens := ctx.Encoder.Encode(&fulltext)
 			if uint(len(*tokens)) > ctx.MaxTokens {
-				*tokens = (*tokens)[:2048]
-				break
-
-				ctx.Context = strings.Join(
+				fulltext = strings.Join(
 					strings.Split(ctx.Context, "\n")[1:], "\n")
 			} else {
 				break
 			}
 		}
-
 		resp := ctx.API.GenerateWithParams(&fulltext, ctx.Parameters)
 		output = resp.Response
 
