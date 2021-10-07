@@ -1,11 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/chzyer/readline"
-	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
-	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
+	"github.com/inancgumus/screen"
+	"github.com/wbrown/novelai-research-tool/context"
 	"log"
 	"os"
 	"os/exec"
@@ -18,247 +17,162 @@ const colorDkGrey = "\033[38;5;235m"
 const colorWhite = "\033[0m"
 const colorInput = "\033[30;47m"
 
-type Adventure struct {
-	Parameters  novelai_api.NaiGenerateParams
-	Context     string
-	Memory      string
-	FullReturn  bool
-	AuthorsNote string
-	LastContext string
-	API         novelai_api.NovelAiAPI
-	Encoder     gpt_bpe.GPTEncoder
-	MaxTokens   uint
+func fixcmd() {
+	cmd := exec.Command("cmd")
+	cmd.Stdout = os.Stdout
+	cmd.Run()
+	cls()
 }
 
-func NewAdventure() (adventure Adventure) {
-	parametersFile, _ := os.ReadFile("params.json")
-	var parameters novelai_api.NaiGenerateParams
-	if err := json.Unmarshal(parametersFile, &parameters); err != nil {
-		println("Error in JSON.")
-		fmt.Scanln()
+func cls() {
+	screen.Clear()
+	screen.MoveTopLeft()
+}
+
+func pause() {
+	fmt.Scanln()
+}
+
+func writeText(path string, text string) {
+	if f, err := os.Create(path); err != nil {
+		println("\n\n\n\nError saving file.")
 		log.Fatal(err)
-
+	} else if _, err = f.WriteString(text); err != nil {
+		println("\n\n\n\nError saving file.")
+		log.Fatal(err)
 	}
-
-	contextBytes, _ := os.ReadFile("prompt.txt")
-	adventure.Context = string(contextBytes)
-	adventure.LastContext = string(contextBytes)
-	adventure.Parameters = parameters
-	adventure.API = novelai_api.NewNovelAiAPI()
-	adventure.Encoder = gpt_bpe.NewEncoder()
-	adventure.FullReturn = parameters.ReturnFullText
-	adventure.MaxTokens = 2048 - *parameters.MaxLength
-	adventure.Memory = parameters.LogitMemory
-	adventure.AuthorsNote = parameters.LogitAuthors
-	return adventure
 }
 
-func (adventure Adventure) start() {
-	adventure.Context = adventure.Context
-	adventure.LastContext = adventure.Context
+func refresh(context_ string, output_ string, ctx context.SimpleContext) {
+	cls()
+	fmt.Println(colorDkGrey + ctx.Memory + "\n" + colorGrey + context_ + colorWhite + output_ +
+		"\n" + colorDkGrey + ctx.AuthorsNote + colorWhite)
+}
+
+func start() {
+	cls()
+	ctx := context.NewSimpleContext()
+	ctx.LastContext = ctx.Context
+	fmt.Println(colorDkGrey + ctx.Memory + "\n" +
+		colorGrey + ctx.Context + "\n" +
+		colorDkGrey + ctx.AuthorsNote + colorWhite)
+
 	rl, err := readline.New(colorInput + ">" + colorWhite)
 	if err != nil {
 		println("\n\n\n\nError making newline.")
-		fmt.Scanln()
+		pause()
 		panic(err)
 	}
 	defer rl.Close()
 
 	var output string
-	var send bool
 	var fulltext string
 	var splittext string
 	var strlen int
-	var array_context [65536]string
-	var array_output [65536]string
-	var array_pos int
-
-	send = true
+	var array_context []string
+	var array_output []string
 	for {
-
 		line, err := rl.Readline()
-
 		if err != nil { // io.EOF
 			break
 		}
 
-		if line == "BACK" {
-			send = false
-
-			if array_pos > 0 {
-				array_pos = array_pos - 1
-
-				adventure.Context = array_context[array_pos]
-				output = array_output[array_pos]
-
-				cmd := exec.Command("cmd", "/c", "cls")
-				cmd.Stdout = os.Stdout
-				cmd.Run()
-				fmt.Println(colorDkGrey + adventure.Memory + "\n" + colorGrey + adventure.Context + colorWhite + output + colorDkGrey + "\n" + adventure.AuthorsNote + colorWhite)
+		ctx.Parameters.NextWord = false
+		switch line {
+		case "BACK":
+			if len(array_context) > 0 {
+				ctx.Context = array_context[len(array_context)-1]
+				output = array_context[len(array_output)-1]
+				array_context = array_context[:len(array_context)-1]
+				array_output = array_output[:len(array_output)-1]
 			}
-
-		}
-
-		if line == "SAVE" {
-			send = false
-
-			f, err := os.Create("prompt.txt")
-			_, err2 := f.WriteString(adventure.Context)
-
-			if err != nil {
-				println("\n\n\n\nError saving file.")
-				fmt.Scanln()
-				log.Fatal(err)
-				fmt.Scanln()
-			}
-
-			if err2 != nil {
-				println("\n\n\n\nError saving file.")
-				fmt.Scanln()
-				log.Fatal(err)
-				fmt.Scanln()
-			}
-		}
-
-		adventure.Parameters.NextWord = false
-		if line == "NEXT" {
-			adventure.Parameters.NextWord = true
-			fmt.Println("\nEXPECTED NEXT TOKENS...\n")
-
-		}
-
-		if line == "EDIT" {
-			send = false
-
+			refresh(ctx.Context, "", ctx)
+			continue
+		case "SAVE":
+			ctx.SaveContext("prompt.txt")
+			refresh(ctx.Context, "", ctx)
+			continue
+		case "EDIT":
 			defer rl.Close()
 			readline.New(colorInput + ">" + colorWhite + output)
-
-			fmt.Println(colorDkGrey + adventure.Memory + "\n" + colorGrey + adventure.Context + "\n" + colorDkGrey + adventure.AuthorsNote + colorWhite)
-
+			refresh(ctx.Context, "", ctx)
 			datax := output
 			data2 := []byte(datax)
 			rl.WriteStdin(data2)
 
-			adventure.Context = adventure.LastContext
-			fmt.Println(colorGrey + adventure.Context)
+			ctx.Context = ctx.LastContext
+			fmt.Println(colorGrey + ctx.Context)
+			continue
+		}
 
+		if line == "NEXT" {
+			line = ""
+			ctx.Parameters.NextWord = true
 		}
 
 		if line == "RETRY" {
-			send = true
-			adventure.Context = adventure.LastContext
-
-			cmd := exec.Command("cmd", "/c", "cls") //Windows example, its tested
-			cmd.Stdout = os.Stdout
-			cmd.Run()
-			fmt.Println(colorDkGrey + adventure.Memory + "\n" + colorGrey + adventure.Context + "\n" + colorDkGrey + adventure.AuthorsNote + colorWhite)
-
 			line = ""
+			output = ""
+			ctx.Context = ctx.LastContext
+			refresh(ctx.Context, "", ctx)
 		}
 
-		if send == true {
+		ctx.Context = ctx.Context + line
+		fulltext = ""
+		splittext = ctx.Memory + "\n" + ctx.Context
+		splitamt := float64(len(splittext)) * 0.025
+		strlen = len(splittext) - 16 - int(splitamt)
+		fulltext = splittext[:strlen] + ctx.AuthorsNote + splittext[strlen:]
 
-			if adventure.Parameters.NextWord == false {
-				adventure.Context = adventure.Context + line
+		writeText("lastinput.txt", fulltext)
+		for {
+			tokens := ctx.Encoder.Encode(&fulltext)
+			if uint(len(*tokens)) > ctx.MaxTokens {
+				*tokens = (*tokens)[:2048]
+				break
+
+				ctx.Context = strings.Join(
+					strings.Split(ctx.Context, "\n")[1:], "\n")
+			} else {
+				break
 			}
-			splittext = adventure.Memory + "\n" + adventure.Context
-			splitamt := float64(len(splittext)) * 0.025
-			strlen = len(splittext) - 16 - int(splitamt)
-			fulltext = splittext[:strlen] + adventure.AuthorsNote + splittext[strlen:]
-
-			f, err := os.Create("lastinput.txt")
-			_, err2 := f.WriteString(fulltext)
-
-			if err != nil {
-				println("\n\n\n\nError saving file.")
-				fmt.Scanln()
-				log.Fatal(err)
-				fmt.Scanln()
-			}
-
-			if err2 != nil {
-				println("\n\n\n\nError saving file.")
-				fmt.Scanln()
-				log.Fatal(err)
-				fmt.Scanln()
-			}
-
-			for {
-				tokens := adventure.Encoder.Encode(&fulltext)
-				if uint(len(*tokens)) > adventure.MaxTokens {
-					(*tokens) = (*tokens)[:2048]
-					break
-
-					adventure.Context = strings.Join(
-						strings.Split(adventure.Context, "\n")[1:], "\n")
-				} else {
-					break
-				}
-			}
-			resp := adventure.API.GenerateWithParams(&fulltext,
-				adventure.Parameters)
-			output = resp.Response
-
-			var eos_pos int
-			var eos_exit bool
-			eos_pos = len(output) - 2
-			for eos_pos >= 0 {
-
-				curChar := output[eos_pos]
-				eos_exit = false
-				if unicode.IsPunct(rune(curChar)) && eos_exit == false && adventure.FullReturn == false && eos_pos < len(output) {
-					output = output[:eos_pos+1]
-					eos_exit = true
-				}
-				eos_pos = eos_pos - 1
-			}
-
-			if adventure.Parameters.NextWord == true {
-				fmt.Println(colorWhite + "\nPRESS ENTER TO CONTINUE...\n")
-				fmt.Scanln()
-			}
-
-			cmd := exec.Command("cmd", "/c", "cls") //Windows example, its tested
-			cmd.Stdout = os.Stdout
-			cmd.Run()
-
-			array_context[array_pos] = adventure.Context
-			array_output[array_pos] = output
-			array_pos = array_pos + 1
-
-			fmt.Println(colorDkGrey + adventure.Memory + "\n" + colorGrey + adventure.Context + colorWhite + output + colorDkGrey + "\n" + adventure.AuthorsNote + colorWhite)
-
-			if adventure.Parameters.NextWord == false {
-				adventure.LastContext = adventure.Context
-				adventure.Context = adventure.Context + output
-			}
-		} else {
-
-			cmd := exec.Command("cmd", "/c", "cls") //Windows example, its tested
-			cmd.Stdout = os.Stdout
-			cmd.Run()
-			fmt.Println(colorDkGrey + adventure.Memory + "\n" + colorGrey + adventure.Context + colorWhite + output + colorDkGrey + "\n" + adventure.AuthorsNote + colorWhite)
-			send = true
-			defer rl.Close()
-			readline.New(colorInput + ">" + colorWhite)
-			if err != nil {
-				println("\n\n\n\nError creating newline.")
-				fmt.Scanln()
-				panic(err)
-				fmt.Scanln()
-			}
-
 		}
+
+		resp := ctx.API.GenerateWithParams(&fulltext, ctx.Parameters)
+		output = resp.Response
+
+		var eos_pos int
+		var eos_exit bool
+		eos_pos = len(output) - 2
+		for eos_pos >= 0 {
+			curChar := output[eos_pos]
+			eos_exit = false
+			if unicode.IsPunct(rune(curChar)) && eos_exit == false && ctx.FullReturn == false && eos_pos < len(output) {
+				output = output[:eos_pos+1]
+				eos_exit = true
+			}
+			eos_pos = eos_pos - 1
+		}
+
+		if ctx.Parameters.NextWord == true {
+			fmt.Println(colorWhite + "\nPRESS ENTER TO CONTINUE...\n")
+			pause()
+		}
+
+		array_context = append(array_context, ctx.Context)
+		array_output = append(array_output, output)
+
+		refresh(ctx.Context, output, ctx)
+
+		if ctx.Parameters.NextWord == false {
+			ctx.LastContext = ctx.Context
+			ctx.Context = ctx.Context + output
+		}
+
 	}
 }
 
 func main() {
-
-	adventure := NewAdventure()
-
-	cmd := exec.Command("cmd", "/c", "cls") //Windows example, its tested
-	cmd.Stdout = os.Stdout
-	cmd.Run()
-	fmt.Println(colorDkGrey + adventure.Memory + "\n" + colorGrey + adventure.Context + "\n" + colorDkGrey + adventure.AuthorsNote + colorWhite)
-	adventure.start()
+	fixcmd()
+	start()
 }
