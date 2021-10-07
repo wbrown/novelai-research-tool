@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/chzyer/readline"
+	"github.com/inancgumus/screen"
 	"github.com/wbrown/novelai-research-tool/context"
 	"log"
 	"os"
+	"os/exec"
 	"strings"
 	"unicode"
 )
@@ -14,10 +16,17 @@ const colorGrey = "\033[38;5;240m"
 const colorDkGrey = "\033[38;5;235m"
 const colorWhite = "\033[0m"
 const colorInput = "\033[30;47m"
-const clearScreen = "'\033[2J'"
+
+func fixcmd() {
+	cmd := exec.Command("cmd")
+	cmd.Stdout = os.Stdout
+	cmd.Run()
+	cls()
+}
 
 func cls() {
-	print(clearScreen)
+	screen.Clear()
+	screen.MoveTopLeft()
 }
 
 func pause() {
@@ -34,15 +43,16 @@ func writeText(path string, text string) {
 	}
 }
 
-func printContextOutput(ctx context.SimpleContext, output string) {
-	fmt.Println(colorDkGrey + ctx.Memory + "\n" + colorGrey + ctx.Context +
-		colorWhite + output + colorDkGrey + "\n" + ctx.AuthorsNote + colorWhite)
+func refresh(context_ string, output_ string, ctx context.SimpleContext) {
+	cls()
+	fmt.Println(colorDkGrey + ctx.Memory + "\n" + colorGrey + context_ + colorWhite + output_ +
+		"\n" + colorDkGrey + ctx.AuthorsNote + colorWhite)
 }
 
 func start() {
+	cls()
 	ctx := context.NewSimpleContext()
 	ctx.LastContext = ctx.Context
-	cls()
 	fmt.Println(colorDkGrey + ctx.Memory + "\n" +
 		colorGrey + ctx.Context + "\n" +
 		colorDkGrey + ctx.AuthorsNote + colorWhite)
@@ -61,32 +71,31 @@ func start() {
 	var strlen int
 	var array_context []string
 	var array_output []string
-
 	for {
 		line, err := rl.Readline()
 		if err != nil { // io.EOF
 			break
 		}
+
+		ctx.Parameters.NextWord = false
 		switch line {
 		case "BACK":
 			if len(array_context) > 0 {
+				ctx.Context = array_context[len(array_context)-1]
+				output = array_context[len(array_output)-1]
 				array_context = array_context[:len(array_context)-1]
 				array_output = array_output[:len(array_output)-1]
-				ctx.Context = array_context[len(array_context)]
-				output = array_output[len(array_output)]
 			}
-			printContextOutput(ctx, output)
+			refresh(ctx.Context, "", ctx)
 			continue
 		case "SAVE":
 			ctx.SaveContext("prompt.txt")
+			refresh(ctx.Context, "", ctx)
 			continue
 		case "EDIT":
 			defer rl.Close()
 			readline.New(colorInput + ">" + colorWhite + output)
-
-			fmt.Println(colorDkGrey + ctx.Memory + "\n" + colorGrey + ctx.Context +
-				"\n" + colorDkGrey + ctx.AuthorsNote + colorWhite)
-
+			refresh(ctx.Context, "", ctx)
 			datax := output
 			data2 := []byte(datax)
 			rl.WriteStdin(data2)
@@ -94,14 +103,22 @@ func start() {
 			ctx.Context = ctx.LastContext
 			fmt.Println(colorGrey + ctx.Context)
 			continue
-		case "NEXT":
-			ctx.Parameters.NextWord = true
-			ctx.SaveContext("prompt.txt")
 		}
 
-		if ctx.Parameters.NextWord == false {
-			ctx.Context = ctx.Context + line
+		if line == "NEXT" {
+			line = ""
+			ctx.Parameters.NextWord = true
 		}
+
+		if line == "RETRY" {
+			line = ""
+			output = ""
+			ctx.Context = ctx.LastContext
+			refresh(ctx.Context, "", ctx)
+		}
+
+		ctx.Context = ctx.Context + line
+		fulltext = ""
 		splittext = ctx.Memory + "\n" + ctx.Context
 		splitamt := float64(len(splittext)) * 0.025
 		strlen = len(splittext) - 16 - int(splitamt)
@@ -120,8 +137,8 @@ func start() {
 				break
 			}
 		}
-		resp := ctx.API.GenerateWithParams(&fulltext,
-			ctx.Parameters)
+
+		resp := ctx.API.GenerateWithParams(&fulltext, ctx.Parameters)
 		output = resp.Response
 
 		var eos_pos int
@@ -141,20 +158,21 @@ func start() {
 			fmt.Println(colorWhite + "\nPRESS ENTER TO CONTINUE...\n")
 			pause()
 		}
+
 		array_context = append(array_context, ctx.Context)
-		array_output = append(array_context, output)
-		fmt.Println(colorDkGrey + ctx.Memory + "\n" +
-			colorGrey + ctx.Context +
-			colorWhite + output + colorDkGrey + "\n" +
-			ctx.AuthorsNote + colorWhite)
+		array_output = append(array_output, output)
+
+		refresh(ctx.Context, output, ctx)
 
 		if ctx.Parameters.NextWord == false {
 			ctx.LastContext = ctx.Context
 			ctx.Context = ctx.Context + output
 		}
+
 	}
 }
 
 func main() {
+	fixcmd()
 	start()
 }
