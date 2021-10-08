@@ -10,6 +10,8 @@ import (
 	"os/exec"
 	"strings"
 	"unicode"
+	"encoding/json"
+	"reflect"
 )
 
 const colorGrey = "\033[38;5;240m"
@@ -31,6 +33,70 @@ func cls() {
 
 func pause() {
 	fmt.Scanln()
+}
+
+var lorebook_decode []map[string]interface{}
+
+var full_context string
+var full_logits [][]float32
+var new_logits [][]float32
+var param_logits *[][]float32
+
+var key_list [1024]string
+var key_amt int
+
+func lorebook() {
+	lorebook_decode = []map[string]interface{}{}
+	lb_file, _ := os.ReadFile("lorebook.json")
+	
+	err := json.Unmarshal(lb_file, &lorebook_decode)
+
+	if err != nil{
+		fmt.Println(err)
+	}
+	
+	//Find the list of active keys.
+	lbstr := lorebook_decode[0]["Keylist"]
+	keylist_array := reflect.ValueOf(lbstr)
+	key_amt = keylist_array.Len()
+	
+	for i := 0; i < keylist_array.Len(); i++ {
+		get_entry := keylist_array.Index(i).Interface().(string)
+		key_list[i] = get_entry
+	}
+	
+	ctx := context.NewSimpleContext()
+	full_context =""
+	full_logits = [][]float32{{23193, 0.0}} //Very unclean implementation to ensure that a token's bias is not overwritten, this is a token I don't think anyone will ever use.
+	param_logits = ctx.Parameters.LogitBiasIds //Don't want to overwrite.
+}
+
+func lorebook_entries(context string) {
+	for i := 0; i < key_amt; i++ {
+		entry := key_list[i]
+		if strings.Contains(context,entry){
+			new_logits = [][]float32{{23193, 0.0}}
+			
+			get_context, ok := lorebook_decode[0][entry].(map[string]interface{})["Context"].(string)
+			if ok {
+					get_context = lorebook_decode[0][entry].(map[string]interface{})["Context"].(string)
+			} else {
+					get_context = ""
+			}
+			
+			get_logit, ok := lorebook_decode[0][entry].(map[string]interface{})["Logits"].(string)
+			if ok {
+					get_logit = lorebook_decode[0][entry].(map[string]interface{})["Logits"].(string)
+			} else {
+					get_logit = "[[23193,0.0]]"
+			}
+				
+			json.Unmarshal([]byte(get_logit), &new_logits)
+			full_logits = append(full_logits,new_logits...)
+			full_context = full_context + "\n" + get_context
+			
+		}
+	}
 }
 
 func writeText(path string, text string) {
@@ -114,10 +180,28 @@ func start() {
 			ctx.Context = ctx.LastContext
 			refresh(ctx.Context, "", ctx)
 		}
-
+		
+		
+		
 		line = strings.TrimSpace(line)
 		ctx.Context = ctx.Context + line
-		fulltext = ctx.Memory + "\n" + ctx.Context
+		
+
+		//Lorebook
+		var lb_context string
+		
+		if len(ctx.Context) > 512 {
+			lb_context = ctx.Context[len(ctx.Context)-512:]
+			} else {
+			lb_context = ctx.Context
+		}
+		
+		lorebook_entries(lb_context)
+		new_append := append((*param_logits),full_logits...)
+		ctx.Parameters.LogitBiasIds = &(new_append)
+		
+		fulltext = ctx.Memory + full_context + "\n" + ctx.Context
+				
 		if len(ctx.AuthorsNote) > 0 {
 			splittext := strings.Split(fulltext, "\n")
 			insertPos := len(splittext)-2
@@ -156,6 +240,12 @@ func start() {
 		}
 
 		if ctx.Parameters.NextWord == true {
+			fmt.Println(colorWhite + "\nANTICIPATED TOKENS...")
+			
+			for i := 0; i < resp.NextWordReturned; i++ {
+				fmt.Println(colorWhite+(resp.NextWordArray)[i][0] + colorGrey + " (" + (resp.NextWordArray)[i][1]+")")
+			}
+			
 			fmt.Println(colorWhite + "\nPRESS ENTER TO CONTINUE...\n")
 			pause()
 		}
@@ -175,5 +265,6 @@ func start() {
 
 func main() {
 	fixcmd()
+	lorebook()
 	start()
 }

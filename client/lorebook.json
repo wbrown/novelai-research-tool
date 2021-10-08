@@ -1,0 +1,17 @@
+[
+	{
+		"Keylist":["snake","lizard","dragon"],
+		"snake": {
+			"Context":"[The snake slithered closer, its slender body rubbing against the ground as it approached.]",
+			"Logits":"[[17522,1.000],[36808,1.000],[1017,1.000],[1555,0.700],[82,0.490],[1017,1.000],[40861,0.700],[1017,1.000],[1555,0.700],[7209,1.000],[7405,-4.000],[5101,-4.000],[2832,-4.000],[28421,-4.000]]"
+		},
+		"lizard": {
+			"Context":"[The lizard crawled slowly closer, its tail swinging back and forth as it approached.]",
+			"Logits":"[[128,2.0],[1337,1.0]]"
+		},
+		"dragon": {
+			"Context":"[The dragon was massive, its wings causing gusts of wing behind it as it approached.]",
+			"Logits":"[[128,2.0],[1337,1.0]]"
+		}
+	}
+]

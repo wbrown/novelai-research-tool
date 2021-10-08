@@ -14,6 +14,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"reflect"
 )
 
 type NovelAiAPI struct {
@@ -60,6 +61,7 @@ type NaiGenerateParams struct {
 	TrimSpaces             *bool        `json:"trim_spaces"`
 	NonZeroProbs           bool         `json:"output_nonzero_probs"`
 	NextWord               bool         `json:"next_word"`
+	NextWordArray		   [256][2]string
 }
 
 type NaiGenerateResp struct {
@@ -67,6 +69,8 @@ type NaiGenerateResp struct {
 	Response        string `json:"response"`
 	EncodedRequest  string `json:"encoded_request"`
 	EncodedResponse string `json:"encoded_response"`
+	NextWordArray	[256][2]string
+	NextWordReturned	int
 	Error           error  `json:"error"`
 }
 
@@ -373,8 +377,29 @@ func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGeneratePara
 			os.Exit(1)
 		}
 
-		str := fmt.Sprintf("%v", val)
-		fmt.Println("\033[38;5;240m" + str)
+		//decode next_word array
+		next_array_decode := map[string]interface{}{}
+		
+		err = json.Unmarshal([]byte(apiResp.Output), &next_array_decode)
+		if err != nil{
+			fmt.Println(err)
+		}
+		get_keys := next_array_decode["output"]
+		get_array := reflect.ValueOf(get_keys)
+		//filter them into the NextWordArray
+		for i := 0; i < get_array.Len(); i++ {
+			get_entry := get_array.Index(i).Interface()
+			next_ := reflect.ValueOf(get_entry)
+			next_value_token := next_.Index(0).Interface()
+			next_value_weight := next_.Index(1).Interface()
+			
+			//add to array
+			(resp.NextWordArray)[i][0] = fmt.Sprintf("%v",next_value_token)
+			(resp.NextWordArray)[i][1] = fmt.Sprintf("%v",next_value_weight)
+			
+			resp.NextWordReturned ++
+		}
+		
 	}
 
 	return resp
