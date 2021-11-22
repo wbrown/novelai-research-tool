@@ -8,6 +8,7 @@ require (
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1 // indirect
 	github.com/fatih/color v1.12.0
+	github.com/gdamore/tcell/v2 v2.4.0
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/inancgumus/screen v0.0.0-20190314163918-06e984b86ed3
 	github.com/jdkato/prose/v2 v2.0.0

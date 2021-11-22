@@ -10,7 +10,7 @@
     "Period": "In the Past"
   },
   "parameters": {
-    "model": "6B-v3",
+    "model": "6B-v4",
     "prefix": "vanilla",
     "temperature": 0.55,
     "max_length": 40,
@@ -30,8 +30,7 @@
   "permutations": [
     {
       "model": [
-        "2.7B",
-        "6B-v3"
+        "6B-v4"
       ],
       "temperature": [
         0.45,

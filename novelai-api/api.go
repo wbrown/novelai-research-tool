@@ -174,15 +174,15 @@ func NewGenerateParams() NaiGenerateParams {
 	topA := 1.0
 	tfs := 1.0
 	repPen := 3.5
-	repPenRange := uint(1024)
+	repPenRange := uint(2048)
 	repPenSlope := 6.57
 	banBrackets := true
 	badWordsIds := make([][]uint16, 0)
 	logitBiasIds := make([][]float32, 0)
 	trimSpaces := true
 	return NaiGenerateParams{
-		Model:                  "6B-v3",
-		Prefix:                 "general_crossgenre",
+		Model:                  "6B-v4",
+		Prefix:                 "vanilla",
 		Temperature:            &temperature,
 		MaxLength:              &maxLength,
 		MinLength:              &minLength,
