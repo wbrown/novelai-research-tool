@@ -16,6 +16,62 @@ import (
 	"strings"
 )
 
+//
+// Logprob structures
+//
+
+type LogprobPair struct {
+	Before *float32
+	After  *float32
+}
+
+type Logprob struct {
+	Tokens   gpt_bpe.Tokens
+	Logprobs LogprobPair
+}
+
+func (lp *LogprobPair) UnmarshalJSON(buf []byte) error {
+	tmp := []interface{}{&lp.Before, &lp.After}
+	wantLen := len(tmp)
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if g, e := len(tmp), wantLen; g != e {
+		return fmt.Errorf(
+			"wrong number of fields in LogprobPair: %d != %d", g, e)
+	}
+	return nil
+}
+
+func (lp *Logprob) MarshalJSON() ([]byte, error) {
+	lpPair := []*float32{lp.Logprobs.Before, lp.Logprobs.After}
+	lpTokens := lp.Tokens
+	return json.Marshal([]interface{}{lpTokens, lpPair})
+}
+
+func (l *Logprob) UnmarshalJSON(buf []byte) error {
+	tmp := []interface{}{&l.Tokens, &l.Logprobs}
+	wantLen := len(tmp)
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if g, e := len(tmp), wantLen; g != e {
+		return fmt.Errorf(
+			"wrong number of fields in Logprob: %d != %d", g, e)
+	}
+	return nil
+}
+
+type LogprobEntry struct {
+	Chosen *[]Logprob `json:"chosen"`
+	Before *[]Logprob `json:"before"`
+	After  *[]Logprob `json:"after"`
+}
+
+//
+// General NovelAI API structures
+//
+
 type NovelAiAPI struct {
 	backend string
 	keys    NaiKeys
@@ -24,10 +80,11 @@ type NovelAiAPI struct {
 }
 
 type NaiGenerateHTTPResp struct {
-	Output     string `json:"output"`
-	Error      string `json:"error"`
-	StatusCode int    `json:"statusCode"`
-	Message    string `json:"message"`
+	Output     string          `json:"output"`
+	Error      string          `json:"error"`
+	StatusCode int             `json:"statusCode"`
+	Message    string          `json:"message"`
+	Logprobs   *[]LogprobEntry `json:"logprobs""`
 }
 
 type NextArray struct {
@@ -60,14 +117,16 @@ type NaiGenerateParams struct {
 	TrimSpaces             *bool        `json:"trim_spaces"`
 	NonZeroProbs           bool         `json:"output_nonzero_probs"`
 	NextWord               bool         `json:"next_word"`
+	NumLogprobs            *uint        `json:"num_logprobs"`
 }
 
 type NaiGenerateResp struct {
-	Request         string `json:"request"`
-	Response        string `json:"response"`
-	EncodedRequest  string `json:"encoded_request"`
-	EncodedResponse string `json:"encoded_response"`
-	Error           error  `json:"error"`
+	Request         string          `json:"request"`
+	Response        string          `json:"response"`
+	EncodedRequest  string          `json:"encoded_request"`
+	EncodedResponse string          `json:"encoded_response"`
+	Logprobs        *[]LogprobEntry `json:"logprobs_response"`
+	Error           error           `json:"error"`
 }
 
 func BannedBrackets() [][]uint16 {
@@ -158,6 +217,9 @@ func (params *NaiGenerateParams) CoerceNullValues(other NaiGenerateParams) {
 	if params.TrimSpaces == nil {
 		params.TrimSpaces = other.TrimSpaces
 	}
+	if params.NumLogprobs == nil {
+		params.NumLogprobs = other.NumLogprobs
+	}
 }
 
 func (params *NaiGenerateParams) CoerceDefaults() {
@@ -180,6 +242,7 @@ func NewGenerateParams() NaiGenerateParams {
 	badWordsIds := make([][]uint16, 0)
 	logitBiasIds := make([][]float32, 0)
 	trimSpaces := true
+	numLogprobs := uint(5)
 	return NaiGenerateParams{
 		Model:                  "6B-v4",
 		Prefix:                 "vanilla",
@@ -200,6 +263,7 @@ func NewGenerateParams() NaiGenerateParams {
 		UseString:              false,
 		ReturnFullText:         false,
 		TrimSpaces:             &trimSpaces,
+		NumLogprobs:            &numLogprobs,
 	}
 }
 
@@ -338,7 +402,8 @@ func NewNovelAiAPI() NovelAiAPI {
 	}
 }
 
-func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGenerateParams) (resp NaiGenerateResp) {
+func (api NovelAiAPI) GenerateWithParams(content *string,
+	params NaiGenerateParams) (resp NaiGenerateResp) {
 	if params.TrimSpaces == nil || *params.TrimSpaces == true {
 		*content = strings.TrimRight(*content, " \t")
 	}
@@ -360,6 +425,7 @@ func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGeneratePara
 			if params.TrimResponses != nil && *params.TrimResponses == true {
 				tokens, err = api.encoder.TrimIncompleteSentence(tokens)
 			}
+			resp.Logprobs = apiResp.Logprobs
 			resp.EncodedResponse = apiResp.Output
 			resp.Response = api.encoder.Decode(tokens)
 		}
