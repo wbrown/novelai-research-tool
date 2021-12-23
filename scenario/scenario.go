@@ -74,6 +74,7 @@ type LorebookEntry struct {
 	ForceActivation     bool          `json:"forceActivation"`
 	KeyRelative         bool          `json:"keyRelative"`
 	NonStoryActivatable bool          `json:"nonStoryActivatable"`
+	CategoryId          string        `json:"category"`
 	Tokens              *gpt_bpe.Tokens
 	KeysRegex           []*regexp.Regexp
 }
