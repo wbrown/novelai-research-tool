@@ -367,8 +367,8 @@ func resolvePermutation(origPermutation ContentTest,
 				permutation.AIModule = &aiModule
 				permutation.Scenario.Settings.Prefix = permutation.AIModule.ToPrefix()
 				permutation.Scenario.Settings.ScenarioAIModule = &scenario.ScenarioAIModule{
-					Name: aiModule.Name,
-					Id: permutation.Scenario.Settings.Prefix,
+					Name:        aiModule.Name,
+					Id:          permutation.Scenario.Settings.Prefix,
 					Description: aiModule.Description,
 				}
 			}
@@ -449,7 +449,8 @@ func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
 				ct.Parameters.Label = strings.Replace(
 					strings.Replace(
 						filepath.Base(fmt.Sprintf("%v",
-							ct.ScenarioFilename)), "-", "_", -1),
+							ct.ScenarioFilename)),
+						"-", "_", -1),
 					".", "_", -1)
 			} else {
 				ct.Parameters.Label = "base"
