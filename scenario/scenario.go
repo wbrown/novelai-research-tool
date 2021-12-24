@@ -180,6 +180,7 @@ type Scenario struct {
 	Lorebook           Lorebook            `json:"lorebook,omitempty"`
 	Placeholders       []Placeholder       `json:"placeholders,omitempty"`
 	StoryContextConfig *ContextConfig      `json:"storyContextConfig,omitempty"`
+	Biases             *structs.BiasGroups `json:"-" yaml:"biases"`
 	AIModule           *aimodules.AIModule `json:"-"`
 	PlaceholderMap     Placeholders        `json:"-"`
 }
