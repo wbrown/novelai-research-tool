@@ -525,11 +525,11 @@ var placeholderVarRegex = regexp.MustCompile(
 	"\\$\\{(?P<var>[\\p{L}|0-9|#|_|\\-|(|)]+)(\\}|\\[[^\\}]+\\})")
 
 type Placeholder struct {
-	Variable        string `json:"key"`
-	Defaults        string `json:"defaultValue"`
-	Description     string `json:"description"`
-	LongDescription string `json:"longDescription"`
-	Value           string `json:"value"`
+	Variable        string `json:"key" yaml:"key"`
+	Defaults        string `json:"defaultValue" yaml:"default"`
+	Description     string `json:"description" yaml:"description"`
+	LongDescription string `json:"longDescription" yaml:"longDescription"`
+	Value           string `json:"value" yaml:"value"`
 }
 
 type Placeholders map[string]*Placeholder
