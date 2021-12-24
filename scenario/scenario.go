@@ -7,6 +7,7 @@ import (
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
 	"io/ioutil"
 	"log"
+	"reflect"
 	"regexp"
 	"sort"
 	"strings"
@@ -123,9 +124,63 @@ type LorebookSettings struct {
 }
 
 type Lorebook struct {
-	Version  int              `json:"lorebookVersion"`
-	Entries  []LorebookEntry  `json:"entries"`
-	Settings LorebookSettings `json:"settings"`
+	Version    int              `json:"lorebookVersion"`
+	Entries    []LorebookEntry  `json:"entries"`
+	Settings   LorebookSettings `json:"settings"`
+	Categories []Category       `json:"categories"`
+}
+
+func (lorebook *Lorebook) ToPlaintext() string {
+	entryStrings := make([]string, 0)
+	for entryIdx := range lorebook.Entries {
+		entry := lorebook.Entries[entryIdx]
+		if entry.Enabled == nil || *entry.Enabled {
+			normalizedDisplayName := strings.Replace(*entry.DisplayName,
+				":", " -", -1)
+			entryStrings = append(entryStrings,
+				strings.Join([]string{normalizedDisplayName, *entry.Text},
+					":\n"))
+		}
+	}
+	return strings.Join(entryStrings, "\n***\n")
+}
+
+func (defaults *LorebookEntry) RealizeDefaults(entry *LorebookEntry) {
+	fields := reflect.TypeOf(*defaults)
+	for field := 0; field < fields.NumField(); field++ {
+		fieldValues := reflect.ValueOf(defaults).Elem().Field(field)
+		if fieldValues.IsNil() {
+			continue
+		}
+		entryValue := reflect.ValueOf(entry).Elem().Field(field)
+		if entryValue.IsNil() {
+			entryValue.Set(fieldValues)
+		}
+	}
+}
+
+func (biasGroups *BiasGroups) RealizeBiases() {
+	for biasIdx := range *biasGroups {
+		biasGroup := (*biasGroups)[biasIdx]
+		if biasGroup.YamlPhrases != nil {
+			if (*biasGroups)[biasIdx].Phrases == nil {
+				biasSequences := make([]BiasSequences, 0)
+				(*biasGroups)[biasIdx].Phrases = &biasSequences
+			}
+			for phraseIdx := range *biasGroup.YamlPhrases {
+				jsonifiedPhrase := BiasSequences{
+					Sequences: make([]gpt_bpe.Tokens, 0),
+					Type:      BiasLitString,
+				}
+				phraseString := (*biasGroup.YamlPhrases)[phraseIdx]
+				tokens := gpt_bpe.Encoder.Encode(&phraseString)
+				jsonifiedPhrase.Sequences = append(jsonifiedPhrase.Sequences,
+					*tokens)
+				*(*biasGroups)[biasIdx].Phrases = append(
+					*(*biasGroups)[biasIdx].Phrases, jsonifiedPhrase)
+			}
+		}
+	}
 }
 
 type ScenarioAIModule struct {
