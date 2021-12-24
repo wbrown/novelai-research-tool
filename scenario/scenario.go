@@ -5,6 +5,7 @@ import (
 	"github.com/wbrown/novelai-research-tool/aimodules"
 	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
+	"github.com/wbrown/novelai-research-tool/structs"
 	"io/ioutil"
 	"log"
 	"reflect"
@@ -12,31 +13,6 @@ import (
 	"sort"
 	"strings"
 )
-
-type BiasType uint
-
-const (
-	BiasString    BiasType = 0
-	BiasTokens             = 1
-	BiasLitString          = 2
-)
-
-type BiasSequences struct {
-	Sequences []gpt_bpe.Tokens `json:"sequences"`
-	Type      BiasType         `json:"type"`
-}
-
-type BiasGroup struct {
-	YamlPhrases          *[]string        `json:"-" yaml:"phrases"`
-	Phrases              *[]BiasSequences `json:"phrases,omitempty" yaml:"-"`
-	Bias                 *float64         `json:"bias,omitempty" yaml:"bias"`
-	EnsureSequenceFinish *bool            `json:"ensure_sequence_finish,omitempty" yaml:"ensureSequenceFinish"`
-	GenerateOnce         *bool            `json:"generate_once,omitempty" yaml:"generateOnce"`
-	Enabled              *bool            `json:"enabled,omitempty" yaml:"enabled"`
-	WhenInactive         *bool            `json:"whenInactive,omitempty" yaml:"whenInactive"`
-}
-
-type BiasGroups []BiasGroup
 
 type ContextConfig struct {
 	Prefix               *string `json:"prefix,omitempty" yaml:"prefix"`
@@ -54,12 +30,12 @@ type ContextConfig struct {
 }
 
 type ContextEntry struct {
-	Text         string        `json:"text"`
-	ContextCfg   ContextConfig `json:"contextConfig"`
-	Tokens       *gpt_bpe.Tokens
-	Label        string
-	MatchIndexes []map[string][][]int
-	Index        uint
+	Text         *string              `json:"text,omitempty" yaml:"text"`
+	ContextCfg   *ContextConfig       `json:"contextConfig,omitempty" yaml:"config"`
+	Tokens       *gpt_bpe.Tokens      `json:"-" yaml:"-"`
+	Label        string               `json:"-" yaml:"-"`
+	MatchIndexes []map[string][][]int `json:"-" yaml:"-"`
+	Index        uint                 `json:"-" yaml:"-"`
 }
 
 type ContextEntries []ContextEntry
@@ -92,31 +68,31 @@ const (
 )
 
 type LorebookEntry struct {
-	Text                *string        `json:"text,omitempty" yaml:"text"`
-	ContextCfg          *ContextConfig `json:"contextConfig,omitempty" yaml:"contextConfig"`
-	LastUpdatedAt       *int           `json:"lastUpdatedAt,omitempty" yaml:"lastUpdatedAt"`
-	DisplayName         *string        `json:"displayName,omitempty" yaml:"displayName"`
-	Keys                *[]string      `json:"keys,omitempty" yaml:"keys"`
-	SearchRange         *int           `json:"searchRange,omitempty" yaml:"searchRange"`
-	Enabled             *bool          `json:"enabled,omitempty" yaml:"enabled"`
-	ForceActivation     *bool          `json:"forceActivation,omitempty" yaml:"forceActivation"`
-	KeyRelative         *bool          `json:"keyRelative,omitempty" yaml:"keyRelative"`
-	NonStoryActivatable *bool          `json:"nonStoryActivatable,omitempty" yaml:"nonStoryActivatable"`
-	CategoryId          *string        `json:"category,omitempty" yaml:"categoryId"`
-	LoreBiasGroups      *BiasGroups    `json:"loreBiasGroups,omitempty" yaml:"loreBiasGroups"`
+	Text                *string             `json:"text,omitempty" yaml:"text"`
+	ContextCfg          *ContextConfig      `json:"contextConfig,omitempty" yaml:"contextConfig"`
+	LastUpdatedAt       *int                `json:"lastUpdatedAt,omitempty" yaml:"lastUpdatedAt"`
+	DisplayName         *string             `json:"displayName,omitempty" yaml:"displayName"`
+	Keys                *[]string           `json:"keys,omitempty" yaml:"keys"`
+	SearchRange         *int                `json:"searchRange,omitempty" yaml:"searchRange"`
+	Enabled             *bool               `json:"enabled,omitempty" yaml:"enabled"`
+	ForceActivation     *bool               `json:"forceActivation,omitempty" yaml:"forceActivation"`
+	KeyRelative         *bool               `json:"keyRelative,omitempty" yaml:"keyRelative"`
+	NonStoryActivatable *bool               `json:"nonStoryActivatable,omitempty" yaml:"nonStoryActivatable"`
+	CategoryId          *string             `json:"category,omitempty" yaml:"categoryId"`
+	LoreBiasGroups      *structs.BiasGroups `json:"loreBiasGroups,omitempty" yaml:"loreBiasGroups"`
 	Tokens              *gpt_bpe.Tokens
 	KeysRegex           []*regexp.Regexp
 }
 
 type Category struct {
-	Name                *string        `json:"name,omitempty" yaml:"name"`
-	Id                  *string        `json:"id,omitempty" yaml:"id"`
-	Enabled             *bool          `json:"enabled,omitempty" yaml:"enabled"`
-	CreateSubcontext    *bool          `json:"createSubcontext,omitempty" yaml:"createSubcontext"`
-	SubcontextSettings  *LorebookEntry `json:"subcontextSettings,omitempty" yaml:"subcontextSettings"`
-	UseCategoryDefaults *bool          `json:"useCategoryDefaults,omitempty" yaml:"useCategoryDefaults"`
-	CategoryDefaults    *LorebookEntry `json:"categoryDefaults,omitempty" yaml:"categoryDefaults"`
-	LoreBiasGroups      *BiasGroups    `json:"loreBiasGroups,omitempty" yaml:"loreBiasGroups"`
+	Name                *string             `json:"name,omitempty" yaml:"name"`
+	Id                  *string             `json:"id,omitempty" yaml:"id"`
+	Enabled             *bool               `json:"enabled,omitempty" yaml:"enabled"`
+	CreateSubcontext    *bool               `json:"createSubcontext,omitempty" yaml:"createSubcontext"`
+	SubcontextSettings  *LorebookEntry      `json:"subcontextSettings,omitempty" yaml:"subcontextSettings"`
+	UseCategoryDefaults *bool               `json:"useCategoryDefaults,omitempty" yaml:"useCategoryDefaults"`
+	CategoryDefaults    *LorebookEntry      `json:"categoryDefaults,omitempty" yaml:"categoryDefaults"`
+	LoreBiasGroups      *structs.BiasGroups `json:"loreBiasGroups,omitempty" yaml:"loreBiasGroups"`
 }
 
 type LorebookSettings struct {
@@ -134,7 +110,7 @@ func (lorebook *Lorebook) ToPlaintext() string {
 	entryStrings := make([]string, 0)
 	for entryIdx := range lorebook.Entries {
 		entry := lorebook.Entries[entryIdx]
-		if entry.Enabled == nil || *entry.Enabled {
+		if entry.Text != nil && (entry.Enabled == nil || *entry.Enabled) {
 			normalizedDisplayName := strings.Replace(*entry.DisplayName,
 				":", " -", -1)
 			entryStrings = append(entryStrings,
@@ -143,6 +119,24 @@ func (lorebook *Lorebook) ToPlaintext() string {
 		}
 	}
 	return strings.Join(entryStrings, "\n***\n")
+}
+
+func (lorebook *Lorebook) ToPlaintextFile(path string) {
+	output := lorebook.ToPlaintext()
+	if err := ioutil.WriteFile(path, []byte(output), 0755); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (lorebook *Lorebook) ToFile(path string) {
+	var err error
+	outputBytes, err := json.MarshalIndent(lorebook, "", " ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if ioutil.WriteFile(path, outputBytes, 0755) != nil {
+		log.Fatal(err)
+	}
 }
 
 func (defaults *LorebookEntry) RealizeDefaults(entry *LorebookEntry) {
@@ -159,30 +153,6 @@ func (defaults *LorebookEntry) RealizeDefaults(entry *LorebookEntry) {
 	}
 }
 
-func (biasGroups *BiasGroups) RealizeBiases() {
-	for biasIdx := range *biasGroups {
-		biasGroup := (*biasGroups)[biasIdx]
-		if biasGroup.YamlPhrases != nil {
-			if (*biasGroups)[biasIdx].Phrases == nil {
-				biasSequences := make([]BiasSequences, 0)
-				(*biasGroups)[biasIdx].Phrases = &biasSequences
-			}
-			for phraseIdx := range *biasGroup.YamlPhrases {
-				jsonifiedPhrase := BiasSequences{
-					Sequences: make([]gpt_bpe.Tokens, 0),
-					Type:      BiasLitString,
-				}
-				phraseString := (*biasGroup.YamlPhrases)[phraseIdx]
-				tokens := gpt_bpe.Encoder.Encode(&phraseString)
-				jsonifiedPhrase.Sequences = append(jsonifiedPhrase.Sequences,
-					*tokens)
-				*(*biasGroups)[biasIdx].Phrases = append(
-					*(*biasGroups)[biasIdx].Phrases, jsonifiedPhrase)
-			}
-		}
-	}
-}
-
 type ScenarioAIModule struct {
 	Id          string `json:"id"`
 	Name        string `json:"name"`
@@ -191,26 +161,28 @@ type ScenarioAIModule struct {
 }
 
 type ScenarioSettings struct {
-	Parameters       novelai_api.NaiGenerateParams `json:"parameters"`
-	TrimResponses    bool                          `json:"trimResponses"`
-	BanBrackets      bool                          `json:"banBrackets"`
-	Prefix           string                        `json:"prefix"`
-	ScenarioAIModule *ScenarioAIModule             `json:"aiModule"`
+	Parameters       *novelai_api.NaiGenerateParams `json:"parameters,omitempty"`
+	TrimResponses    *bool                          `json:"trimResponses,omitempty"`
+	BanBrackets      *bool                          `json:"banBrackets,omitempty"`
+	Prefix           *string                        `json:"prefix,omitempty"`
+	ScenarioAIModule *ScenarioAIModule              `json:"-,omitempty"`
 }
 
 type Scenario struct {
-	ScenarioVersion int              `json:"scenarioVersion"`
-	Title           string           `json:"title"`
-	Author          string           `json:"author"`
-	Description     string           `json:"description"`
-	Prompt          string           `json:"prompt"`
-	Tags            []string         `json:"tags"`
-	Context         []ContextEntry   `json:"context"`
-	Settings        ScenarioSettings `json:"settings"`
-	Lorebook        Lorebook         `json:"lorebook"`
-	Placeholders    []Placeholder    `json:"placeholders"`
-	AIModule        *aimodules.AIModule
-	PlaceholderMap  Placeholders
+	ScenarioVersion    int                 `json:"scenarioVersion"`
+	Title              string              `json:"title"`
+	Author             string              `json:"author"`
+	Description        string              `json:"description"`
+	Prompt             string              `json:"prompt"`
+	Tags               []string            `json:"tags,omitempty"`
+	Context            []ContextEntry      `json:"context,omitempty"`
+	Settings           ScenarioSettings    `json:"settings,omitempty"`
+	Lorebook           Lorebook            `json:"lorebook,omitempty"`
+	Placeholders       []Placeholder       `json:"placeholders,omitempty"`
+	StoryContextConfig *ContextConfig      `json:"storyContextConfig,omitempty"`
+	Biases             *structs.BiasGroups `json:`
+	AIModule           *aimodules.AIModule `json:"-"`
+	PlaceholderMap     Placeholders        `json:"-"`
 }
 
 type ContextReportEntry struct {
@@ -256,7 +228,7 @@ func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries Conte
 				keyRegex = keysRegex[keyIdx]
 			}
 			for ctxIdx := range contexts {
-				searchText := contexts[ctxIdx].Text
+				searchText := *contexts[ctxIdx].Text
 				searchLen := len(searchText) - *searchRange
 				if searchLen > 0 {
 					searchText = searchText[searchLen:]
@@ -291,8 +263,8 @@ func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries Conte
 
 		if len(indexes) > 0 || *lorebookEntry.ForceActivation {
 			entry := ContextEntry{
-				Text:         resolvedText,
-				ContextCfg:   *lorebookEntry.ContextCfg,
+				Text:         &resolvedText,
+				ContextCfg:   lorebookEntry.ContextCfg,
 				Tokens:       tokens,
 				Label:        label,
 				MatchIndexes: indexes,
@@ -331,8 +303,8 @@ func (scenario Scenario) createStoryContext(story string) ContextEntry {
 	force := true
 
 	return ContextEntry{
-		Text: story,
-		ContextCfg: ContextConfig{
+		Text: &story,
+		ContextCfg: &ContextConfig{
 			Prefix:            nil,
 			Suffix:            nil,
 			ReservedTokens:    &reservedTokens,
@@ -440,10 +412,11 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 	contexts := ContextEntries{storyEntry}
 	lorebookContexts := scenario.ResolveLorebook(contexts)
 	for ctxIdx := range contexts {
-		resolved := scenario.PlaceholderMap.ReplacePlaceholders(contexts[ctxIdx].Text)
-		if resolved != contexts[ctxIdx].Text {
+		resolved := scenario.PlaceholderMap.ReplacePlaceholders(
+			*contexts[ctxIdx].Text)
+		if resolved != *contexts[ctxIdx].Text {
 			contexts[ctxIdx].Tokens = gpt_bpe.Encoder.Encode(&resolved)
-			contexts[ctxIdx].Text = resolved
+			contexts[ctxIdx].Text = &resolved
 		}
 	}
 	contexts = append(contexts, scenario.Context...)
@@ -467,7 +440,8 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 	contextReport := make(ContextReport, 0)
 	newContexts := make([]string, 0)
 	// Reserve 20 tokens if we're using an AI module.
-	if scenario.Settings.Parameters.Prefix != "vanilla" {
+	if scenario.Settings.Parameters.Prefix == nil ||
+		*scenario.Settings.Parameters.Prefix != "vanilla" {
 		budget -= 20
 	}
 	for ctxIdx := range contexts {
@@ -551,13 +525,14 @@ var placeholderVarRegex = regexp.MustCompile(
 	"\\$\\{(?P<var>[\\p{L}|0-9|#|_|\\-|(|)]+)(\\}|\\[[^\\}]+\\})")
 
 type Placeholder struct {
-	Variable    string `json:"key"`
-	Defaults    string `json:"defaultValue"`
-	Description string `json:"description"`
-	Value       string `json:"value"`
+	Variable        string `json:"key"`
+	Defaults        string `json:"defaultValue"`
+	Description     string `json:"description"`
+	LongDescription string `json:"longDescription"`
+	Value           string `json:"value"`
 }
 
-type Placeholders map[string]Placeholder
+type Placeholders map[string]*Placeholder
 
 func getPlaceholderTable(text string) (trimmed string, tableBlock string) {
 	trimmed = text
@@ -576,10 +551,11 @@ func extractPlaceholderDefs(rgx *regexp.Regexp, text string) (variables Placehol
 	defs := rgx.FindAllString(text, -1)
 	for defIdx := range defs {
 		fields := rgx.FindStringSubmatch(defs[defIdx])
-		variables[fields[1]] = Placeholder{Variable: fields[1],
-			Defaults:    fields[2],
-			Description: fields[3],
-			Value:       fields[2],
+		variables[fields[1]] = &Placeholder{Variable: fields[1],
+			Defaults:        fields[2],
+			Description:     fields[3],
+			Value:           fields[2],
+			LongDescription: fields[4],
 		}
 	}
 	return variables
@@ -591,7 +567,7 @@ func (target *Placeholders) UpdateValues(kvs map[string]string) {
 			entry.Value = v
 			(*target)[k] = entry
 		} else {
-			(*target)[k] = Placeholder{
+			(*target)[k] = &Placeholder{
 				Variable: k,
 				Value:    v,
 			}
@@ -627,6 +603,23 @@ func DiscoverPlaceholderDefs(text string) Placeholders {
 	return extractPlaceholderDefs(placeholderDefRegex, text)
 }
 
+func (accPlaceholders Placeholders) Realize() {
+	for varName := range accPlaceholders {
+		accPlaceholders[varName].Variable = varName
+	}
+}
+
+func (accPlaceholders Placeholders) Add(new Placeholders) {
+	for varName := range new {
+		new.Realize()
+		if _, exists := accPlaceholders[varName]; exists {
+			log.Printf("WARNING: Previous placeholder definition for"+
+				" %s exists. Overwriting!", varName)
+		}
+		accPlaceholders[varName] = new[varName]
+	}
+}
+
 func (target *Placeholders) merge(source Placeholders) {
 	for k, v := range source {
 		(*target)[k] = v
@@ -638,12 +631,12 @@ func (scenario *Scenario) GetPlaceholderDefs() (defs Placeholders) {
 	for placeholderIdx := range scenario.Placeholders {
 		placeholder := scenario.Placeholders[placeholderIdx]
 		placeholder.Value = placeholder.Defaults
-		defs[placeholder.Variable] = placeholder
+		defs[placeholder.Variable] = &placeholder
 	}
 	defs.merge(DiscoverPlaceholderTable(scenario.Prompt))
 	defs.merge(DiscoverPlaceholderDefs(scenario.Prompt))
 	for ctxIdx := range scenario.Context {
-		defs.merge(DiscoverPlaceholderDefs(scenario.Context[ctxIdx].Text))
+		defs.merge(DiscoverPlaceholderDefs(*scenario.Context[ctxIdx].Text))
 	}
 	for lbkIdx := range scenario.Lorebook.Entries {
 		defs.merge(DiscoverPlaceholderDefs(
@@ -653,12 +646,12 @@ func (scenario *Scenario) GetPlaceholderDefs() (defs Placeholders) {
 }
 
 func (scenario *Scenario) SetMemory(memory string) {
-	scenario.Context[0].Text = memory
+	scenario.Context[0].Text = &memory
 	scenario.Context[0].Tokens = gpt_bpe.Encoder.Encode(&memory)
 }
 
 func (scenario *Scenario) SetAuthorsNote(an string) {
-	scenario.Context[1].Text = an
+	scenario.Context[1].Text = &an
 	scenario.Context[1].Tokens = gpt_bpe.Encoder.Encode(&an)
 }
 
@@ -683,8 +676,8 @@ func ScenarioFromSpec(prompt string, memory string, an string) (scenario Scenari
 	anForce := true
 	scenario.Prompt = prompt
 	scenario.Context = ContextEntries{
-		{Text: memory,
-			ContextCfg: ContextConfig{
+		{Text: &memory,
+			ContextCfg: &ContextConfig{
 				Prefix:            &memoryPrefix,
 				Suffix:            &memorySuffix,
 				TokenBudget:       &memoryBudget,
@@ -698,8 +691,8 @@ func ScenarioFromSpec(prompt string, memory string, an string) (scenario Scenari
 			Tokens: gpt_bpe.Encoder.Encode(&memory),
 			Label:  "Memory",
 			Index:  1},
-		{Text: an,
-			ContextCfg: ContextConfig{
+		{Text: &an,
+			ContextCfg: &ContextConfig{
 				Prefix:            &anPrefix,
 				Suffix:            &anSuffix,
 				TokenBudget:       &anBudget,
@@ -734,7 +727,7 @@ func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scen
 	for ctxIdx := range scenario.Context {
 		ctx := scenario.Context[ctxIdx]
 		toEncode := *ctx.ContextCfg.Prefix +
-			ctx.Text
+			*ctx.Text
 		ctx.Tokens = tokenizer.Encode(&toEncode)
 		scenario.Context[ctxIdx] = ctx
 	}
@@ -766,7 +759,7 @@ func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scen
 
 	scenario.Settings.Parameters.CoerceDefaults()
 	scenario.Settings.Parameters.Prefix = scenario.Settings.Prefix
-	*scenario.Settings.Parameters.BanBrackets = scenario.Settings.BanBrackets
+	scenario.Settings.Parameters.BanBrackets = scenario.Settings.BanBrackets
 	scenario.PlaceholderMap = scenario.GetPlaceholderDefs()
 	return scenario, err
 }

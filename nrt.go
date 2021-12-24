@@ -174,7 +174,8 @@ func (ct *ContentTest) GetModuleFilename() (moduleFile string) {
 	if ct.ModuleFilename != "" {
 		return ct.ModuleFilename
 	} else if ct.Scenario != nil && ct.Scenario.AIModule != nil &&
-		ct.Parameters.Prefix == ct.Scenario.AIModule.ToPrefix() &&
+		ct.Parameters.Prefix != nil &&
+		*ct.Parameters.Prefix == ct.Scenario.AIModule.ToPrefix() &&
 		ct.ScenarioFilename != "" {
 		return ct.ScenarioFilename
 	} else {
@@ -184,13 +185,14 @@ func (ct *ContentTest) GetModuleFilename() (moduleFile string) {
 
 func (ct *ContentTest) GetPrefixName() (prefixName string) {
 	if ct.Scenario != nil && ct.Scenario.AIModule != nil &&
-		ct.Parameters.Prefix == ct.Scenario.AIModule.ToPrefix() &&
+		ct.Parameters.Prefix != nil &&
+		*ct.Parameters.Prefix == ct.Scenario.AIModule.ToPrefix() &&
 		len(ct.Scenario.AIModule.Name) != 0 {
 		prefixName = ct.Scenario.AIModule.Name
 	} else if ct.AIModule != nil {
 		prefixName = ct.AIModule.Name
-	} else {
-		prefixName = ct.Parameters.Prefix
+	} else if ct.Parameters.Prefix != nil {
+		prefixName = *ct.Parameters.Prefix
 	}
 	return prefixName
 }
@@ -365,15 +367,17 @@ func resolvePermutation(origPermutation ContentTest,
 				}
 				aiModule := aimodules.AIModuleFromFile(permutation.ModulePath)
 				permutation.AIModule = &aiModule
-				permutation.Scenario.Settings.Prefix = permutation.AIModule.ToPrefix()
+				genPrefix := permutation.AIModule.ToPrefix()
+				permutation.Scenario.Settings.Prefix = &genPrefix
 				permutation.Scenario.Settings.ScenarioAIModule = &scenario.ScenarioAIModule{
 					Name:        aiModule.Name,
-					Id:          permutation.Scenario.Settings.Prefix,
+					Id:          *permutation.Scenario.Settings.Prefix,
 					Description: aiModule.Description,
 				}
 			}
 		case "Model":
-			permutation.Parameters.Model = value.String()
+			modelVal := value.String()
+			permutation.Parameters.Model = &modelVal
 		default:
 			reflect.ValueOf(&permutation.Parameters).Elem().Field(targetField.Index[0]).Set(value)
 		}
@@ -411,12 +415,13 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) Conten
 			permutations = newPermutations
 		}
 	}
-	ct.Parameters.Label = ct.MakeLabel(spec)
+	newLabel := ct.MakeLabel(spec)
+	ct.Parameters.Label = &newLabel
 	filteredPermutations := []ContentTest{ct}
 	for permutationIdx := range permutations {
 		permutation := permutations[permutationIdx]
-		if permutation.Parameters.Model != "6B-v3" &&
-			permutation.Parameters.Prefix != "vanilla" {
+		if *permutation.Parameters.Model != "6B-v4" &&
+			*permutation.Parameters.Prefix != "vanilla" {
 			continue
 		}
 		// Deduplicate based on fields we've permuted on.
@@ -429,8 +434,9 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) Conten
 			}
 		}
 		if !same {
-			permutation.Scenario.Settings.Parameters = permutation.Parameters
-			permutation.Parameters.Label = permutation.MakeLabel(spec)
+			permutation.Scenario.Settings.Parameters = &permutation.Parameters
+			newLabel := permutation.MakeLabel(spec)
+			permutation.Parameters.Label = &newLabel
 			filteredPermutations = append(filteredPermutations, permutation)
 		}
 	}
@@ -444,16 +450,18 @@ func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
 				ct.GeneratePermutationsFromSpec(ct.Permutations[specIdx])...)
 		}
 	} else {
-		if ct.Parameters.Label == "" {
+		if ct.Parameters.Label == nil || *ct.Parameters.Label == "" {
 			if ct.ScenarioFilename != "" {
-				ct.Parameters.Label = strings.Replace(
+				newLabel := strings.Replace(
 					strings.Replace(
 						filepath.Base(fmt.Sprintf("%v",
 							ct.ScenarioFilename)),
 						"-", "_", -1),
 					".", "_", -1)
+				ct.Parameters.Label = &newLabel
 			} else {
-				ct.Parameters.Label = "base"
+				baseLabel := "base"
+				ct.Parameters.Label = &baseLabel
 			}
 		}
 		tests = append(tests, ct)
@@ -470,7 +478,10 @@ func (ct *ContentTest) generateOutputPath() string {
 		(len(filepath.Join(ct.WorkingDir, ct.OutputPrefix)) +
 			len(tsString) + len(ct.WorkingDir) +
 			MaxFileExtensionLength + 1)
-	label := ct.Parameters.Label
+	label := ""
+	if ct.Parameters.Label != nil {
+		label = *ct.Parameters.Label
+	}
 	if budget < len(label) && runtime.GOOS == "windows" {
 		if budget < 30 {
 			log.Printf("nrt: your working path is too long: %v",
@@ -547,8 +558,8 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 			test.Scenario = &scenario
 		}
 		test.Prompt = test.Scenario.Prompt
-		test.Memory = test.Scenario.Context[0].Text
-		test.AuthorsNote = test.Scenario.Context[1].Text
+		test.Memory = *test.Scenario.Context[0].Text
+		test.AuthorsNote = *test.Scenario.Context[1].Text
 		test.Parameters.CoerceNullValues(test.Scenario.Settings.Parameters)
 	} else {
 		test.Parameters.CoerceDefaults()
@@ -563,7 +574,8 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 		}
 		aimodule := aimodules.AIModuleFromFile(test.ModulePath)
 		test.AIModule = &aimodule
-		test.Parameters.Prefix = test.AIModule.ToPrefix()
+		newPrefix := test.AIModule.ToPrefix()
+		test.Parameters.Prefix = &newPrefix
 	}
 	if test.PromptFilename != "" {
 		test.PromptPath = filepath.Join(test.WorkingDir, test.PromptFilename)
@@ -577,7 +589,7 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 		scenarioSpec := scenario.ScenarioFromSpec(test.Prompt, test.Memory,
 			test.AuthorsNote)
 		test.Scenario = &scenarioSpec
-		test.Scenario.Settings.Parameters.CoerceNullValues(test.Parameters)
+		test.Scenario.Settings.Parameters.CoerceNullValues(&test.Parameters)
 	}
 	defaultTest := MakeDefaultContentTest()
 	test.CoerceContentTest(&defaultTest)
@@ -601,13 +613,13 @@ func MakeTestFromScenario(path string) (test ContentTest) {
 	test.WorkingDir = filepath.Dir(path)
 	test.OutputPrefix = strings.Replace(filepath.Base(path), ".scenario", "", -1)
 	test.Prompt = test.Scenario.Prompt
-	test.Memory = test.Scenario.Context[0].Text
-	test.AuthorsNote = test.Scenario.Context[1].Text
+	test.Memory = *test.Scenario.Context[0].Text
+	test.AuthorsNote = *test.Scenario.Context[1].Text
 	test.Scenario.Settings.Parameters.CoerceDefaults()
 	test.Parameters.CoerceNullValues(test.Scenario.Settings.Parameters)
 	test.Parameters.Prefix = test.Scenario.Settings.Prefix
-	*test.Parameters.BanBrackets = test.Scenario.Settings.BanBrackets
-	test.Parameters = test.Scenario.Settings.Parameters
+	test.Parameters.BanBrackets = test.Scenario.Settings.BanBrackets
+	test.Parameters = *test.Scenario.Settings.Parameters
 	return test
 }
 
