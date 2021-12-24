@@ -80,8 +80,8 @@ type LorebookEntry struct {
 	NonStoryActivatable *bool               `json:"nonStoryActivatable,omitempty" yaml:"nonStoryActivatable"`
 	CategoryId          *string             `json:"category,omitempty" yaml:"categoryId"`
 	LoreBiasGroups      *structs.BiasGroups `json:"loreBiasGroups,omitempty" yaml:"loreBiasGroups"`
-	Tokens              *gpt_bpe.Tokens
-	KeysRegex           []*regexp.Regexp
+	Tokens              *gpt_bpe.Tokens     `json:"-" yaml:"-"`
+	KeysRegex           []*regexp.Regexp    `json:"-" yaml:"-"`
 }
 
 type Category struct {
@@ -180,7 +180,6 @@ type Scenario struct {
 	Lorebook           Lorebook            `json:"lorebook,omitempty"`
 	Placeholders       []Placeholder       `json:"placeholders,omitempty"`
 	StoryContextConfig *ContextConfig      `json:"storyContextConfig,omitempty"`
-	Biases             *structs.BiasGroups `json:`
 	AIModule           *aimodules.AIModule `json:"-"`
 	PlaceholderMap     Placeholders        `json:"-"`
 }
