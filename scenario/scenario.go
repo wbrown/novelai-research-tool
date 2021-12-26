@@ -92,7 +92,7 @@ type Category struct {
 	SubcontextSettings  *LorebookEntry      `json:"subcontextSettings,omitempty" yaml:"subcontextSettings"`
 	UseCategoryDefaults *bool               `json:"useCategoryDefaults,omitempty" yaml:"useCategoryDefaults"`
 	CategoryDefaults    *LorebookEntry      `json:"categoryDefaults,omitempty" yaml:"categoryDefaults"`
-	CategoryBiasGroups  *structs.BiasGroups `json:"categoryBiasGroups, omitempty" yaml:"categoryBiasGroups"`
+	CategoryBiasGroups  *structs.BiasGroups `json:"categoryBiasGroups,omitempty" yaml:"categoryBiasGroups"`
 }
 
 type LorebookSettings struct {
