@@ -92,11 +92,11 @@ type Category struct {
 	SubcontextSettings  *LorebookEntry      `json:"subcontextSettings,omitempty" yaml:"subcontextSettings"`
 	UseCategoryDefaults *bool               `json:"useCategoryDefaults,omitempty" yaml:"useCategoryDefaults"`
 	CategoryDefaults    *LorebookEntry      `json:"categoryDefaults,omitempty" yaml:"categoryDefaults"`
-	LoreBiasGroups      *structs.BiasGroups `json:"loreBiasGroups,omitempty" yaml:"loreBiasGroups"`
+	CategoryBiasGroups  *structs.BiasGroups `json:"categoryBiasGroups, omitempty" yaml:"categoryBiasGroups"`
 }
 
 type LorebookSettings struct {
-	OrderByKeyLocations bool `json:"orderByKeyLocations"`
+	OrderByKeyLocations bool `json:"orderByKeyLocations" yaml:"orderByKeyLocations"`
 }
 
 type Lorebook struct {
@@ -529,7 +529,7 @@ type Placeholder struct {
 	Defaults        string `json:"defaultValue" yaml:"default"`
 	Description     string `json:"description" yaml:"description"`
 	LongDescription string `json:"longDescription" yaml:"longDescription"`
-	Value           string `json:"value" yaml:"value"`
+	Value           string `json:"-" yaml:"value"`
 }
 
 type Placeholders map[string]*Placeholder
