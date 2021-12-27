@@ -132,7 +132,7 @@ func (lpids *LogitProcessorIDs) check() error {
 
 func (lpr *LogitProcessorRepr) toId() (LogitProcessorID, error) {
 	currRepr := strings.ToLower(string(*lpr))
-	for lookupIdx, _ := range LogitProcessorIdMap {
+	for lookupIdx := range LogitProcessorIdMap {
 		if strings.ToLower(string(LogitProcessorIdMap[lookupIdx])) == currRepr {
 			return lookupIdx, nil
 		}
@@ -194,34 +194,36 @@ func (ids *LogitProcessorIDs) UnmarshalJSON(buf []byte) error {
 }
 
 type NaiGenerateParams struct {
-	Label                  *string             `json:"label,omitempty"`
-	Model                  *string             `json:"model,omitempty"`
-	Prefix                 *string             `json:"prefix,omitempty"`
-	LogitMemory            *string             `json:"memory,omitempty"`
-	LogitAuthors           *string             `json:"authorsnote,omitempty"`
-	Temperature            *float64            `json:"temperature,omitempty"`
-	MaxLength              *uint               `json:"max_length,omitempty"`
-	MinLength              *uint               `json:"min_length,omitempty"`
-	TopK                   *uint               `json:"top_k,omitempty"`
-	TopP                   *float64            `json:"top_p,omitempty"`
-	TopA                   *float64            `json:"top_a,omitempty"`
-	TailFreeSampling       *float64            `json:"tail_free_sampling,omitempty"`
-	RepetitionPenalty      *float64            `json:"repetition_penalty,omitempty"`
-	RepetitionPenaltyRange *uint               `json:"repetition_penalty_range,omitempty"`
-	RepetitionPenaltySlope *float64            `json:"repetition_penalty_slope,omitempty"`
-	BadWordsIds            *[][]uint16         `json:"bad_words_ids,omitempty"`
-	LogitBiasIds           *[][]float32        `json:"logit_bias,omitempty"`
-	LogitBiasGroups        *structs.BiasGroups `json:"logit_bias_groups,omitempty"`
-	BanBrackets            *bool               `json:"ban_brackets,omitempty"`
-	UseCache               *bool               `json:"use_cache,omitempty"`
-	UseString              *bool               `json:"use_string,omitempty"`
-	ReturnFullText         *bool               `json:"return_full_text,omitempty"`
-	TrimResponses          *bool               `json:"trim_responses,omitempty"`
-	TrimSpaces             *bool               `json:"trim_spaces,omitempty"`
-	NonZeroProbs           *bool               `json:"output_nonzero_probs,omitempty"`
-	NextWord               *bool               `json:"next_word,omitempty"`
-	NumLogprobs            *uint               `json:"num_logprobs,omitempty"`
-	Order                  *LogitProcessorIDs  `json:"order"`
+	Label                      *string             `json:"label,omitempty"`
+	Model                      *string             `json:"model,omitempty"`
+	Prefix                     *string             `json:"prefix,omitempty"`
+	LogitMemory                *string             `json:"memory,omitempty"`
+	LogitAuthors               *string             `json:"authorsnote,omitempty"`
+	Temperature                *float64            `json:"temperature,omitempty"`
+	MaxLength                  *uint               `json:"max_length,omitempty"`
+	MinLength                  *uint               `json:"min_length,omitempty"`
+	TopK                       *uint               `json:"top_k,omitempty"`
+	TopP                       *float64            `json:"top_p,omitempty"`
+	TopA                       *float64            `json:"top_a,omitempty"`
+	TailFreeSampling           *float64            `json:"tail_free_sampling,omitempty"`
+	RepetitionPenalty          *float64            `json:"repetition_penalty,omitempty"`
+	RepetitionPenaltyRange     *uint               `json:"repetition_penalty_range,omitempty"`
+	RepetitionPenaltySlope     *float64            `json:"repetition_penalty_slope,omitempty"`
+	RepetitionPenaltyFrequency *float64            `json:"repetition_penalty_frequency,omitempty"`
+	RepetitionPenaltyPresence  *float64            `json:"repetition_penalty_presence,omitempty"`
+	BadWordsIds                *[][]uint16         `json:"bad_words_ids,omitempty"`
+	LogitBiasIds               *[][]float32        `json:"logit_bias,omitempty"`
+	LogitBiasGroups            *structs.BiasGroups `json:"logit_bias_groups,omitempty"`
+	BanBrackets                *bool               `json:"ban_brackets,omitempty"`
+	UseCache                   *bool               `json:"use_cache,omitempty"`
+	UseString                  *bool               `json:"use_string,omitempty"`
+	ReturnFullText             *bool               `json:"return_full_text,omitempty"`
+	TrimResponses              *bool               `json:"trim_responses,omitempty"`
+	TrimSpaces                 *bool               `json:"trim_spaces,omitempty"`
+	NonZeroProbs               *bool               `json:"output_nonzero_probs,omitempty"`
+	NextWord                   *bool               `json:"next_word,omitempty"`
+	NumLogprobs                *uint               `json:"num_logprobs,omitempty"`
+	Order                      *LogitProcessorIDs  `json:"order"`
 }
 
 type NaiGenerateResp struct {
@@ -312,6 +314,12 @@ func (params *NaiGenerateParams) CoerceNullValues(other *NaiGenerateParams) {
 	if params.RepetitionPenaltySlope == nil {
 		params.RepetitionPenaltySlope = other.RepetitionPenaltySlope
 	}
+	if params.RepetitionPenaltyFrequency == nil {
+		params.RepetitionPenaltyFrequency = other.RepetitionPenaltyFrequency
+	}
+	if params.RepetitionPenaltyPresence == nil {
+		params.RepetitionPenaltyPresence = other.RepetitionPenaltyPresence
+	}
 	if params.BanBrackets == nil {
 		params.BanBrackets = other.BanBrackets
 	}
@@ -350,6 +358,8 @@ func NewGenerateParams() NaiGenerateParams {
 	repPen := 3.5
 	repPenRange := uint(2048)
 	repPenSlope := 6.57
+	repPenPresence := 0.0
+	repPenFrequency := 0.0
 	banBrackets := true
 	badWordsIds := make([][]uint16, 0)
 	logitBiasIds := make([][]float32, 0)
@@ -359,26 +369,28 @@ func NewGenerateParams() NaiGenerateParams {
 	trimSpaces := true
 	numLogprobs := uint(5)
 	return NaiGenerateParams{
-		Model:                  &model,
-		Prefix:                 &prefix,
-		Temperature:            &temperature,
-		MaxLength:              &maxLength,
-		MinLength:              &minLength,
-		TopA:                   &topA,
-		TopK:                   &topK,
-		TopP:                   &topP,
-		TailFreeSampling:       &tfs,
-		RepetitionPenalty:      &repPen,
-		RepetitionPenaltyRange: &repPenRange,
-		RepetitionPenaltySlope: &repPenSlope,
-		BadWordsIds:            &badWordsIds,
-		LogitBiasIds:           &logitBiasIds,
-		BanBrackets:            &banBrackets,
-		UseCache:               &useCache,
-		UseString:              &useString,
-		ReturnFullText:         &returnFullText,
-		TrimSpaces:             &trimSpaces,
-		NumLogprobs:            &numLogprobs,
+		Model:                      &model,
+		Prefix:                     &prefix,
+		Temperature:                &temperature,
+		MaxLength:                  &maxLength,
+		MinLength:                  &minLength,
+		TopA:                       &topA,
+		TopK:                       &topK,
+		TopP:                       &topP,
+		TailFreeSampling:           &tfs,
+		RepetitionPenalty:          &repPen,
+		RepetitionPenaltyRange:     &repPenRange,
+		RepetitionPenaltySlope:     &repPenSlope,
+		RepetitionPenaltyPresence:  &repPenPresence,
+		RepetitionPenaltyFrequency: &repPenFrequency,
+		BadWordsIds:                &badWordsIds,
+		LogitBiasIds:               &logitBiasIds,
+		BanBrackets:                &banBrackets,
+		UseCache:                   &useCache,
+		UseString:                  &useString,
+		ReturnFullText:             &returnFullText,
+		TrimSpaces:                 &trimSpaces,
+		NumLogprobs:                &numLogprobs,
 	}
 }
 
