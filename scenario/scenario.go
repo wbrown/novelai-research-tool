@@ -345,6 +345,9 @@ func (ctx *ContextEntry) getTrimDirection() gpt_bpe.TrimDirection {
 }
 
 func (ctx *ContextEntry) getMaxTrimType() MaxTrimType {
+	if ctx.ContextCfg.MaximumTrimType == nil {
+		return TrimNewlines
+	}
 	switch *ctx.ContextCfg.MaximumTrimType {
 	case "sentence":
 		return TrimSentences

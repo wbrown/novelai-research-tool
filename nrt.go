@@ -27,24 +27,24 @@ func (ph *PlaceholderMap) toMap() (ret map[string]string) {
 }
 
 type PermutationsSpec struct {
-	Model                  []string         `json:"model"`
-	Prefix                 []string         `json:"prefix"`
-	ModuleFilename         []string         `json:"module_filename"`
-	PromptFilename         []string         `json:"prompt_filename"`
-	Prompt                 []string         `json:"prompt"`
-	Memory                 []string         `json:"memory"`
-	AuthorsNote            []string         `json:"authors_note"`
-	Placeholders           []PlaceholderMap `json:"placeholders"`
-	Temperature            []*float64       `json:"temperature"`
-	MaxLength              []*uint          `json:"max_length"`
-	MinLength              []*uint          `json:"min_length"`
-	TopK                   []*uint          `json:"top_k"`
-	TopP                   []*float64       `json:"top_p"`
-	TopA                   []*float64       `json:"top_a"`
-	TailFreeSampling       []*float64       `json:"tail_free_sampling"`
-	RepetitionPenalty      []*float64       `json:"repetition_penalty"`
-	RepetitionPenaltyRange []*uint          `json:"repetition_penalty_range"`
-	RepetitionPenaltySlope []*float64       `json:"repetition_penalty_slope"`
+	Model                  []string          `json:"model"`
+	Prefix                 []*string         `json:"prefix"`
+	ModuleFilename         []*string         `json:"module_filename"`
+	PromptFilename         []*string         `json:"prompt_filename"`
+	Prompt                 []*string         `json:"prompt"`
+	Memory                 []*string         `json:"memory"`
+	AuthorsNote            []*string         `json:"authors_note"`
+	Placeholders           []*PlaceholderMap `json:"placeholders"`
+	Temperature            []*float64        `json:"temperature"`
+	MaxLength              []*uint           `json:"max_length"`
+	MinLength              []*uint           `json:"min_length"`
+	TopK                   []*uint           `json:"top_k"`
+	TopP                   []*float64        `json:"top_p"`
+	TopA                   []*float64        `json:"top_a"`
+	TailFreeSampling       []*float64        `json:"tail_free_sampling"`
+	RepetitionPenalty      []*float64        `json:"repetition_penalty"`
+	RepetitionPenaltyRange []*uint           `json:"repetition_penalty_range"`
+	RepetitionPenaltySlope []*float64        `json:"repetition_penalty_slope"`
 }
 
 type ContentTest struct {
@@ -226,21 +226,21 @@ func (ct *ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
 			}
 		case "Memory":
 			for memoryIdx := range spec.Memory {
-				if spec.Memory[memoryIdx] == ct.Memory {
+				if *spec.Memory[memoryIdx] == ct.Memory {
 					fieldValueRepr = fmt.Sprintf("#%d", memoryIdx+1)
 					break
 				}
 			}
 		case "AuthorsNote":
 			for authIdx := range spec.AuthorsNote {
-				if spec.AuthorsNote[authIdx] == ct.AuthorsNote {
+				if *spec.AuthorsNote[authIdx] == ct.AuthorsNote {
 					fieldValueRepr = fmt.Sprintf("#%d", authIdx+1)
 					break
 				}
 			}
 		case "Prompt":
 			for promptIdx := range spec.Prompt {
-				if spec.Prompt[promptIdx] == ct.Prompt {
+				if *spec.Prompt[promptIdx] == ct.Prompt {
 					fieldValueRepr = fmt.Sprintf("#%d", promptIdx+1)
 					break
 				}
@@ -329,11 +329,11 @@ func resolvePermutation(origPermutation ContentTest,
 		switch fieldName {
 		case "Placeholders":
 			newPlaceholders := make(PlaceholderMap, 0)
-			fromPlaceholders := value.Interface().(PlaceholderMap)
+			fromPlaceholders := value.Interface().(*PlaceholderMap)
 			for k, v := range permutation.Placeholders {
 				newPlaceholders[k] = v
 			}
-			for k, v := range fromPlaceholders {
+			for k, v := range *fromPlaceholders {
 				newPlaceholders[k] = v
 			}
 			permutation.Placeholders = newPlaceholders
@@ -589,6 +589,7 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 		scenarioSpec := scenario.ScenarioFromSpec(test.Prompt, test.Memory,
 			test.AuthorsNote)
 		test.Scenario = &scenarioSpec
+		test.Scenario.Settings.Parameters = &novelai_api.NaiGenerateParams{}
 		test.Scenario.Settings.Parameters.CoerceNullValues(&test.Parameters)
 	}
 	defaultTest := MakeDefaultContentTest()

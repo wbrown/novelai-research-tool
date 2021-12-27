@@ -92,6 +92,107 @@ type NextArray struct {
 	Output [][]interface{} `json:"output"`
 }
 
+type LogitProcessorID uint16
+
+const (
+	Temperature LogitProcessorID = iota
+	Top_K
+	Top_P
+	TFS
+)
+
+type LogitProcessorIDs []LogitProcessorID
+type LogitProcessorRepr string
+type LogitProcessorReprMap map[LogitProcessorID]LogitProcessorRepr
+type LogitProcessorReprs []LogitProcessorRepr
+
+var LogitProcessorIdMap = LogitProcessorReprMap{
+	Temperature: "Temperature",
+	Top_K:       "Top_K",
+	Top_P:       "Top_P",
+	TFS:         "TFS",
+}
+
+func (lpids *LogitProcessorIDs) check() error {
+	if len(*lpids) != len(LogitProcessorIdMap) {
+		return errors.New("Must have four logit IDs in `order`!")
+	}
+	seen := make(LogitProcessorIDs, 0)
+	for idIdx := range *lpids {
+		for seenIdx := range seen {
+			if seen[seenIdx] == (*lpids)[idIdx] {
+				return errors.New(
+					"Duplicate entry found in logit `order`!")
+			}
+		}
+		seen = append(seen, (*lpids)[idIdx])
+	}
+	return nil
+}
+
+func (lpr *LogitProcessorRepr) toId() (LogitProcessorID, error) {
+	currRepr := strings.ToLower(string(*lpr))
+	for lookupIdx, _ := range LogitProcessorIdMap {
+		if strings.ToLower(string(LogitProcessorIdMap[lookupIdx])) == currRepr {
+			return lookupIdx, nil
+		}
+	}
+	return 0, errors.New(fmt.Sprintf("Logit `%s` is not valid!", lpr))
+}
+
+func (lprs *LogitProcessorReprs) toIds() (*LogitProcessorIDs, error) {
+	ids := make(LogitProcessorIDs, 0)
+	for currReprIdx := range *lprs {
+		if logitId, err := (*lprs)[currReprIdx].toId(); err != nil {
+			return nil, err
+		} else {
+			ids = append(ids, logitId)
+		}
+	}
+	if err := ids.check(); err != nil {
+		return nil, err
+	}
+	return &ids, nil
+}
+
+func (id *LogitProcessorID) UnmarshalJSON(buf []byte) error {
+	var tmp interface{}
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if newIntId, ok := tmp.(uint16); ok {
+		logitId := interface{}(newIntId).(LogitProcessorID)
+		id = &logitId
+		return nil
+	} else if repr, ok := tmp.(string); ok {
+		logitRepr := LogitProcessorRepr(repr)
+		if convId, err := logitRepr.toId(); err != nil {
+			return err
+		} else {
+			newId := convId
+			*id = newId
+			return nil
+		}
+	} else {
+		return errors.New("Logit ID is not a string or an uint!")
+	}
+}
+
+func (ids *LogitProcessorIDs) UnmarshalJSON(buf []byte) error {
+	var serIds []LogitProcessorID
+	if err := json.Unmarshal(buf, &serIds); err == nil {
+		newIds := LogitProcessorIDs(serIds)
+		if err = newIds.check(); err != nil {
+			return err
+		} else {
+			*ids = newIds
+			return nil
+		}
+	} else {
+		return err
+	}
+}
+
 type NaiGenerateParams struct {
 	Label                  *string             `json:"label,omitempty"`
 	Model                  *string             `json:"model,omitempty"`
@@ -120,7 +221,9 @@ type NaiGenerateParams struct {
 	NonZeroProbs           *bool               `json:"output_nonzero_probs,omitempty"`
 	NextWord               *bool               `json:"next_word,omitempty"`
 	NumLogprobs            *uint               `json:"num_logprobs,omitempty"`
+	Order                  *LogitProcessorIDs  `json:"order"`
 }
+
 type NaiGenerateResp struct {
 	Request         string          `json:"request"`
 	Response        string          `json:"response"`
@@ -223,6 +326,9 @@ func (params *NaiGenerateParams) CoerceNullValues(other *NaiGenerateParams) {
 	}
 	if params.NumLogprobs == nil {
 		params.NumLogprobs = other.NumLogprobs
+	}
+	if params.Order == nil {
+		params.Order = other.Order
 	}
 }
 

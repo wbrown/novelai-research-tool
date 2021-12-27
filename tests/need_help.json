@@ -25,7 +25,8 @@
     "ban_brackets": true,
     "use_cache": false,
     "use_string": false,
-    "return_full_text": false
+    "return_full_text": false,
+    "order": ["Temperature", "Top_K", "Top_P", "TFS"]
   },
   "permutations": [
     {
