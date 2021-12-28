@@ -145,7 +145,8 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	priorTrim := ct.Parameters.TrimResponses
 	throttle := time.NewTimer(1100 * time.Millisecond)
 	for generation := 0; generation < generations; generation++ {
-		submission, ctxReport := ct.Scenario.GenerateContext(context, *ct.MaxTokens)
+		submission, ctxReport := ct.Scenario.GenerateContext(context,
+			*ct.MaxTokens)
 		if generation == generations-1 {
 			trimTrue := true
 			ct.Parameters.TrimResponses = &trimTrue
@@ -172,7 +173,9 @@ func makeFileNameSafe(s string) string {
 		"-", "_",
 		".", "_",
 		":", "_",
-		" ", "_").Replace(s)
+		" ", "_",
+		"[", "",
+		"]", "").Replace(s)
 }
 
 func (ct *ContentTest) GetModuleFilename() (moduleFile string) {
@@ -224,7 +227,8 @@ func (ct *ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
 			fieldValueRepr = ct.GetPrefixName()
 		case "Placeholders":
 			for placeholderIdx := range spec.Placeholders {
-				if reflect.DeepEqual(spec.Placeholders[placeholderIdx], ct.Placeholders) {
+				if reflect.DeepEqual(spec.Placeholders[placeholderIdx],
+					ct.Placeholders) {
 					fieldValueRepr = fmt.Sprintf("#%d", placeholderIdx+1)
 					break
 				}
@@ -317,7 +321,8 @@ func (ct ContentTest) FieldsSame(fields []string, other ContentTest) bool {
 				fmt.Sprintf("%v", otherVal.Elem()) {
 				return false
 			}
-		} else if fmt.Sprintf("%v", ctVal) != fmt.Sprintf("%v", otherVal) {
+		} else if fmt.Sprintf("%v", ctVal) !=
+			fmt.Sprintf("%v", otherVal) {
 			return false
 		}
 	}
@@ -374,17 +379,19 @@ func resolvePermutation(origPermutation ContentTest,
 				permutation.AIModule = &aiModule
 				genPrefix := permutation.AIModule.ToPrefix()
 				permutation.Scenario.Settings.Prefix = &genPrefix
-				permutation.Scenario.Settings.ScenarioAIModule = &scenario.ScenarioAIModule{
-					Name:        aiModule.Name,
-					Id:          *permutation.Scenario.Settings.Prefix,
-					Description: aiModule.Description,
-				}
+				permutation.Scenario.Settings.ScenarioAIModule =
+					&scenario.ScenarioAIModule{
+						Name:        aiModule.Name,
+						Id:          *permutation.Scenario.Settings.Prefix,
+						Description: aiModule.Description,
+					}
 			}
 		case "Model":
 			modelVal := value.String()
 			permutation.Parameters.Model = &modelVal
 		default:
-			reflect.ValueOf(&permutation.Parameters).Elem().Field(targetField.Index[0]).Set(value)
+			reflect.ValueOf(&permutation.Parameters).Elem().Field(
+				targetField.Index[0]).Set(value)
 		}
 		newPermutations = append(newPermutations, permutation)
 	}
