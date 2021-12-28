@@ -447,6 +447,11 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 		*scenario.Settings.Parameters.Prefix != "vanilla" {
 		budget -= 20
 	}
+	// Reserve 20 tokens if we're completing sentences.
+	if scenario.Settings.Parameters.GenerateUntilSentence == nil ||
+		*scenario.Settings.Parameters.GenerateUntilSentence {
+		budget -= 20
+	}
 	for ctxIdx := range contexts {
 		ctx := contexts[ctxIdx]
 		reserved := 0

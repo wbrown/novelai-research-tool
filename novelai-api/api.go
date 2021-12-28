@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"reflect"
 	"runtime"
 	"strings"
 )
@@ -230,11 +231,11 @@ type NaiGenerateParams struct {
 	UseCache                   *bool               `json:"use_cache,omitempty"`
 	UseString                  *bool               `json:"use_string,omitempty"`
 	ReturnFullText             *bool               `json:"return_full_text,omitempty"`
-	TrimResponses              *bool               `json:"trim_responses,omitempty"`
 	TrimSpaces                 *bool               `json:"trim_spaces,omitempty"`
 	NonZeroProbs               *bool               `json:"output_nonzero_probs,omitempty"`
 	NextWord                   *bool               `json:"next_word,omitempty"`
 	NumLogprobs                *uint               `json:"num_logprobs,omitempty"`
+	GenerateUntilSentence      *bool               `json:"generate_until_sentence"`
 	Order                      *LogitProcessorIDs  `json:"order"`
 }
 
@@ -287,68 +288,14 @@ func (params *NaiGenerateParams) CoerceNullValues(other *NaiGenerateParams) {
 	if other == nil {
 		return
 	}
-	if params.Label == nil {
-		params.Label = other.Label
-	}
-	if params.Model == nil {
-		params.Model = other.Model
-	}
-	if params.Prefix == nil {
-		params.Prefix = other.Prefix
-	}
-	if params.Temperature == nil {
-		params.Temperature = other.Temperature
-	}
-	if params.MaxLength == nil {
-		params.MaxLength = other.MaxLength
-	}
-	if params.MinLength == nil {
-		params.MinLength = other.MinLength
-	}
-	if params.TopK == nil {
-		params.TopK = other.TopK
-	}
-	if params.TopP == nil {
-		params.TopP = other.TopP
-	}
-	if params.TopA == nil {
-		params.TopA = other.TopA
-	}
-	if params.TailFreeSampling == nil {
-		params.TailFreeSampling = other.TailFreeSampling
-	}
-	if params.RepetitionPenalty == nil {
-		params.RepetitionPenalty = other.RepetitionPenalty
-	}
-	if params.RepetitionPenaltyRange == nil {
-		params.RepetitionPenaltyRange = other.RepetitionPenaltyRange
-	}
-	if params.RepetitionPenaltySlope == nil {
-		params.RepetitionPenaltySlope = other.RepetitionPenaltySlope
-	}
-	if params.RepetitionPenaltyFrequency == nil {
-		params.RepetitionPenaltyFrequency = other.RepetitionPenaltyFrequency
-	}
-	if params.RepetitionPenaltyPresence == nil {
-		params.RepetitionPenaltyPresence = other.RepetitionPenaltyPresence
-	}
-	if params.BanBrackets == nil {
-		params.BanBrackets = other.BanBrackets
-	}
-	if params.BadWordsIds == nil {
-		params.BadWordsIds = other.BadWordsIds
-	}
-	if params.LogitBiasIds == nil {
-		params.LogitBiasIds = other.LogitBiasIds
-	}
-	if params.TrimSpaces == nil {
-		params.TrimSpaces = other.TrimSpaces
-	}
-	if params.NumLogprobs == nil {
-		params.NumLogprobs = other.NumLogprobs
-	}
-	if params.Order == nil {
-		params.Order = other.Order
+	fields := reflect.TypeOf(*params)
+	for field := 0; field < fields.NumField(); field++ {
+		fieldValues := reflect.ValueOf(*params).Field(field)
+		otherValues := reflect.ValueOf(*other).Field(field)
+		if fieldValues.IsNil() && !otherValues.IsNil() {
+			reflect.ValueOf(params).Elem().Field(
+				field).Set(otherValues)
+		}
 	}
 }
 
@@ -380,6 +327,7 @@ func NewGenerateParams() NaiGenerateParams {
 	returnFullText := false
 	trimSpaces := true
 	numLogprobs := uint(5)
+	generateUntilSentence := true
 	return NaiGenerateParams{
 		Model:                      &model,
 		Prefix:                     &prefix,
@@ -401,6 +349,7 @@ func NewGenerateParams() NaiGenerateParams {
 		UseCache:                   &useCache,
 		UseString:                  &useString,
 		ReturnFullText:             &returnFullText,
+		GenerateUntilSentence:      &generateUntilSentence,
 		TrimSpaces:                 &trimSpaces,
 		NumLogprobs:                &numLogprobs,
 	}
@@ -465,7 +414,8 @@ func (params *NaiGenerateParams) ResolveRepetitionParams() {
 	}
 }
 
-func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (respDecoded NaiGenerateHTTPResp) {
+func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (
+	respDecoded NaiGenerateHTTPResp) {
 	params.Model = *params.Parameters.Model
 	if *params.Parameters.BanBrackets {
 		newBadWords := append(BannedBrackets(),
@@ -562,9 +512,9 @@ func (api NovelAiAPI) GenerateWithParams(content *string,
 			resp.Error = err
 		} else {
 			tokens := gpt_bpe.TokensFromBin(&binTokens)
-			if params.TrimResponses != nil && *params.TrimResponses == true {
+			/* if params.TrimResponses != nil && *params.TrimResponses == true {
 				tokens, err = api.encoder.TrimIncompleteSentence(tokens)
-			}
+			} */
 			resp.Logprobs = apiResp.Logprobs
 			resp.EncodedResponse = apiResp.Output
 			resp.Response = api.encoder.Decode(tokens)
