@@ -69,28 +69,7 @@ type LogprobEntry struct {
 	After  *[]Logprob `json:"after"`
 }
 
-//
-// General NovelAI API structures
-//
-
-type NovelAiAPI struct {
-	backend string
-	keys    NaiKeys
-	client  *http.Client
-	encoder gpt_bpe.GPTEncoder
-}
-
-type NaiGenerateHTTPResp struct {
-	Output     string          `json:"output"`
-	Error      string          `json:"error"`
-	StatusCode int             `json:"statusCode"`
-	Message    string          `json:"message"`
-	Logprobs   *[]LogprobEntry `json:"logprobs""`
-}
-
-type NextArray struct {
-	Output [][]interface{} `json:"output"`
-}
+// Logit processing and order
 
 type LogitProcessorID uint16
 
@@ -131,7 +110,8 @@ func (lpids *LogitProcessorIDs) check() error {
 }
 
 func (lpr *LogitProcessorRepr) toId() (LogitProcessorID, error) {
-	currRepr := strings.ToLower(string(*lpr))
+	currRepr := strings.Replace(strings.ToLower(string(*lpr)),
+		"-", "_", -1)
 	for lookupIdx := range LogitProcessorIdMap {
 		if strings.ToLower(string(LogitProcessorIdMap[lookupIdx])) == currRepr {
 			return lookupIdx, nil
@@ -191,6 +171,38 @@ func (ids *LogitProcessorIDs) UnmarshalJSON(buf []byte) error {
 	} else {
 		return err
 	}
+}
+
+func (id LogitProcessorID) String() string {
+	var repr LogitProcessorRepr
+	var ok bool
+	if repr, ok = LogitProcessorIdMap[id]; !ok {
+		repr = "UNKNOWN"
+	}
+	return fmt.Sprintf("<%s>", repr)
+}
+
+//
+// General NovelAI API structures
+//
+
+type NovelAiAPI struct {
+	backend string
+	keys    NaiKeys
+	client  *http.Client
+	encoder gpt_bpe.GPTEncoder
+}
+
+type NaiGenerateHTTPResp struct {
+	Output     string          `json:"output"`
+	Error      string          `json:"error"`
+	StatusCode int             `json:"statusCode"`
+	Message    string          `json:"message"`
+	Logprobs   *[]LogprobEntry `json:"logprobs""`
+}
+
+type NextArray struct {
+	Output [][]interface{} `json:"output"`
 }
 
 type NaiGenerateParams struct {
