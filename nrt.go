@@ -53,6 +53,7 @@ type PermutationsSpec struct {
 }
 
 type ContentTest struct {
+	Index            int                           `json:-`
 	OutputPrefix     string                        `json:"output_prefix"`
 	PromptFilename   string                        `json:"prompt_filename"`
 	ScenarioFilename string                        `json:"scenario_filename"`
@@ -325,6 +326,7 @@ func (ct ContentTest) FieldsSame(fields []string, other ContentTest) bool {
 
 func resolvePermutation(origPermutation ContentTest,
 	fieldName string, fieldValues *reflect.Value) ContentTests {
+	var stringType = reflect.TypeOf("")
 	newPermutations := make(ContentTests, 0)
 	for valIdx := 0; valIdx < fieldValues.Len(); valIdx++ {
 		permutation := origPermutation
@@ -335,18 +337,21 @@ func resolvePermutation(origPermutation ContentTest,
 			newPlaceholders := make(PlaceholderMap, 0)
 			fromPlaceholders := value.Interface().(*PlaceholderMap)
 			for k, v := range permutation.Placeholders {
-				newPlaceholders[k] = v
+				newPlaceholders[k] = sanitizeString(v)
 			}
 			for k, v := range *fromPlaceholders {
-				newPlaceholders[k] = v
+				newPlaceholders[k] = sanitizeString(v)
 			}
 			permutation.Placeholders = newPlaceholders
 		case "Prompt":
-			permutation.Prompt = fmt.Sprintf("%s", value.Elem())
+			permutation.Prompt = sanitizeString(fmt.Sprintf("%s",
+				value.Elem()))
 		case "Memory":
-			permutation.Memory = fmt.Sprintf("%s", value.Elem())
+			permutation.Memory = sanitizeString(fmt.Sprintf("%s",
+				value.Elem()))
 		case "AuthorsNote":
-			permutation.AuthorsNote = fmt.Sprintf("%s", value.Elem())
+			permutation.AuthorsNote = sanitizeString(fmt.Sprintf("%s",
+				value.Elem()))
 		case "PromptFilename":
 			permutation.PromptFilename = fmt.Sprintf("%v", value)
 			if len(permutation.PromptFilename) > 0 {
@@ -360,7 +365,7 @@ func resolvePermutation(origPermutation ContentTest,
 				permutation.loadPrompt(permutation.PromptPath)
 			}
 		case "ModuleFilename":
-			permutation.ModuleFilename = fmt.Sprintf("%v", value)
+			permutation.ModuleFilename = fmt.Sprintf("%v", value.Elem())
 			if len(permutation.ModuleFilename) > 0 {
 				permutation.ModulePath = filepath.Join(permutation.WorkingDir,
 					permutation.ModuleFilename)
@@ -384,6 +389,9 @@ func resolvePermutation(origPermutation ContentTest,
 			modelVal := value.String()
 			permutation.Parameters.Model = &modelVal
 		default:
+			if value.Type() == stringType {
+				value.SetString(sanitizeString(value.String()))
+			}
 			reflect.ValueOf(&permutation.Parameters).Elem().Field(
 				targetField.Index[0]).Set(value)
 		}
@@ -507,6 +515,16 @@ func (ct *ContentTest) loadPrompt(path string) {
 		os.Exit(1)
 	}
 	ct.Prompt = string(promptBytes)
+}
+
+func sanitizeString(s string) string {
+	return strings.Replace(s, "\r\n", "\n", -1)
+}
+
+func (ct ContentTest) sanitizeStrings() {
+	ct.Prompt = sanitizeString(ct.Prompt)
+	ct.AuthorsNote = sanitizeString(ct.AuthorsNote)
+	ct.Memory = sanitizeString(ct.Memory)
 }
 
 func (ct ContentTest) Perform() {
