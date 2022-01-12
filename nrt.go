@@ -143,7 +143,7 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	results.Parameters = ct.Parameters
 	ct.Scenario.SetMemory(ct.Memory)
 	ct.Scenario.SetAuthorsNote(ct.AuthorsNote)
-	throttle := time.NewTimer(1100 * time.Millisecond)
+	throttle := time.NewTimer(2000 * time.Millisecond)
 	for generation := 0; generation < generations; generation++ {
 		submission, ctxReport := ct.Scenario.GenerateContext(context,
 			*ct.MaxTokens)
@@ -353,7 +353,7 @@ func resolvePermutation(origPermutation ContentTest,
 			permutation.AuthorsNote = sanitizeString(fmt.Sprintf("%s",
 				value.Elem()))
 		case "PromptFilename":
-			permutation.PromptFilename = fmt.Sprintf("%v", value)
+			permutation.PromptFilename = fmt.Sprintf("%v", value.Elem())
 			if len(permutation.PromptFilename) > 0 {
 				permutation.PromptPath = filepath.Join(permutation.WorkingDir,
 					permutation.PromptFilename)
