@@ -3,7 +3,7 @@ package context
 import (
 	"encoding/json"
 	"fmt"
-	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
+	"github.com/wbrown/gpt_bpe"
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
 	"log"
 	"os"
@@ -35,11 +35,11 @@ func NewSimpleContext() (context SimpleContext) {
 	context.Parameters = parameters
 	context.API = novelai_api.NewNovelAiAPI()
 	context.Encoder = gpt_bpe.NewEncoder()
-	context.FullReturn = parameters.ReturnFullText
+	context.FullReturn = *parameters.ReturnFullText
 	context.MaxTokens = 2048 - *parameters.MaxLength
-	context.Memory = parameters.LogitMemory
-	context.AuthorsNote = parameters.LogitAuthors
-	if context.Parameters.Prefix != "vanilla" {
+	context.Memory = *parameters.LogitMemory
+	context.AuthorsNote = *parameters.LogitAuthors
+	if *context.Parameters.Prefix != "vanilla" {
 		context.MaxTokens = context.MaxTokens - 20
 	}
 

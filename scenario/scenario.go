@@ -2,8 +2,8 @@ package scenario
 
 import (
 	"encoding/json"
+	gpt_bpe "github.com/wbrown/gpt_bpe"
 	"github.com/wbrown/novelai-research-tool/aimodules"
-	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
 	"github.com/wbrown/novelai-research-tool/structs"
 	"io/ioutil"

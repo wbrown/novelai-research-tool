@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/chzyer/readline"
 	"github.com/jdkato/prose/v2"
-	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
+	"github.com/wbrown/gpt_bpe"
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
 	"log"
 	"strings"

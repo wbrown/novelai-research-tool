@@ -2,7 +2,7 @@ package scenario
 
 import (
 	"encoding/json"
-	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
+	"github.com/wbrown/gpt_bpe"
 	"io/ioutil"
 	"log"
 	"os"
@@ -115,10 +115,12 @@ var placeholderTests = PlaceholderTests{
 			"1Name": {"1Name",
 				"Daniel",
 				"Your name?",
+				"",
 				"Daniel"},
 			"2HerName": {"2HerName",
 				"Audrey",
 				"Her name?",
+				"",
 				"Audrey"},
 		}},
 	{phTable,
@@ -127,14 +129,17 @@ var placeholderTests = PlaceholderTests{
 			"1Name": {"1Name",
 				"Daniel Blackthorn",
 				"Name",
+				"",
 				"Daniel Blackthorn"},
 			"2HairColor": {"2HairColor",
 				"red",
 				"Hair Color (red, blonde)",
+				"",
 				"red"},
 			"3Skin": {"3Skin",
 				"pale",
 				"Complexion (dark, light, olive, pale)",
+				"",
 				"pale"}}},
 }
 

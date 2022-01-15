@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cenkalti/backoff/v4"
-	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
+	"github.com/wbrown/gpt_bpe"
 	"github.com/wbrown/novelai-research-tool/structs"
 	"io/ioutil"
 	"log"

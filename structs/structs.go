@@ -1,6 +1,6 @@
 package structs
 
-import gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
+import "github.com/wbrown/gpt_bpe"
 
 type BiasType uint
 
