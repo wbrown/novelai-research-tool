@@ -31,6 +31,7 @@ type NaiGenerateHTTPResp struct {
 }
 
 type NaiGenerateParams struct {
+<<<<<<< Updated upstream
 	Label                  string      `json:"label"`
 	Model                  string      `json:"model"`
 	Prefix                 string      `json:"prefix"`
@@ -51,6 +52,40 @@ type NaiGenerateParams struct {
 	ReturnFullText         bool        `json:"return_full_text"`
 	TrimResponses          *bool        `json:"trim_responses"`
 	TrimSpaces             *bool        `json:"trim_spaces"`
+=======
+	Label                      *string             `json:"label,omitempty"`
+	Model                      *string             `json:"model,omitempty"`
+	Prefix                     *string             `json:"prefix,omitempty"`
+	LogitMemory                *string             `json:"memory,omitempty"`
+	LogitAuthors               *string             `json:"authorsnote,omitempty"`
+	Temperature                *float64            `json:"temperature,omitempty"`
+	MaxLength                  *uint               `json:"max_length,omitempty"`
+	MinLength                  *uint               `json:"min_length,omitempty"`
+	TopK                       *uint               `json:"top_k,omitempty"`
+	TopP                       *float64            `json:"top_p,omitempty"`
+	TopA                       *float64            `json:"top_a,omitempty"`
+	TypicalP                   *float64            `json:"typical_p,omitempty"`	
+	TailFreeSampling           *float64            `json:"tail_free_sampling,omitempty"`
+	RepetitionPenalty          *float64            `json:"repetition_penalty,omitempty"`
+	RepetitionPenaltyRange     *uint               `json:"repetition_penalty_range,omitempty"`
+	RepetitionPenaltySlope     *float64            `json:"repetition_penalty_slope,omitempty"`
+	RepetitionPenaltyFrequency *float64            `json:"repetition_penalty_frequency,omitempty"`
+	RepetitionPenaltyPresence  *float64            `json:"repetition_penalty_presence,omitempty"`
+	RepWhitelistIds            *[]uint16         `json:"repetition_penalty_whitelist,omitempty"`
+	BadWordsIds                *[][]uint16         `json:"bad_words_ids,omitempty"`
+	LogitBiasIds               *[][]float32        `json:"logit_bias,omitempty"`
+	LogitBiasGroups            *structs.BiasGroups `json:"logit_bias_groups,omitempty"`
+	BanBrackets                *bool               `json:"ban_brackets,omitempty"`
+	UseCache                   *bool               `json:"use_cache,omitempty"`
+	UseString                  *bool               `json:"use_string,omitempty"`
+	ReturnFullText             *bool               `json:"return_full_text,omitempty"`
+	TrimSpaces                 *bool               `json:"trim_spaces,omitempty"`
+	NonZeroProbs               *bool               `json:"output_nonzero_probs,omitempty"`
+	NextWord                   *bool               `json:"next_word,omitempty"`
+	NumLogprobs                *uint               `json:"num_logprobs,omitempty"`
+	GenerateUntilSentence      *bool               `json:"generate_until_sentence"`
+	Order                      *LogitProcessorIDs  `json:"order"`
+>>>>>>> Stashed changes
 }
 
 type NaiGenerateResp struct {
@@ -86,6 +121,18 @@ func BannedBrackets() [][]uint16 {
 		{17202}, {8162}}
 }
 
+<<<<<<< Updated upstream
+=======
+func LogitBias() [][]float32 {
+	return [][]float32{{50256, 0.0}}
+}
+
+func RepWhitelistIds() []uint16 {
+	return []uint16{50256}
+}
+
+
+>>>>>>> Stashed changes
 func EndOfTextTokens() [][]uint16 {
 	return [][]uint16{{27,91,437,1659,5239,91,29},
 		{1279,91,437,1659,5239,91,29},
@@ -161,8 +208,17 @@ func NewGenerateParams() NaiGenerateParams {
 	repPenSlope := 6.57
 	banBrackets := true
 	badWordsIds := make([][]uint16, 0)
+<<<<<<< Updated upstream
+=======
+	repWhitelistIds := make([]uint16, 0)
+	logitBiasIds := make([][]float32, 0)
+	useCache := true
+	useString := false
+	returnFullText := false
+>>>>>>> Stashed changes
 	trimSpaces := true
 	return NaiGenerateParams{
+<<<<<<< Updated upstream
 		Model:                  "6B-v3",
 		Prefix:                 "general_crossgenre",
 		Temperature:            &temperature,
@@ -180,6 +236,33 @@ func NewGenerateParams() NaiGenerateParams {
 		UseString:              false,
 		ReturnFullText:         false,
 		TrimSpaces:             &trimSpaces,
+=======
+		Model:                      &model,
+		Prefix:                     &prefix,
+		Temperature:                &temperature,
+		MaxLength:                  &maxLength,
+		MinLength:                  &minLength,
+		TopA:                       &topA,
+		TopK:                       &topK,
+		TopP:                       &topP,
+		TypicalP:                   &typicalP,
+		TailFreeSampling:           &tfs,
+		RepetitionPenalty:          &repPen,
+		RepetitionPenaltyRange:     &repPenRange,
+		RepetitionPenaltySlope:     &repPenSlope,
+		RepetitionPenaltyPresence:  &repPenPresence,
+		RepetitionPenaltyFrequency: &repPenFrequency,
+		RepWhitelistIds:            &repWhitelistIds,
+		BadWordsIds:                &badWordsIds,
+		LogitBiasIds:               &logitBiasIds,
+		BanBrackets:                &banBrackets,
+		UseCache:                   &useCache,
+		UseString:                  &useString,
+		ReturnFullText:             &returnFullText,
+		GenerateUntilSentence:      &generateUntilSentence,
+		TrimSpaces:                 &trimSpaces,
+		NumLogprobs:                &numLogprobs,
+>>>>>>> Stashed changes
 	}
 }
 
@@ -217,6 +300,17 @@ func (params *NaiGenerateParams) ResolveSamplingParams() {
 		tailFreeSampling := 1.0
 		params.TailFreeSampling = &tailFreeSampling
 	}
+<<<<<<< Updated upstream
+=======
+	if params.TopA == nil || *params.TopA == 0 {
+		topA := 1.0
+		params.TopA = &topA
+	}
+	if params.TypicalP == nil || *params.TypicalP == 0 {
+		typicalP := 1.0
+		params.TypicalP = &typicalP
+	}
+>>>>>>> Stashed changes
 }
 
 func (params NaiGenerateParams) GetScaledRepPen() float64 {
@@ -254,6 +348,21 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (respD
 	if len(*params.Parameters.BadWordsIds) == 0 {
 		params.Parameters.BadWordsIds = nil
 	}
+<<<<<<< Updated upstream
+=======
+	if len(*params.Parameters.LogitBiasIds) == 0 {
+		params.Parameters.LogitBiasIds = nil
+	}
+	
+
+	if *params.Parameters.RepWhitelistIds == nil {
+	
+	println(*params.Parameters.RepWhitelistIds)
+	fmt.Scanln()
+		temp_map := make([]uint16, 0)
+		params.Parameters.RepWhitelistIds = &temp_map
+	}
+>>>>>>> Stashed changes
 	cl := http.DefaultClient
 	encoded, _ := json.Marshal(params)
 	req := generateGenRequest(encoded, keys.AccessToken, backend)
