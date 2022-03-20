@@ -15,4 +15,3 @@ require (
 	github.com/wbrown/gpt_bpe v0.0.0-20220115223351-b9e9bd88d08a
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 )
-© 2022 GitHub, Inc.
