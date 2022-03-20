@@ -75,6 +75,5 @@ func AIModuleFromFile(path string) AIModule {
 	}
 	aiModule.EncryptedData, aiModule.PrefixID,
 		aiModule.Hash = encryptPrefix(aiModule.EncodedData)
-	println(aiModule.ToPrefix())
 	return aiModule
 }

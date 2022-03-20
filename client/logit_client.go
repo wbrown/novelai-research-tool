@@ -33,6 +33,10 @@ func pause() {
 	fmt.Scanln()
 }
 
+func BoolPointer(b bool) *bool {
+    return &b
+}
+
 func writeText(path string, text string) {
 	if f, err := os.Create(path); err != nil {
 		println("\n\n\n\nError saving file.")
@@ -75,7 +79,7 @@ func start() {
 			break
 		}
 
-		//*ctx.Parameters.NumLogprobs = 0
+		ctx.Parameters.NextWord = BoolPointer(false)
 		switch line {
 		case "BACK":
 			if len(array_context) > 0 {
@@ -105,7 +109,7 @@ func start() {
 
 		if line == "NEXT" {
 			line = ""
-			//*ctx.Parameters.NumLogprobs = 12
+			ctx.Parameters.NextWord = BoolPointer(true)
 		}
 
 		if line == "RETRY" {
@@ -155,20 +159,26 @@ func start() {
 			eos_pos = eos_pos - 1
 		}
 
-		//if ctx.NumLogprobs !=0 {
-		//	fmt.Println(colorWhite + "\nPRESS ENTER TO CONTINUE...\n")
-		//	pause()
-		//}
+		if *ctx.Parameters.NextWord == true {
+		fmt.Println(colorWhite + "\nANTICIPATED TOKENS...")
+			
+			for i := 0; i < resp.NextWordReturned; i++ {
+				fmt.Println(colorWhite+(resp.NextWordArray)[i][0] + colorGrey + " (" + (resp.NextWordArray)[i][1]+")")
+			}
+			
+			fmt.Println(colorWhite + "\nPRESS ENTER TO CONTINUE...\n")
+			pause()
+		}
 
 		array_context = append(array_context, ctx.Context)
 		array_output = append(array_output, output)
 
 		refresh(ctx.Context, output, ctx)
 
-		//if ctx.NumLogprobs == 0 {
-		//	ctx.LastContext = ctx.Context
-		//	ctx.Context = ctx.Context + output
-		//}
+		if *ctx.Parameters.NextWord == false {
+			ctx.LastContext = ctx.Context
+			ctx.Context = ctx.Context + output
+		}
 
 	}
 }

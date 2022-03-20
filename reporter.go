@@ -35,10 +35,14 @@ func (ct *ContentTest) generateParamRepr() (paramRepr string) {
 		default:
 			fieldValues = reflect.ValueOf(ct.Parameters).Field(field)
 			if fieldValues.Kind() == reflect.Ptr {
-				fieldValues = fieldValues.Elem()
+				if fieldValues.IsNil() {
+					continue
+				} else {
+					fieldValues = fieldValues.Elem()
+				}
 			}
 		}
-		paramRepr += fmt.Sprintf("%25v: %v\n", fieldName, fieldValues)
+		paramRepr += fmt.Sprintf("%26v: %v\n", fieldName, fieldValues)
 	}
 	return paramRepr
 }
@@ -203,8 +207,8 @@ func (tr *TextReporter) close() {
 }
 
 type Reporters struct {
-	JSON *JSONReporter
-	Text *TextReporter
+	JSON    *JSONReporter
+	Text    *TextReporter
 	Console *ConsoleReporter
 }
 
@@ -231,8 +235,8 @@ func (reporters Reporters) SerializeIteration(result *IterationResult) {
 func (ct ContentTest) MakeReporters() Reporters {
 	consoleReport := ct.CreateConsoleReporter()
 	outputPath := ct.generateOutputPath()
-	textReport := ct.CreateTextReporter( outputPath + ".txt")
-	jsonReport := CreateJSONReporter( outputPath + ".json")
+	textReport := ct.CreateTextReporter(outputPath + ".txt")
+	jsonReport := CreateJSONReporter(outputPath + ".json")
 	return Reporters{
 		&jsonReport,
 		&textReport,

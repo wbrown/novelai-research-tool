@@ -2,36 +2,40 @@ package scenario
 
 import (
 	"encoding/json"
+	gpt_bpe "github.com/wbrown/gpt_bpe"
 	"github.com/wbrown/novelai-research-tool/aimodules"
-	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
+	"github.com/wbrown/novelai-research-tool/structs"
 	"io/ioutil"
 	"log"
+	"reflect"
 	"regexp"
 	"sort"
 	"strings"
 )
 
 type ContextConfig struct {
-	Prefix            string `json:"prefix"`
-	Suffix            string `json:"suffix"`
-	TokenBudget       int    `json:"tokenBudget"`
-	ReservedTokens    int    `json:"reservedTokens"`
-	BudgetPriority    int    `json:"budgetPriority"`
-	TrimDirection     string `json:"trimDirection"`
-	InsertionType     string `json:"insertionType"`
-	MaximumTrimType   string `json:"maximumTrimType"`
-	InsertionPosition int    `json:"insertionPosition"`
-	Force             bool   `json:"forced"`
+	Prefix               *string `json:"prefix,omitempty" yaml:"prefix"`
+	Suffix               *string `json:"suffix,omitempty" yaml:"suffix"`
+	TokenBudget          *int    `json:"tokenBudget,omitempty" yaml:"tokenBudget"`
+	ReservedTokens       *int    `json:"reservedTokens,omitempty" yaml:"reservedTokens"`
+	BudgetPriority       *int    `json:"budgetPriority,omitempty" yaml:"budgetPriority"`
+	TrimDirection        *string `json:"trimDirection,omitempty" yaml:"trimDirection"`
+	InsertionType        *string `json:"insertionType,omitempty" yaml:"insertionType"`
+	MaximumTrimType      *string `json:"maximumTrimType,omitempty" yaml:"maximumTrimType"`
+	InsertionPosition    *int    `json:"insertionPosition,omitempty" yaml:"insertionPosition"`
+	AllowInnerInsertion  *bool   `json:"allowInnerInsertion,omitempty" yaml:"allowInnerInsertion"`
+	AllowInsertionInside *bool   `json:"allowInsertionInside,omitempty" yaml:"allowInsertionInside"`
+	Force                *bool   `json:"forced,omitempty" yaml:"forced"`
 }
 
 type ContextEntry struct {
-	Text         string        `json:"text"`
-	ContextCfg   ContextConfig `json:"contextConfig"`
-	Tokens       *gpt_bpe.Tokens
-	Label        string
-	MatchIndexes []map[string][][]int
-	Index        uint
+	Text         *string              `json:"text,omitempty" yaml:"text"`
+	ContextCfg   *ContextConfig       `json:"contextConfig,omitempty" yaml:"config"`
+	Tokens       *gpt_bpe.Tokens      `json:"-" yaml:"-"`
+	Label        string               `json:"-" yaml:"-"`
+	MatchIndexes []map[string][][]int `json:"-" yaml:"-"`
+	Index        uint                 `json:"-" yaml:"-"`
 }
 
 type ContextEntries []ContextEntry
@@ -45,11 +49,11 @@ func (ctxes ContextEntries) Swap(i, j int) {
 }
 
 func (ctxes ContextEntries) Less(i, j int) bool {
-	if ctxes[i].ContextCfg.BudgetPriority <
-		ctxes[j].ContextCfg.BudgetPriority {
+	if *ctxes[i].ContextCfg.BudgetPriority <
+		*ctxes[j].ContextCfg.BudgetPriority {
 		return true
-	} else if ctxes[i].ContextCfg.BudgetPriority ==
-		ctxes[j].ContextCfg.BudgetPriority {
+	} else if *ctxes[i].ContextCfg.BudgetPriority ==
+		*ctxes[j].ContextCfg.BudgetPriority {
 		return ctxes[i].Index > ctxes[j].Index
 	}
 	return false
@@ -64,28 +68,89 @@ const (
 )
 
 type LorebookEntry struct {
-	Text                string        `json:"text"`
-	ContextCfg          ContextConfig `json:"contextConfig"`
-	LastUpdatedAt       int           `json:"lastUpdatedAt"`
-	DisplayName         string        `json:"displayName"`
-	Keys                []string      `json:"keys"`
-	SearchRange         int           `json:"searchRange"`
-	Enabled             bool          `json:"enabled"`
-	ForceActivation     bool          `json:"forceActivation"`
-	KeyRelative         bool          `json:"keyRelative"`
-	NonStoryActivatable bool          `json:"nonStoryActivatable"`
-	Tokens              *gpt_bpe.Tokens
-	KeysRegex           []*regexp.Regexp
+	Text                *string             `json:"text,omitempty" yaml:"text"`
+	ContextCfg          *ContextConfig      `json:"contextConfig,omitempty" yaml:"contextConfig"`
+	LastUpdatedAt       *int                `json:"lastUpdatedAt,omitempty" yaml:"lastUpdatedAt"`
+	DisplayName         *string             `json:"displayName,omitempty" yaml:"displayName"`
+	Keys                *[]string           `json:"keys,omitempty" yaml:"keys"`
+	SearchRange         *int                `json:"searchRange,omitempty" yaml:"searchRange"`
+	Enabled             *bool               `json:"enabled,omitempty" yaml:"enabled"`
+	ForceActivation     *bool               `json:"forceActivation,omitempty" yaml:"forceActivation"`
+	KeyRelative         *bool               `json:"keyRelative,omitempty" yaml:"keyRelative"`
+	NonStoryActivatable *bool               `json:"nonStoryActivatable,omitempty" yaml:"nonStoryActivatable"`
+	CategoryId          *string             `json:"category,omitempty" yaml:"categoryId"`
+	LoreBiasGroups      *structs.BiasGroups `json:"loreBiasGroups,omitempty" yaml:"loreBiasGroups"`
+	Tokens              *gpt_bpe.Tokens     `json:"-" yaml:"-"`
+	KeysRegex           []*regexp.Regexp    `json:"-" yaml:"-"`
+}
+
+type Category struct {
+	Name                *string             `json:"name,omitempty" yaml:"name"`
+	Id                  *string             `json:"id,omitempty" yaml:"id"`
+	Enabled             *bool               `json:"enabled,omitempty" yaml:"enabled"`
+	CreateSubcontext    *bool               `json:"createSubcontext,omitempty" yaml:"createSubcontext"`
+	SubcontextSettings  *LorebookEntry      `json:"subcontextSettings,omitempty" yaml:"subcontextSettings"`
+	UseCategoryDefaults *bool               `json:"useCategoryDefaults,omitempty" yaml:"useCategoryDefaults"`
+	CategoryDefaults    *LorebookEntry      `json:"categoryDefaults,omitempty" yaml:"categoryDefaults"`
+	CategoryBiasGroups  *structs.BiasGroups `json:"categoryBiasGroups,omitempty" yaml:"categoryBiasGroups"`
 }
 
 type LorebookSettings struct {
-	OrderByKeyLocations bool `json:"orderByKeyLocations"`
+	OrderByKeyLocations bool `json:"orderByKeyLocations" yaml:"orderByKeyLocations"`
 }
 
 type Lorebook struct {
-	Version  int              `json:"lorebookVersion"`
-	Entries  []LorebookEntry  `json:"entries"`
-	Settings LorebookSettings `json:"settings"`
+	Version    int              `json:"lorebookVersion"`
+	Entries    []LorebookEntry  `json:"entries"`
+	Settings   LorebookSettings `json:"settings"`
+	Categories []Category       `json:"categories"`
+}
+
+func (lorebook *Lorebook) ToPlaintext() string {
+	entryStrings := make([]string, 0)
+	for entryIdx := range lorebook.Entries {
+		entry := lorebook.Entries[entryIdx]
+		if entry.Text != nil && (entry.Enabled == nil || *entry.Enabled) {
+			normalizedDisplayName := strings.Replace(*entry.DisplayName,
+				":", " -", -1)
+			entryStrings = append(entryStrings,
+				strings.Join([]string{normalizedDisplayName, *entry.Text},
+					":\n"))
+		}
+	}
+	return strings.Join(entryStrings, "\n***\n")
+}
+
+func (lorebook *Lorebook) ToPlaintextFile(path string) {
+	output := lorebook.ToPlaintext()
+	if err := ioutil.WriteFile(path, []byte(output), 0755); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (lorebook *Lorebook) ToFile(path string) {
+	var err error
+	outputBytes, err := json.MarshalIndent(lorebook, "", " ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if ioutil.WriteFile(path, outputBytes, 0755) != nil {
+		log.Fatal(err)
+	}
+}
+
+func (defaults *LorebookEntry) RealizeDefaults(entry *LorebookEntry) {
+	fields := reflect.TypeOf(*defaults)
+	for field := 0; field < fields.NumField(); field++ {
+		fieldValues := reflect.ValueOf(defaults).Elem().Field(field)
+		if fieldValues.IsNil() {
+			continue
+		}
+		entryValue := reflect.ValueOf(entry).Elem().Field(field)
+		if entryValue.IsNil() {
+			entryValue.Set(fieldValues)
+		}
+	}
 }
 
 type ScenarioAIModule struct {
@@ -96,26 +161,28 @@ type ScenarioAIModule struct {
 }
 
 type ScenarioSettings struct {
-	Parameters       novelai_api.NaiGenerateParams `json:"parameters"`
-	TrimResponses    bool                          `json:"trimResponses"`
-	BanBrackets      bool                          `json:"banBrackets"`
-	Prefix           string                        `json:"prefix"`
-	ScenarioAIModule *ScenarioAIModule             `json:"aiModule"`
+	Parameters       *novelai_api.NaiGenerateParams `json:"parameters,omitempty"`
+	TrimResponses    *bool                          `json:"trimResponses,omitempty"`
+	BanBrackets      *bool                          `json:"banBrackets,omitempty"`
+	Prefix           *string                        `json:"prefix,omitempty"`
+	ScenarioAIModule *ScenarioAIModule              `json:"-,omitempty"`
 }
 
 type Scenario struct {
-	ScenarioVersion int              `json:"scenarioVersion""`
-	Title           string           `json:"title"`
-	Author          string           `json:"author"`
-	Description     string           `json:"description"`
-	Prompt          string           `json:"prompt"`
-	Tags            []string         `json:"tags"`
-	Context         []ContextEntry   `json:"context"`
-	Settings        ScenarioSettings `json:"settings"`
-	Lorebook        Lorebook         `json:"lorebook"`
-	Placeholders    []Placeholder    `json:"placeholders"`
-	AIModule        *aimodules.AIModule
-	PlaceholderMap  Placeholders
+	ScenarioVersion    int                 `json:"scenarioVersion"`
+	Title              string              `json:"title"`
+	Author             string              `json:"author"`
+	Description        string              `json:"description"`
+	Prompt             string              `json:"prompt"`
+	Tags               []string            `json:"tags,omitempty"`
+	Context            []ContextEntry      `json:"context,omitempty"`
+	Settings           ScenarioSettings    `json:"settings,omitempty"`
+	Lorebook           Lorebook            `json:"lorebook,omitempty"`
+	Placeholders       []Placeholder       `json:"placeholders,omitempty"`
+	StoryContextConfig *ContextConfig      `json:"storyContextConfig,omitempty"`
+	Biases             *structs.BiasGroups `json:"-" yaml:"biases"`
+	AIModule           *aimodules.AIModule `json:"-"`
+	PlaceholderMap     Placeholders        `json:"-"`
 }
 
 type ContextReportEntry struct {
@@ -143,7 +210,7 @@ func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries Conte
 	beginIdx := len(contexts)
 	for loreIdx := range scenario.Lorebook.Entries {
 		lorebookEntry := scenario.Lorebook.Entries[loreIdx]
-		if !lorebookEntry.Enabled {
+		if !*lorebookEntry.Enabled {
 			continue
 		}
 		keys := lorebookEntry.Keys
@@ -152,16 +219,17 @@ func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries Conte
 		searchRange := lorebookEntry.SearchRange
 		for keyIdx := range keysRegex {
 			var keyRegex *regexp.Regexp
-			resolvedKey := scenario.PlaceholderMap.ReplacePlaceholders(keys[keyIdx])
-			if resolvedKey != keys[keyIdx] {
-				keys[keyIdx] = resolvedKey
+			resolvedKey := scenario.PlaceholderMap.ReplacePlaceholders(
+				(*keys)[keyIdx])
+			if resolvedKey != (*keys)[keyIdx] {
+				(*keys)[keyIdx] = resolvedKey
 				keyRegex = createLorebookRegexp(resolvedKey)
 			} else {
 				keyRegex = keysRegex[keyIdx]
 			}
 			for ctxIdx := range contexts {
-				searchText := contexts[ctxIdx].Text
-				searchLen := len(searchText) - searchRange
+				searchText := *contexts[ctxIdx].Text
+				searchLen := len(searchText) - *searchRange
 				if searchLen > 0 {
 					searchText = searchText[searchLen:]
 				}
@@ -174,25 +242,28 @@ func (scenario Scenario) ResolveLorebook(contexts ContextEntries) (entries Conte
 					}
 				}
 				if len(ctxMatches) > 0 {
-					keyMatches[keys[keyIdx]] = append(keyMatches[keys[keyIdx]], ctxMatches...)
+					keyMatches[(*keys)[keyIdx]] = append(
+						keyMatches[(*keys)[keyIdx]], ctxMatches...)
 				}
 				if len(keyMatches) > 0 {
 					indexes = append(indexes, keyMatches)
 				}
 			}
 		}
-		resolvedText := scenario.PlaceholderMap.ReplacePlaceholders(lorebookEntry.Text)
-		label := scenario.PlaceholderMap.ReplacePlaceholders(lorebookEntry.DisplayName)
+		resolvedText := scenario.PlaceholderMap.ReplacePlaceholders(
+			*lorebookEntry.Text)
+		label := scenario.PlaceholderMap.ReplacePlaceholders(
+			*lorebookEntry.DisplayName)
 		var tokens *gpt_bpe.Tokens
-		if resolvedText != lorebookEntry.Text {
+		if resolvedText != *lorebookEntry.Text {
 			tokens = gpt_bpe.Encoder.Encode(&resolvedText)
 		} else {
 			tokens = lorebookEntry.Tokens
 		}
 
-		if len(indexes) > 0 || lorebookEntry.ForceActivation {
+		if len(indexes) > 0 || *lorebookEntry.ForceActivation {
 			entry := ContextEntry{
-				Text:         resolvedText,
+				Text:         &resolvedText,
 				ContextCfg:   lorebookEntry.ContextCfg,
 				Tokens:       tokens,
 				Label:        label,
@@ -222,19 +293,28 @@ For each entry in the context list
 */
 
 func (scenario Scenario) createStoryContext(story string) ContextEntry {
+	reservedTokens := 512
+	insertionPosition := -1
+	tokenBudget := 2048
+	budgetPriority := 0
+	trimDirection := "trimTop"
+	insertionType := "newline"
+	maximumTrimType := "sentence"
+	force := true
+
 	return ContextEntry{
-		Text: story,
-		ContextCfg: ContextConfig{
-			Prefix:            "",
-			Suffix:            "",
-			ReservedTokens:    512,
-			InsertionPosition: -1,
-			TokenBudget:       2048,
-			BudgetPriority:    0,
-			TrimDirection:     "trimTop",
-			InsertionType:     "newline",
-			MaximumTrimType:   "sentence",
-			Force:             true,
+		Text: &story,
+		ContextCfg: &ContextConfig{
+			Prefix:            nil,
+			Suffix:            nil,
+			ReservedTokens:    &reservedTokens,
+			InsertionPosition: &insertionPosition,
+			TokenBudget:       &tokenBudget,
+			BudgetPriority:    &budgetPriority,
+			TrimDirection:     &trimDirection,
+			InsertionType:     &insertionType,
+			MaximumTrimType:   &maximumTrimType,
+			Force:             &force,
 		},
 		Tokens: gpt_bpe.Encoder.Encode(&story),
 		Label:  "Story",
@@ -245,7 +325,7 @@ func (scenario Scenario) createStoryContext(story string) ContextEntry {
 func getReservedContexts(ctxts ContextEntries) (reserved ContextEntries) {
 	for ctxIdx := range ctxts {
 		ctx := ctxts[ctxIdx]
-		if ctx.ContextCfg.ReservedTokens > 0 {
+		if *ctx.ContextCfg.ReservedTokens > 0 {
 			reserved = append(reserved, ctx)
 		}
 	}
@@ -254,7 +334,7 @@ func getReservedContexts(ctxts ContextEntries) (reserved ContextEntries) {
 }
 
 func (ctx *ContextEntry) getTrimDirection() gpt_bpe.TrimDirection {
-	switch ctx.ContextCfg.TrimDirection {
+	switch *ctx.ContextCfg.TrimDirection {
 	case "trimTop":
 		return gpt_bpe.TrimTop
 	case "trimBottom":
@@ -265,7 +345,10 @@ func (ctx *ContextEntry) getTrimDirection() gpt_bpe.TrimDirection {
 }
 
 func (ctx *ContextEntry) getMaxTrimType() MaxTrimType {
-	switch ctx.ContextCfg.MaximumTrimType {
+	if ctx.ContextCfg.MaximumTrimType == nil {
+		return TrimNewlines
+	}
+	switch *ctx.ContextCfg.MaximumTrimType {
 	case "sentence":
 		return TrimSentences
 	case "newline":
@@ -287,8 +370,8 @@ func (ctx *ContextEntry) ResolveTrim(budget int) (trimmedTokens *gpt_bpe.Tokens)
 	target := 0
 	numTokens := len(*ctx.Tokens)
 	projected := budget - numTokens
-	if projected > ctx.ContextCfg.TokenBudget {
-		target = ctx.ContextCfg.TokenBudget
+	if projected > *ctx.ContextCfg.TokenBudget {
+		target = *ctx.ContextCfg.TokenBudget
 	} else if projected >= 0 {
 		// We have enough to fit this into the budget.
 		target = numTokens
@@ -332,10 +415,11 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 	contexts := ContextEntries{storyEntry}
 	lorebookContexts := scenario.ResolveLorebook(contexts)
 	for ctxIdx := range contexts {
-		resolved := scenario.PlaceholderMap.ReplacePlaceholders(contexts[ctxIdx].Text)
-		if resolved != contexts[ctxIdx].Text {
+		resolved := scenario.PlaceholderMap.ReplacePlaceholders(
+			*contexts[ctxIdx].Text)
+		if resolved != *contexts[ctxIdx].Text {
 			contexts[ctxIdx].Tokens = gpt_bpe.Encoder.Encode(&resolved)
-			contexts[ctxIdx].Text = resolved
+			contexts[ctxIdx].Text = &resolved
 		}
 	}
 	contexts = append(contexts, scenario.Context...)
@@ -347,27 +431,33 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 		ctx := reservedContexts[ctxIdx]
 		reservedTokens := ctx.ContextCfg.ReservedTokens
 		szTokens := len(*ctx.Tokens)
-		if szTokens < reservedTokens {
+		if szTokens < *reservedTokens {
 			budget -= szTokens
 			reservations += szTokens
 		} else {
-			budget -= reservedTokens
-			reservations += reservedTokens
+			budget -= *reservedTokens
+			reservations += *reservedTokens
 		}
 	}
 	sort.Sort(sort.Reverse(contexts))
 	contextReport := make(ContextReport, 0)
 	newContexts := make([]string, 0)
 	// Reserve 20 tokens if we're using an AI module.
-	if scenario.Settings.Parameters.Prefix != "vanilla" {
+	if scenario.Settings.Parameters.Prefix == nil ||
+		*scenario.Settings.Parameters.Prefix != "vanilla" {
+		budget -= 20
+	}
+	// Reserve 20 tokens if we're completing sentences.
+	if scenario.Settings.Parameters.GenerateUntilSentence == nil ||
+		*scenario.Settings.Parameters.GenerateUntilSentence {
 		budget -= 20
 	}
 	for ctxIdx := range contexts {
 		ctx := contexts[ctxIdx]
 		reserved := 0
-		if ctx.ContextCfg.ReservedTokens > 0 {
-			if len(*ctx.Tokens) > ctx.ContextCfg.ReservedTokens {
-				reserved = ctx.ContextCfg.ReservedTokens
+		if *ctx.ContextCfg.ReservedTokens > 0 {
+			if len(*ctx.Tokens) > *ctx.ContextCfg.ReservedTokens {
+				reserved = *ctx.ContextCfg.ReservedTokens
 			} else {
 				reserved = len(*ctx.Tokens)
 			}
@@ -383,29 +473,29 @@ func (scenario Scenario) GenerateContext(story string, budget int) (newContext s
 		} else {
 			contextReport = append(contextReport, ContextReportEntry{
 				Label:             ctx.Label,
-				InsertionPos:      ctx.ContextCfg.InsertionPosition,
+				InsertionPos:      *ctx.ContextCfg.InsertionPosition,
 				TokenCount:        len(*ctx.Tokens),
 				TokensInserted:    numTokens,
 				BudgetRemaining:   budget,
 				ReservedRemaining: reservations,
 				MatchIndexes:      ctx.MatchIndexes,
-				Forced:            ctx.ContextCfg.Force,
+				Forced:            *ctx.ContextCfg.Force,
 			})
 		}
 		var before []string
 		var after []string
-		if ctxInsertion < 0 {
-			ctxInsertion += 1
-			if len(newContexts)+ctxInsertion >= 0 {
-				before = newContexts[0 : len(newContexts)+ctxInsertion]
-				after = newContexts[len(newContexts)+ctxInsertion:]
+		if *ctxInsertion < 0 {
+			*ctxInsertion += 1
+			if len(newContexts)+*ctxInsertion >= 0 {
+				before = newContexts[0 : len(newContexts)+*ctxInsertion]
+				after = newContexts[len(newContexts)+*ctxInsertion:]
 			} else {
 				before = []string{}
 				after = newContexts[0:]
 			}
 		} else {
-			before = newContexts[0:ctxInsertion]
-			after = newContexts[ctxInsertion:]
+			before = newContexts[0:*ctxInsertion]
+			after = newContexts[*ctxInsertion:]
 		}
 		newContexts = make([]string, 0)
 		for bIdx := range before {
@@ -443,13 +533,14 @@ var placeholderVarRegex = regexp.MustCompile(
 	"\\$\\{(?P<var>[\\p{L}|0-9|#|_|\\-|(|)]+)(\\}|\\[[^\\}]+\\})")
 
 type Placeholder struct {
-	Variable    string `json:"key"`
-	Defaults    string `json:"defaultValue"`
-	Description string `json:"description"`
-	Value       string `json:"value"`
+	Variable        string `json:"key" yaml:"key"`
+	Defaults        string `json:"defaultValue" yaml:"default"`
+	Description     string `json:"description" yaml:"description"`
+	LongDescription string `json:"longDescription" yaml:"longDescription"`
+	Value           string `json:"-" yaml:"value"`
 }
 
-type Placeholders map[string]Placeholder
+type Placeholders map[string]*Placeholder
 
 func getPlaceholderTable(text string) (trimmed string, tableBlock string) {
 	trimmed = text
@@ -468,10 +559,11 @@ func extractPlaceholderDefs(rgx *regexp.Regexp, text string) (variables Placehol
 	defs := rgx.FindAllString(text, -1)
 	for defIdx := range defs {
 		fields := rgx.FindStringSubmatch(defs[defIdx])
-		variables[fields[1]] = Placeholder{Variable: fields[1],
-			Defaults:    fields[2],
-			Description: fields[3],
-			Value:       fields[2],
+		variables[fields[1]] = &Placeholder{Variable: fields[1],
+			Defaults:        fields[2],
+			Description:     fields[3],
+			Value:           fields[2],
+			LongDescription: fields[4],
 		}
 	}
 	return variables
@@ -483,7 +575,7 @@ func (target *Placeholders) UpdateValues(kvs map[string]string) {
 			entry.Value = v
 			(*target)[k] = entry
 		} else {
-			(*target)[k] = Placeholder{
+			(*target)[k] = &Placeholder{
 				Variable: k,
 				Value:    v,
 			}
@@ -519,6 +611,23 @@ func DiscoverPlaceholderDefs(text string) Placeholders {
 	return extractPlaceholderDefs(placeholderDefRegex, text)
 }
 
+func (accPlaceholders Placeholders) Realize() {
+	for varName := range accPlaceholders {
+		accPlaceholders[varName].Variable = varName
+	}
+}
+
+func (accPlaceholders Placeholders) Add(new Placeholders) {
+	for varName := range new {
+		new.Realize()
+		if _, exists := accPlaceholders[varName]; exists {
+			log.Printf("WARNING: Previous placeholder definition for"+
+				" %s exists. Overwriting!", varName)
+		}
+		accPlaceholders[varName] = new[varName]
+	}
+}
+
 func (target *Placeholders) merge(source Placeholders) {
 	for k, v := range source {
 		(*target)[k] = v
@@ -530,58 +639,77 @@ func (scenario *Scenario) GetPlaceholderDefs() (defs Placeholders) {
 	for placeholderIdx := range scenario.Placeholders {
 		placeholder := scenario.Placeholders[placeholderIdx]
 		placeholder.Value = placeholder.Defaults
-		defs[placeholder.Variable] = placeholder
+		defs[placeholder.Variable] = &placeholder
 	}
 	defs.merge(DiscoverPlaceholderTable(scenario.Prompt))
 	defs.merge(DiscoverPlaceholderDefs(scenario.Prompt))
 	for ctxIdx := range scenario.Context {
-		defs.merge(DiscoverPlaceholderDefs(scenario.Context[ctxIdx].Text))
+		defs.merge(DiscoverPlaceholderDefs(*scenario.Context[ctxIdx].Text))
 	}
 	for lbkIdx := range scenario.Lorebook.Entries {
-		defs.merge(DiscoverPlaceholderDefs(scenario.Lorebook.Entries[lbkIdx].Text))
+		defs.merge(DiscoverPlaceholderDefs(
+			*scenario.Lorebook.Entries[lbkIdx].Text))
 	}
 	return defs
 }
 
 func (scenario *Scenario) SetMemory(memory string) {
-	scenario.Context[0].Text = memory
+	scenario.Context[0].Text = &memory
 	scenario.Context[0].Tokens = gpt_bpe.Encoder.Encode(&memory)
 }
 
 func (scenario *Scenario) SetAuthorsNote(an string) {
-	scenario.Context[1].Text = an
+	scenario.Context[1].Text = &an
 	scenario.Context[1].Tokens = gpt_bpe.Encoder.Encode(&an)
 }
 
 func ScenarioFromSpec(prompt string, memory string, an string) (scenario Scenario) {
+	memoryPrefix := ""
+	memorySuffix := "\n"
+	memoryBudget := 2048
+	memoryReserved := 0
+	memoryPriority := 800
+	memoryTrimDir := "trimBottom"
+	memoryInsertion := "newline"
+	memoryInsertionPos := 0
+	memoryForce := true
+	anPrefix := ""
+	anSuffix := "\n"
+	anBudget := 2048
+	anReserved := 2048
+	anPriority := -400
+	anTrimDir := "trimBottom"
+	anInsertion := "newline"
+	anInsertionPos := -4
+	anForce := true
 	scenario.Prompt = prompt
 	scenario.Context = ContextEntries{
-		{Text: memory,
-			ContextCfg: ContextConfig{
-				Prefix:            "",
-				Suffix:            "\n",
-				TokenBudget:       2048,
-				ReservedTokens:    0,
-				BudgetPriority:    800,
-				TrimDirection:     "trimBottom",
-				InsertionType:     "newline",
-				InsertionPosition: 0,
-				Force:             true,
+		{Text: &memory,
+			ContextCfg: &ContextConfig{
+				Prefix:            &memoryPrefix,
+				Suffix:            &memorySuffix,
+				TokenBudget:       &memoryBudget,
+				ReservedTokens:    &memoryReserved,
+				BudgetPriority:    &memoryPriority,
+				TrimDirection:     &memoryTrimDir,
+				InsertionType:     &memoryInsertion,
+				InsertionPosition: &memoryInsertionPos,
+				Force:             &memoryForce,
 			},
 			Tokens: gpt_bpe.Encoder.Encode(&memory),
 			Label:  "Memory",
 			Index:  1},
-		{Text: an,
-			ContextCfg: ContextConfig{
-				Prefix:            "",
-				Suffix:            "\n",
-				TokenBudget:       2048,
-				ReservedTokens:    2048,
-				BudgetPriority:    -400,
-				TrimDirection:     "trimBottom",
-				InsertionType:     "newline",
-				InsertionPosition: -4,
-				Force:             true,
+		{Text: &an,
+			ContextCfg: &ContextConfig{
+				Prefix:            &anPrefix,
+				Suffix:            &anSuffix,
+				TokenBudget:       &anBudget,
+				ReservedTokens:    &anReserved,
+				BudgetPriority:    &anPriority,
+				TrimDirection:     &anTrimDir,
+				InsertionType:     &anInsertion,
+				InsertionPosition: &anInsertionPos,
+				Force:             &anForce,
 			},
 			Tokens: gpt_bpe.Encoder.Encode(&an),
 			Label:  "A/N",
@@ -606,23 +734,24 @@ func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scen
 	}
 	for ctxIdx := range scenario.Context {
 		ctx := scenario.Context[ctxIdx]
-		toEncode := ctx.ContextCfg.Prefix +
-			ctx.Text
+		toEncode := *ctx.ContextCfg.Prefix +
+			*ctx.Text
 		ctx.Tokens = tokenizer.Encode(&toEncode)
 		scenario.Context[ctxIdx] = ctx
 	}
+	ctxCfgForce := true
 	scenario.Context[0].Label = "Memory"
 	scenario.Context[0].Index = 1
-	scenario.Context[0].ContextCfg.Force = true
+	scenario.Context[0].ContextCfg.Force = &ctxCfgForce
 	scenario.Context[1].Label = "A/N"
 	scenario.Context[1].Index = 2
-	scenario.Context[1].ContextCfg.Force = true
+	scenario.Context[1].ContextCfg.Force = &ctxCfgForce
 	for loreIdx := range scenario.Lorebook.Entries {
 		loreEntry := scenario.Lorebook.Entries[loreIdx]
-		loreEntry.Tokens = tokenizer.Encode(&loreEntry.Text)
+		loreEntry.Tokens = tokenizer.Encode(loreEntry.Text)
 		loreEntry.ContextCfg.Force = loreEntry.ForceActivation
-		for keyIdx := range loreEntry.Keys {
-			key := loreEntry.Keys[keyIdx]
+		for keyIdx := range *loreEntry.Keys {
+			key := (*loreEntry.Keys)[keyIdx]
 			keyRegex := createLorebookRegexp(key)
 			loreEntry.KeysRegex = append(loreEntry.KeysRegex, keyRegex)
 		}
@@ -638,7 +767,7 @@ func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scen
 
 	scenario.Settings.Parameters.CoerceDefaults()
 	scenario.Settings.Parameters.Prefix = scenario.Settings.Prefix
-	*scenario.Settings.Parameters.BanBrackets = scenario.Settings.BanBrackets
+	scenario.Settings.Parameters.BanBrackets = scenario.Settings.BanBrackets
 	scenario.PlaceholderMap = scenario.GetPlaceholderDefs()
 	return scenario, err
 }

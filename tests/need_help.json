@@ -10,28 +10,29 @@
     "Period": "In the Past"
   },
   "parameters": {
-    "model": "6B-v3",
+    "model": "euterpe-v0",
     "prefix": "vanilla",
-    "temperature": 0.55,
+    "temperature": 0.51,
     "max_length": 40,
     "min_length": 40,
-    "top_k": 140,
-    "top_p": 0.9,
-    "tail_free_sampling": 1,
-    "repetition_penalty": 3.5,
-    "repetition_penalty_range": 1024,
-    "repetition_penalty_slope": 6.57,
+    "top_k": 0,
+    "top_p": 1,
+    "tail_free_sampling": 0.992,
+    "repetition_penalty": 3.875,
+    "repetition_penalty_range": 2048,
+    "repetition_penalty_slope": 0,
     "bad_words_ids": [],
     "ban_brackets": true,
     "use_cache": false,
     "use_string": false,
-    "return_full_text": false
+    "return_full_text": false,
+    "num_logprobs": 10,
+    "order": ["Temperature", "Top_K", "Top_P", "TFS"]
   },
   "permutations": [
     {
       "model": [
-        "2.7B",
-        "6B-v3"
+        "6B-v4"
       ],
       "temperature": [
         0.45,
@@ -51,6 +52,10 @@
         {
           "Period": "Present Times"
         }
+      ],
+      "order": [
+        ["Temperature", "Top_K", "Top_P", "TFS"],
+        ["TFS", "Temperature","Top_K", "Top_P"]
       ]
     },
     {

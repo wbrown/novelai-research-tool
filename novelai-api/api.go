@@ -7,14 +7,185 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cenkalti/backoff/v4"
-	gpt_bpe "github.com/wbrown/novelai-research-tool/gpt-bpe"
+	"github.com/wbrown/gpt_bpe"
+	"github.com/wbrown/novelai-research-tool/structs"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"reflect"
 	"runtime"
 	"strings"
 )
+
+//
+// Logprob structures
+//
+
+type LogprobPair struct {
+	Before *float32
+	After  *float32
+}
+
+type Logprob struct {
+	Tokens   gpt_bpe.Tokens
+	Logprobs LogprobPair
+}
+
+func (lp *LogprobPair) UnmarshalJSON(buf []byte) error {
+	tmp := []interface{}{&lp.Before, &lp.After}
+	wantLen := len(tmp)
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if g, e := len(tmp), wantLen; g != e {
+		return fmt.Errorf(
+			"wrong number of fields in LogprobPair: %d != %d", g, e)
+	}
+	return nil
+}
+
+func (lp *Logprob) MarshalJSON() ([]byte, error) {
+	lpPair := []*float32{lp.Logprobs.Before, lp.Logprobs.After}
+	lpTokens := lp.Tokens
+	return json.Marshal([]interface{}{lpTokens, lpPair})
+}
+
+func (l *Logprob) UnmarshalJSON(buf []byte) error {
+	tmp := []interface{}{&l.Tokens, &l.Logprobs}
+	wantLen := len(tmp)
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if g, e := len(tmp), wantLen; g != e {
+		return fmt.Errorf(
+			"wrong number of fields in Logprob: %d != %d", g, e)
+	}
+	return nil
+}
+
+type LogprobEntry struct {
+	Chosen *[]Logprob `json:"chosen"`
+	Before *[]Logprob `json:"before"`
+	After  *[]Logprob `json:"after"`
+}
+
+// Logit processing and order
+
+type LogitProcessorID uint16
+
+const (
+	Temperature LogitProcessorID = iota
+	Top_K
+	Top_P
+	TFS
+)
+
+type LogitProcessorIDs []LogitProcessorID
+type LogitProcessorRepr string
+type LogitProcessorReprMap map[LogitProcessorID]LogitProcessorRepr
+type LogitProcessorReprs []LogitProcessorRepr
+
+var LogitProcessorIdMap = LogitProcessorReprMap{
+	Temperature: "Temperature",
+	Top_K:       "Top_K",
+	Top_P:       "Top_P",
+	TFS:         "TFS",
+}
+
+func (lpids *LogitProcessorIDs) check() error {
+	if len(*lpids) != len(LogitProcessorIdMap) {
+		return errors.New("Must have four logit IDs in `order`!")
+	}
+	seen := make(LogitProcessorIDs, 0)
+	for idIdx := range *lpids {
+		for seenIdx := range seen {
+			if seen[seenIdx] == (*lpids)[idIdx] {
+				return errors.New(
+					"Duplicate entry found in logit `order`!")
+			}
+		}
+		seen = append(seen, (*lpids)[idIdx])
+	}
+	return nil
+}
+
+func (lpr *LogitProcessorRepr) toId() (LogitProcessorID, error) {
+	currRepr := strings.Replace(strings.ToLower(string(*lpr)),
+		"-", "_", -1)
+	for lookupIdx := range LogitProcessorIdMap {
+		if strings.ToLower(string(LogitProcessorIdMap[lookupIdx])) == currRepr {
+			return lookupIdx, nil
+		}
+	}
+	return 0, errors.New(fmt.Sprintf("Logit `%s` is not valid!", lpr))
+}
+
+func (lprs *LogitProcessorReprs) toIds() (*LogitProcessorIDs, error) {
+	ids := make(LogitProcessorIDs, 0)
+	for currReprIdx := range *lprs {
+		if logitId, err := (*lprs)[currReprIdx].toId(); err != nil {
+			return nil, err
+		} else {
+			ids = append(ids, logitId)
+		}
+	}
+	if err := ids.check(); err != nil {
+		return nil, err
+	}
+	return &ids, nil
+}
+
+func (id *LogitProcessorID) UnmarshalJSON(buf []byte) error {
+	var tmp interface{}
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if newIntId, ok := tmp.(uint16); ok {
+		logitId := interface{}(newIntId).(LogitProcessorID)
+		id = &logitId
+		return nil
+	} else if repr, ok := tmp.(string); ok {
+		logitRepr := LogitProcessorRepr(repr)
+		if convId, err := logitRepr.toId(); err != nil {
+			return err
+		} else {
+			newId := convId
+			*id = newId
+			return nil
+		}
+	} else {
+		return errors.New("Logit ID is not a string or an uint!")
+	}
+}
+
+func (ids *LogitProcessorIDs) UnmarshalJSON(buf []byte) error {
+	var serIds []LogitProcessorID
+	if err := json.Unmarshal(buf, &serIds); err == nil {
+		newIds := LogitProcessorIDs(serIds)
+		if err = newIds.check(); err != nil {
+			return err
+		} else {
+			*ids = newIds
+			return nil
+		}
+	} else {
+		return err
+	}
+}
+
+func (id LogitProcessorID) String() string {
+	var repr LogitProcessorRepr
+	var ok bool
+	if repr, ok = LogitProcessorIdMap[id]; !ok {
+		repr = "UNKNOWN"
+	}
+	return fmt.Sprintf("<%s>", repr)
+}
+
+//
+// General NovelAI API structures
+//
 
 type NovelAiAPI struct {
 	backend string
@@ -24,35 +195,18 @@ type NovelAiAPI struct {
 }
 
 type NaiGenerateHTTPResp struct {
-	Output     string `json:"output"`
-	Error      string `json:"error"`
-	StatusCode int    `json:"statusCode"`
-	Message    string `json:"message"`
+	Output     string          `json:"output"`
+	Error      string          `json:"error"`
+	StatusCode int             `json:"statusCode"`
+	Message    string          `json:"message"`
+	Logprobs   *[]LogprobEntry `json:"logprobs""`
+}
+
+type NextArray struct {
+	Output [][]interface{} `json:"output"`
 }
 
 type NaiGenerateParams struct {
-<<<<<<< Updated upstream
-	Label                  string      `json:"label"`
-	Model                  string      `json:"model"`
-	Prefix                 string      `json:"prefix"`
-	Temperature            *float64    `json:"temperature"`
-	MaxLength              *uint       `json:"max_length"`
-	MinLength              *uint       `json:"min_length"`
-	TopK                   *uint       `json:"top_k"`
-	TopP                   *float64    `json:"top_p"`
-	TopA                   *float64    `json:"top_a"`
-	TailFreeSampling       *float64    `json:"tail_free_sampling"`
-	RepetitionPenalty      *float64    `json:"repetition_penalty"`
-	RepetitionPenaltyRange *uint       `json:"repetition_penalty_range"`
-	RepetitionPenaltySlope *float64    `json:"repetition_penalty_slope"`
-	BadWordsIds            *[][]uint16 `json:"bad_words_ids"`
-	BanBrackets            *bool       `json:"ban_brackets"`
-	UseCache               bool        `json:"use_cache"`
-	UseString              bool        `json:"use_string"`
-	ReturnFullText         bool        `json:"return_full_text"`
-	TrimResponses          *bool        `json:"trim_responses"`
-	TrimSpaces             *bool        `json:"trim_spaces"`
-=======
 	Label                      *string             `json:"label,omitempty"`
 	Model                      *string             `json:"model,omitempty"`
 	Prefix                     *string             `json:"prefix,omitempty"`
@@ -85,15 +239,17 @@ type NaiGenerateParams struct {
 	NumLogprobs                *uint               `json:"num_logprobs,omitempty"`
 	GenerateUntilSentence      *bool               `json:"generate_until_sentence"`
 	Order                      *LogitProcessorIDs  `json:"order"`
->>>>>>> Stashed changes
 }
 
 type NaiGenerateResp struct {
-	Request         string `json:"request"`
-	Response        string `json:"response"`
-	EncodedRequest  string `json:"encoded_request"`
-	EncodedResponse string `json:"encoded_response"`
-	Error           error  `json:"error"`
+	Request         string          `json:"request"`
+	Response        string          `json:"response"`
+	EncodedRequest  string          `json:"encoded_request"`
+	EncodedResponse string          `json:"encoded_response"`
+	Logprobs        *[]LogprobEntry `json:"logprobs_response"`
+	NextWordArray	[256][2]string
+	NextWordReturned	int
+	Error           error           `json:"error"`
 }
 
 func BannedBrackets() [][]uint16 {
@@ -121,122 +277,68 @@ func BannedBrackets() [][]uint16 {
 		{17202}, {8162}}
 }
 
-<<<<<<< Updated upstream
-=======
 func LogitBias() [][]float32 {
-	return [][]float32{{50256, 0.0}}
+	return [][]float32{{0, 0.0}}
 }
 
 func RepWhitelistIds() []uint16 {
-	return []uint16{50256}
+	return []uint16{0}
 }
 
-
->>>>>>> Stashed changes
 func EndOfTextTokens() [][]uint16 {
-	return [][]uint16{{27,91,437,1659,5239,91,29},
-		{1279,91,437,1659,5239,91,29},
-		{27,91,10619,46,9792,13918,91,29},
-		{1279,91,10619,46,9792,13918,91,29}}
+	return [][]uint16{{27, 91, 437, 1659, 5239, 91, 29},
+		{1279, 91, 437, 1659, 5239, 91, 29},
+		{27, 91, 10619, 46, 9792, 13918, 91, 29},
+		{1279, 91, 10619, 46, 9792, 13918, 91, 29}}
 }
 
-func (params *NaiGenerateParams) CoerceNullValues(other NaiGenerateParams) {
-	if params.Label == "" {
-		params.Label = other.Label
+func (params *NaiGenerateParams) CoerceNullValues(other *NaiGenerateParams) {
+	if other == nil {
+		return
 	}
-	if params.Model == "" {
-		params.Model = other.Model
-	}
-	if params.Prefix == "" {
-		params.Prefix = other.Prefix
-	}
-	if params.Temperature == nil {
-		params.Temperature = other.Temperature
-	}
-	if params.MaxLength == nil {
-		params.MaxLength = other.MaxLength
-	}
-	if params.MinLength == nil {
-		params.MinLength = other.MinLength
-	}
-	if params.TopA == nil {
-		params.TopA = other.TopA
-	}
-	if params.TopK == nil {
-		params.TopK = other.TopK
-	}
-	if params.TopP == nil {
-		params.TopP = other.TopP
-	}
-	if params.TailFreeSampling == nil {
-		params.TailFreeSampling = other.TailFreeSampling
-	}
-	if params.RepetitionPenalty == nil {
-		params.RepetitionPenalty = other.RepetitionPenalty
-	}
-	if params.RepetitionPenaltyRange == nil {
-		params.RepetitionPenaltyRange = other.RepetitionPenaltyRange
-	}
-	if params.RepetitionPenaltySlope == nil {
-		params.RepetitionPenaltySlope = other.RepetitionPenaltySlope
-	}
-	if params.BanBrackets == nil {
-		params.BanBrackets = other.BanBrackets
-	}
-	if params.BadWordsIds == nil {
-		params.BadWordsIds = other.BadWordsIds
-	}
-	if params.TrimSpaces == nil {
-		params.TrimSpaces = other.TrimSpaces
+	fields := reflect.TypeOf(*params)
+	for field := 0; field < fields.NumField(); field++ {
+		fieldValues := reflect.ValueOf(*params).Field(field)
+		otherValues := reflect.ValueOf(*other).Field(field)
+		if fieldValues.IsNil() && !otherValues.IsNil() {
+			reflect.ValueOf(params).Elem().Field(
+				field).Set(otherValues)
+		}
 	}
 }
 
 func (params *NaiGenerateParams) CoerceDefaults() {
 	defaults := NewGenerateParams()
-	params.CoerceNullValues(defaults)
+	params.CoerceNullValues(&defaults)
 }
 
 func NewGenerateParams() NaiGenerateParams {
+	model := "6B-v4"
+	prefix := "vanilla"
 	temperature := 0.72
 	maxLength := uint(40)
 	minLength := uint(1)
 	topK := uint(0)
 	topP := 0.725
+	topA := 1.0
+	typicalP := 1.0
 	tfs := 1.0
 	repPen := 3.5
-	repPenRange := uint(1024)
+	repPenRange := uint(2048)
 	repPenSlope := 6.57
+	repPenPresence := 0.0
+	repPenFrequency := 0.0
 	banBrackets := true
 	badWordsIds := make([][]uint16, 0)
-<<<<<<< Updated upstream
-=======
-	repWhitelistIds := make([]uint16, 0)
 	logitBiasIds := make([][]float32, 0)
+	repWhitelistIds := make([]uint16, 0)
 	useCache := true
 	useString := false
 	returnFullText := false
->>>>>>> Stashed changes
 	trimSpaces := true
+	numLogprobs := uint(5)
+	generateUntilSentence := true
 	return NaiGenerateParams{
-<<<<<<< Updated upstream
-		Model:                  "6B-v3",
-		Prefix:                 "general_crossgenre",
-		Temperature:            &temperature,
-		MaxLength:              &maxLength,
-		MinLength:              &minLength,
-		TopK:                   &topK,
-		TopP:                   &topP,
-		TailFreeSampling:       &tfs,
-		RepetitionPenalty:      &repPen,
-		RepetitionPenaltyRange: &repPenRange,
-		RepetitionPenaltySlope: &repPenSlope,
-		BadWordsIds:            &badWordsIds,
-		BanBrackets:            &banBrackets,
-		UseCache:               false,
-		UseString:              false,
-		ReturnFullText:         false,
-		TrimSpaces:             &trimSpaces,
-=======
 		Model:                      &model,
 		Prefix:                     &prefix,
 		Temperature:                &temperature,
@@ -262,10 +364,9 @@ func NewGenerateParams() NaiGenerateParams {
 		GenerateUntilSentence:      &generateUntilSentence,
 		TrimSpaces:                 &trimSpaces,
 		NumLogprobs:                &numLogprobs,
->>>>>>> Stashed changes
 	}
+	
 }
-
 type NaiGenerateMsg struct {
 	Input      string            `json:"input"`
 	Model      string            `json:"model"`
@@ -276,13 +377,14 @@ func NewGenerateMsg(input string) NaiGenerateMsg {
 	params := NewGenerateParams()
 	return NaiGenerateMsg{
 		Input:      input,
-		Model:      params.Model,
+		Model:      *params.Model,
 		Parameters: params,
 	}
 }
 
 func generateGenRequest(encoded []byte, accessToken string, backendURI string) *http.Request {
-	req, _ := http.NewRequest("POST", backendURI + "/ai/generate",
+
+	req, _ := http.NewRequest("POST", backendURI+"/ai/generate",
 		bytes.NewBuffer(encoded))
 	req.Header.Set("User-Agent",
 		"nrt/0.1 ("+runtime.GOOS+"; "+runtime.GOARCH+")")
@@ -300,23 +402,12 @@ func (params *NaiGenerateParams) ResolveSamplingParams() {
 		tailFreeSampling := 1.0
 		params.TailFreeSampling = &tailFreeSampling
 	}
-<<<<<<< Updated upstream
-=======
-	if params.TopA == nil || *params.TopA == 0 {
-		topA := 1.0
-		params.TopA = &topA
-	}
-	if params.TypicalP == nil || *params.TypicalP == 0 {
-		typicalP := 1.0
-		params.TypicalP = &typicalP
-	}
->>>>>>> Stashed changes
 }
 
 func (params NaiGenerateParams) GetScaledRepPen() float64 {
 	const oldRange = 1 - 8.0
 	const newRange = 1 - 1.525
-	if params.Model != "2.7B" {
+	if *params.Model != "2.7B" {
 		scaledRepPen := ((*params.RepetitionPenalty-1)*newRange)/oldRange + 1
 		return scaledRepPen
 	}
@@ -336,8 +427,10 @@ func (params *NaiGenerateParams) ResolveRepetitionParams() {
 	}
 }
 
-func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (respDecoded NaiGenerateHTTPResp) {
-	params.Model = params.Parameters.Model
+func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (
+	respDecoded NaiGenerateHTTPResp) {
+	
+	params.Model = *params.Parameters.Model
 	if *params.Parameters.BanBrackets {
 		newBadWords := append(BannedBrackets(),
 			*params.Parameters.BadWordsIds...)
@@ -345,30 +438,25 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (respD
 	}
 	params.Parameters.ResolveRepetitionParams()
 	params.Parameters.ResolveSamplingParams()
+	
 	if len(*params.Parameters.BadWordsIds) == 0 {
-		params.Parameters.BadWordsIds = nil
+	params.Parameters.BadWordsIds = nil
 	}
-<<<<<<< Updated upstream
-=======
+	
 	if len(*params.Parameters.LogitBiasIds) == 0 {
-		params.Parameters.LogitBiasIds = nil
+	params.Parameters.LogitBiasIds = nil
 	}
 	
-
-	if *params.Parameters.RepWhitelistIds == nil {
-	
-	println(*params.Parameters.RepWhitelistIds)
-	fmt.Scanln()
-		temp_map := make([]uint16, 0)
-		params.Parameters.RepWhitelistIds = &temp_map
+	if len(*params.Parameters.RepWhitelistIds) == 0 {
+	params.Parameters.RepWhitelistIds  = nil
 	}
->>>>>>> Stashed changes
+	
 	cl := http.DefaultClient
 	encoded, _ := json.Marshal(params)
 	req := generateGenRequest(encoded, keys.AccessToken, backend)
 	// Retry up to 10 times.
 	var resp *http.Response
-	doGenerate := func () (err error) {
+	doGenerate := func() (err error) {
 		resp, err = cl.Do(req)
 		if err == nil && resp.StatusCode == 201 {
 			return err
@@ -398,14 +486,21 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (respD
 		log.Printf("API: Error reading HTTP body: %s", err)
 		os.Exit(1)
 	}
-	err = json.Unmarshal(body, &respDecoded)
-	if err != nil {
-		log.Printf("API: Error unmarshaling JSON response: %s %s", err, string(body))
-		os.Exit(1)
-	}
-	if len(respDecoded.Error) > 0 {
-		log.Fatal(fmt.Sprintf("API: Server error [%d]: %s",
-			respDecoded.StatusCode, respDecoded.Error))
+	if params.Parameters.NextWord == nil || *params.Parameters.NextWord == false {
+		err = json.Unmarshal(body, &respDecoded)
+		if err != nil {
+			log.Printf("API: Error unmarshaling JSON response: %s %s", err, string(body))
+			fmt.Scanln()
+			os.Exit(1)
+		}
+		if len(respDecoded.Error) > 0 {
+			log.Printf((fmt.Sprintf("API: Server error [%d]: %s",
+				respDecoded.StatusCode, respDecoded.Error)))
+				fmt.Scanln()
+		}
+
+	} else {
+		respDecoded.Output = string(body)
 	}
 	return respDecoded
 }
@@ -414,16 +509,18 @@ func NewNovelAiAPI() NovelAiAPI {
 	auth := AuthEnv()
 	return NovelAiAPI{
 		backend: auth.Backend,
-		keys: auth,
-		client: http.DefaultClient,
+		keys:    auth,
+		client:  http.DefaultClient,
 		encoder: gpt_bpe.NewEncoder(),
 	}
 }
 
-func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGenerateParams) (resp NaiGenerateResp) {
+func (api NovelAiAPI) GenerateWithParams(content *string,
+	params NaiGenerateParams) (resp NaiGenerateResp) {
 	if params.TrimSpaces == nil || *params.TrimSpaces == true {
 		*content = strings.TrimRight(*content, " \t")
 	}
+	var val NextArray
 	encoded := api.encoder.Encode(content)
 	encodedBytes := encoded.ToBin()
 	encodedBytes64 := base64.StdEncoding.EncodeToString(*encodedBytes)
@@ -432,17 +529,54 @@ func (api NovelAiAPI) GenerateWithParams(content *string, params NaiGeneratePara
 	msg := NewGenerateMsg(encodedBytes64)
 	msg.Parameters = params
 	apiResp := naiApiGenerate(&api.keys, msg, api.backend)
-	if binTokens, err := base64.StdEncoding.DecodeString(apiResp.Output); err != nil {
-		log.Println("ERROR:", err)
-		resp.Error = err
-	} else {
-		tokens := gpt_bpe.TokensFromBin(&binTokens)
-		if params.TrimResponses != nil && *params.TrimResponses == true {
-			tokens, err = api.encoder.TrimIncompleteSentence(tokens)
+	if params.NextWord == nil || *params.NextWord == false {
+		if binTokens, err := base64.StdEncoding.DecodeString(apiResp.Output); err != nil {
+			log.Println("ERROR:", err)
+			resp.Error = err
+		} else {
+			tokens := gpt_bpe.TokensFromBin(&binTokens)
+			/* if params.TrimResponses != nil && *params.TrimResponses == true {
+				tokens, err = api.encoder.TrimIncompleteSentence(tokens)
+			} */
+			resp.Logprobs = apiResp.Logprobs
+			resp.EncodedResponse = apiResp.Output
+			resp.Response = api.encoder.Decode(tokens)
 		}
-		resp.EncodedResponse = apiResp.Output
-		resp.Response = api.encoder.Decode(tokens)
 	}
+
+	if params.NextWord != nil && *params.NextWord == true {
+		err := json.Unmarshal([]byte(apiResp.Output), &val)
+		if err != nil {
+			log.Printf("API: Error unmarshaling JSON NextWord response: %s %s", err, apiResp.Output)
+			fmt.Scanln()
+			os.Exit(1)
+		}
+
+		//decode next_word array
+		next_array_decode := map[string]interface{}{}
+		
+		err = json.Unmarshal([]byte(apiResp.Output), &next_array_decode)
+		if err != nil{
+			fmt.Println(err)
+		}
+		get_keys := next_array_decode["output"]
+		get_array := reflect.ValueOf(get_keys)
+		//filter them into the NextWordArray
+		for i := 0; i < get_array.Len(); i++ {
+			get_entry := get_array.Index(i).Interface()
+			next_ := reflect.ValueOf(get_entry)
+			next_value_token := next_.Index(0).Interface()
+			next_value_weight := next_.Index(1).Interface()
+			
+			//add to array
+			(resp.NextWordArray)[i][0] = fmt.Sprintf("%v",next_value_token)
+			(resp.NextWordArray)[i][1] = fmt.Sprintf("%v",next_value_weight)
+			
+			resp.NextWordReturned ++
+		}
+		
+	}
+
 	return resp
 }
 

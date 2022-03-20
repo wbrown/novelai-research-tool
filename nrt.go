@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/wbrown/novelai-research-tool/aimodules"
-	novelai_api "github.com/GamerUntouch/novelai-research-tool/tree/newsamplingoptions/novelai-api"
+	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
 	"github.com/wbrown/novelai-research-tool/scenario"
-	"github.com/fatih/color"
 	"io/ioutil"
 	"log"
 	"os"
@@ -16,6 +15,8 @@ import (
 	"strings"
 	"time"
 )
+
+
 
 type PlaceholderMap map[string]string
 
@@ -27,262 +28,7 @@ func (ph *PlaceholderMap) toMap() (ret map[string]string) {
 	return ret
 }
 
-<<<<<<< Updated upstream
-type PermutationsSpec struct {
-	Model                  []string         `json:"model"`
-	Prefix                 []string         `json:"prefix"`
-	ModuleFilename         []string         `json:"module_filename"`
-	PromptFilename         []string         `json:"prompt_filename"`
-	Prompt                 []string         `json:"prompt"`
-	Memory                 []string         `json:"memory"`
-	AuthorsNote            []string         `json:"authors_note"`
-	Placeholders           []PlaceholderMap `json:"placeholders"`
-	Temperature            []*float64       `json:"temperature"`
-	MaxLength              []*uint          `json:"max_length"`
-	MinLength              []*uint          `json:"min_length"`
-	TopK                   []*uint          `json:"top_k"`
-	TopP                   []*float64       `json:"top_p"`
-	TopA                   []*float64       `json:"top_a"`
-	TailFreeSampling       []*float64       `json:"tail_free_sampling"`
-	RepetitionPenalty      []*float64       `json:"repetition_penalty"`
-	RepetitionPenaltyRange []*uint          `json:"repetition_penalty_range"`
-	RepetitionPenaltySlope []*float64       `json:"repetition_penalty_slope"`
-=======
 //
-
-func handleWrite(f *os.File, s string) {
-	_, err := f.WriteString(s)
-	if err != nil {
-		log.Printf("reporter: Error writing string: `%s`: %s", s, err)
-		os.Exit(1)
-	}
-}
-
-func (ct *ContentTest) generateParamRepr() (paramRepr string) {
-	fields := reflect.TypeOf(ct.Parameters)
-	for field := 0; field < fields.NumField(); field++ {
-		var fieldValues reflect.Value
-		fieldName := fields.FieldByIndex([]int{field}).Name
-		if fieldValues.Kind() == reflect.Ptr {
-			fieldValues = fieldValues.Elem()
-		}
-		switch fieldName {
-		case "ModuleFilename":
-			fieldValues = reflect.ValueOf(ct.GetModuleFilename())
-		case "Prefix":
-			fieldValues = reflect.ValueOf(ct.GetPrefixName())
-		default:
-			fieldValues = reflect.ValueOf(ct.Parameters).Field(field)
-			if fieldValues.Kind() == reflect.Ptr {
-				if fieldValues.IsNil() {
-					continue
-				} else {
-					fieldValues = fieldValues.Elem()
-				}
-			}
-		}
-		paramRepr += fmt.Sprintf("%26v: %v\n", fieldName, fieldValues)
-	}
-	return paramRepr
-}
-
-//
-// ConsoleReporter - reports on test progress to the console for the user
-//
-
-type ConsoleReporter struct {
-	blue         func(a ...interface{}) string
-	green        func(a ...interface{}) string
-	blueNewline  string
-	greenNewline string
-	ct           *ContentTest
-}
-
-func (ct *ContentTest) CreateConsoleReporter() (ur ConsoleReporter) {
-	ur.ct = ct
-	ur.blue = color.New(color.FgWhite, color.BgBlue).SprintFunc()
-	ur.blueNewline = ur.blue("\\n") + "\n"
-	ur.green = color.New(color.FgWhite, color.BgGreen).SprintFunc()
-	ur.greenNewline = ur.green("\\n") + "\n"
-	fmt.Printf("%v\n", ur.blue("Parameters:"))
-	fmt.Printf("%s", ct.generateParamRepr())
-	fmt.Printf("%v\n", ur.blue("Placeholders:"))
-	for _, v := range ct.Scenario.PlaceholderMap {
-		fmt.Printf("%25s: \"%s\"\n", v.Variable, v.Value)
-	}
-	return ur
-}
-
-func (cr *ConsoleReporter) ReportIteration(iteration int) {
-	fmt.Printf("%v %v / %v\n", cr.blue("Iteration:"), iteration+1, *cr.ct.Iterations)
-	fmt.Printf("%v %v\n", cr.blue("Prompt:"),
-		strings.Replace(cr.ct.Prompt, "\n", cr.blueNewline, -1))
-	if len(cr.ct.Memory) > 0 {
-		fmt.Printf("%v %v\n", cr.blue("Memory:"),
-			strings.Replace(cr.ct.Memory, "\n", cr.blueNewline, -1))
-	}
-	if len(cr.ct.AuthorsNote) > 0 {
-		fmt.Printf("%v %v\n", cr.blue("Author's Note:"),
-			strings.Replace(cr.ct.AuthorsNote, "\n", cr.blueNewline, -1))
-	}
-}
-
-func (cr *ConsoleReporter) ReportGeneration(resp string) {
-	fmt.Printf("%v%v\n", cr.green("=>"),
-		strings.Replace(resp, "\n", cr.greenNewline, -1))
-}
-
-func (cr *ConsoleReporter) close() {
-	fmt.Printf("%v\n", cr.blue("== Test Instance Complete =="))
-}
-
-//
-// JSONReporter - takes output of test iterations and serializes to a JSON
-//                file
-//
-
-type JSONReporter struct {
-	fileHandle *os.File
-	iteration  int
-}
-
-func CreateJSONReporter(path string) (reportWriter JSONReporter) {
-	var err error
-	dir := filepath.Dir(path)
-	err = os.MkdirAll(dir, 0755)
-	if err != nil {
-		log.Printf("reporter: Cannot create path: `%s`: %s", dir, err)
-		os.Exit(1)
-	}
-	reportWriter.fileHandle, err = os.OpenFile(path,
-		os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-	if err != nil {
-		log.Printf("reporter: Cannot open file for writing: `%s`: %s", path, err)
-		os.Exit(1)
-	}
-	reportWriter.iteration = 0
-	handleWrite(reportWriter.fileHandle, "[")
-	return reportWriter
-}
-
-func (reportWriter *JSONReporter) SerializeIteration(result *IterationResult) {
-	if reportWriter.iteration != 0 {
-		handleWrite(reportWriter.fileHandle, ",\n")
-	}
-	reportWriter.iteration += 1
-	serialized, err := json.MarshalIndent(result, "", "  ")
-	if err != nil {
-		log.Printf("reporter: Cannot marshal JSON: %v, %v", result, err)
-		os.Exit(1)
-	}
-	handleWrite(reportWriter.fileHandle, string(serialized))
-	reportWriter.fileHandle.Sync()
-}
-
-func (reportWriter *JSONReporter) close() {
-	handleWrite(reportWriter.fileHandle, "]")
-	reportWriter.fileHandle.Close()
-}
-
-//
-// TextReporter - takes output of test iterations and serializes to a JSON
-//                file
-//
-
-type TextReporter struct {
-	fileHandle *os.File
-	ct         *ContentTest
-}
-
-func (ct ContentTest) CreateTextReporter(path string) (textReporter TextReporter) {
-	var err error
-	dir := filepath.Dir(path)
-	err = os.MkdirAll(dir, 0755)
-	if err != nil {
-		log.Printf("reporter: Cannot create path: `%s`: %s", dir, err)
-		os.Exit(1)
-	}
-	textReporter.fileHandle, err = os.OpenFile(path,
-		os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-	if err != nil {
-		log.Printf("reporter: Cannot open file for writing: `%s`: %s", path, err)
-		os.Exit(1)
-	}
-	paramsReport := ct.generateParamRepr()
-	phReport := ""
-	for _, v := range ct.Scenario.PlaceholderMap {
-		phReport += fmt.Sprintf("%25s:\"%s\"\n", v.Variable, v.Value)
-	}
-	handleWrite(textReporter.fileHandle, "=== Parameters ====================================\n")
-	handleWrite(textReporter.fileHandle, paramsReport)
-	handleWrite(textReporter.fileHandle, "=== Placeholders ==================================\n")
-	handleWrite(textReporter.fileHandle, phReport)
-	handleWrite(textReporter.fileHandle, "=== Prompt ========================================\n")
-	handleWrite(textReporter.fileHandle, ct.Prompt)
-	if len(ct.Memory) > 0 {
-		handleWrite(textReporter.fileHandle, "\n=== Memory ========================================\n")
-		handleWrite(textReporter.fileHandle, ct.Memory)
-	}
-	if len(ct.AuthorsNote) > 0 {
-		handleWrite(textReporter.fileHandle, "\n=== Author's Note =================================\n")
-		handleWrite(textReporter.fileHandle, ct.AuthorsNote)
-	}
-	return textReporter
-}
-
-func (tr *TextReporter) ReportIteration(iteration int) {
-	handleWrite(tr.fileHandle,
-		fmt.Sprintf("\n\n=== Iteration %-5v ==============================\n", iteration))
-	tr.fileHandle.Sync()
-}
-
-func (tr *TextReporter) ReportGeneration(resp string) {
-	handleWrite(tr.fileHandle, resp)
-	tr.fileHandle.Sync()
-}
-
-func (tr *TextReporter) close() {
-	tr.fileHandle.Close()
-}
-
-type Reporters struct {
-	JSON    *JSONReporter
-	Text    *TextReporter
-	Console *ConsoleReporter
-}
-
-func (reporters Reporters) close() {
-	reporters.JSON.close()
-	reporters.Text.close()
-	reporters.Console.close()
-}
-
-func (reporters Reporters) ReportIteration(iteration int) {
-	reporters.Console.ReportIteration(iteration)
-	reporters.Text.ReportIteration(iteration)
-}
-
-func (reporters Reporters) ReportGeneration(resp string) {
-	reporters.Console.ReportGeneration(resp)
-	reporters.Text.ReportGeneration(resp)
-}
-
-func (reporters Reporters) SerializeIteration(result *IterationResult) {
-	reporters.JSON.SerializeIteration(result)
-}
-
-func (ct ContentTest) MakeReporters() Reporters {
-	consoleReport := ct.CreateConsoleReporter()
-	outputPath := ct.generateOutputPath()
-	textReport := ct.CreateTextReporter(outputPath + ".txt")
-	jsonReport := CreateJSONReporter(outputPath + ".json")
-	return Reporters{
-		&jsonReport,
-		&textReport,
-		&consoleReport,
-	}
-}
-
 
 type PermutationsSpec struct {
 	Model                      []string                         `json:"model"`
@@ -299,7 +45,6 @@ type PermutationsSpec struct {
 	TopK                       []*uint                          `json:"top_k"`
 	TopP                       []*float64                       `json:"top_p"`
 	TopA                       []*float64                       `json:"top_a"`
-	TypicalP                   []*float64                       `json:"typical_p"`
 	TailFreeSampling           []*float64                       `json:"tail_free_sampling"`
 	RepetitionPenalty          []*float64                       `json:"repetition_penalty"`
 	RepetitionPenaltyRange     []*uint                          `json:"repetition_penalty_range"`
@@ -307,10 +52,10 @@ type PermutationsSpec struct {
 	RepetitionPenaltyFrequency []*float64                       `json:"repetition_penalty_frequency"`
 	RepetitionPenaltyPresence  []*float64                       `json:"repetition_penalty_presence"`
 	Order                      []*novelai_api.LogitProcessorIDs `json:"order"`
->>>>>>> Stashed changes
 }
 
 type ContentTest struct {
+	Index            int                           `json:-`
 	OutputPrefix     string                        `json:"output_prefix"`
 	PromptFilename   string                        `json:"prompt_filename"`
 	ScenarioFilename string                        `json:"scenario_filename"`
@@ -400,16 +145,11 @@ func (ct *ContentTest) performGenerations(generations int, input string,
 	results.Parameters = ct.Parameters
 	ct.Scenario.SetMemory(ct.Memory)
 	ct.Scenario.SetAuthorsNote(ct.AuthorsNote)
-	priorTrim := ct.Parameters.TrimResponses
-	throttle := time.NewTimer(1100 * time.Millisecond)
+	throttle := time.NewTimer(2000 * time.Millisecond)
 	for generation := 0; generation < generations; generation++ {
-		submission, ctxReport := ct.Scenario.GenerateContext(context, *ct.MaxTokens)
-		if generation == generations-1 {
-			trimTrue := true
-			ct.Parameters.TrimResponses = &trimTrue
-		}
+		submission, ctxReport := ct.Scenario.GenerateContext(context,
+			*ct.MaxTokens)
 		resp := ct.API.GenerateWithParams(&submission, ct.Parameters)
-		ct.Parameters.TrimResponses = priorTrim
 		if generation == 0 {
 			results.Encoded.Prompt = resp.EncodedRequest
 		}
@@ -430,14 +170,17 @@ func makeFileNameSafe(s string) string {
 		"-", "_",
 		".", "_",
 		":", "_",
-		" ", "_").Replace(s)
+		" ", "_",
+		"[", "",
+		"]", "").Replace(s)
 }
 
 func (ct *ContentTest) GetModuleFilename() (moduleFile string) {
 	if ct.ModuleFilename != "" {
 		return ct.ModuleFilename
 	} else if ct.Scenario != nil && ct.Scenario.AIModule != nil &&
-		ct.Parameters.Prefix == ct.Scenario.AIModule.ToPrefix() &&
+		ct.Parameters.Prefix != nil &&
+		*ct.Parameters.Prefix == ct.Scenario.AIModule.ToPrefix() &&
 		ct.ScenarioFilename != "" {
 		return ct.ScenarioFilename
 	} else {
@@ -447,13 +190,14 @@ func (ct *ContentTest) GetModuleFilename() (moduleFile string) {
 
 func (ct *ContentTest) GetPrefixName() (prefixName string) {
 	if ct.Scenario != nil && ct.Scenario.AIModule != nil &&
-		ct.Parameters.Prefix == ct.Scenario.AIModule.ToPrefix() &&
+		ct.Parameters.Prefix != nil &&
+		*ct.Parameters.Prefix == ct.Scenario.AIModule.ToPrefix() &&
 		len(ct.Scenario.AIModule.Name) != 0 {
 		prefixName = ct.Scenario.AIModule.Name
 	} else if ct.AIModule != nil {
 		prefixName = ct.AIModule.Name
-	} else {
-		prefixName = ct.Parameters.Prefix
+	} else if ct.Parameters.Prefix != nil {
+		prefixName = *ct.Parameters.Prefix
 	}
 	return prefixName
 }
@@ -480,28 +224,29 @@ func (ct *ContentTest) MakeLabel(spec PermutationsSpec) (label string) {
 			fieldValueRepr = ct.GetPrefixName()
 		case "Placeholders":
 			for placeholderIdx := range spec.Placeholders {
-				if reflect.DeepEqual(spec.Placeholders[placeholderIdx], ct.Placeholders) {
+				if reflect.DeepEqual(spec.Placeholders[placeholderIdx],
+					ct.Placeholders) {
 					fieldValueRepr = fmt.Sprintf("#%d", placeholderIdx+1)
 					break
 				}
 			}
 		case "Memory":
 			for memoryIdx := range spec.Memory {
-				if spec.Memory[memoryIdx] == ct.Memory {
+				if *spec.Memory[memoryIdx] == ct.Memory {
 					fieldValueRepr = fmt.Sprintf("#%d", memoryIdx+1)
 					break
 				}
 			}
 		case "AuthorsNote":
 			for authIdx := range spec.AuthorsNote {
-				if spec.AuthorsNote[authIdx] == ct.AuthorsNote {
+				if *spec.AuthorsNote[authIdx] == ct.AuthorsNote {
 					fieldValueRepr = fmt.Sprintf("#%d", authIdx+1)
 					break
 				}
 			}
 		case "Prompt":
 			for promptIdx := range spec.Prompt {
-				if spec.Prompt[promptIdx] == ct.Prompt {
+				if *spec.Prompt[promptIdx] == ct.Prompt {
 					fieldValueRepr = fmt.Sprintf("#%d", promptIdx+1)
 					break
 				}
@@ -573,7 +318,8 @@ func (ct ContentTest) FieldsSame(fields []string, other ContentTest) bool {
 				fmt.Sprintf("%v", otherVal.Elem()) {
 				return false
 			}
-		} else if fmt.Sprintf("%v", ctVal) != fmt.Sprintf("%v", otherVal) {
+		} else if fmt.Sprintf("%v", ctVal) !=
+			fmt.Sprintf("%v", otherVal) {
 			return false
 		}
 	}
@@ -582,6 +328,7 @@ func (ct ContentTest) FieldsSame(fields []string, other ContentTest) bool {
 
 func resolvePermutation(origPermutation ContentTest,
 	fieldName string, fieldValues *reflect.Value) ContentTests {
+	var stringType = reflect.TypeOf("")
 	newPermutations := make(ContentTests, 0)
 	for valIdx := 0; valIdx < fieldValues.Len(); valIdx++ {
 		permutation := origPermutation
@@ -590,22 +337,25 @@ func resolvePermutation(origPermutation ContentTest,
 		switch fieldName {
 		case "Placeholders":
 			newPlaceholders := make(PlaceholderMap, 0)
-			fromPlaceholders := value.Interface().(PlaceholderMap)
+			fromPlaceholders := value.Interface().(*PlaceholderMap)
 			for k, v := range permutation.Placeholders {
-				newPlaceholders[k] = v
+				newPlaceholders[k] = sanitizeString(v)
 			}
-			for k, v := range fromPlaceholders {
-				newPlaceholders[k] = v
+			for k, v := range *fromPlaceholders {
+				newPlaceholders[k] = sanitizeString(v)
 			}
 			permutation.Placeholders = newPlaceholders
 		case "Prompt":
-			permutation.Prompt = fmt.Sprintf("%s", value)
+			permutation.Prompt = sanitizeString(fmt.Sprintf("%s",
+				value.Elem()))
 		case "Memory":
-			permutation.Memory = fmt.Sprintf("%s", value)
+			permutation.Memory = sanitizeString(fmt.Sprintf("%s",
+				value.Elem()))
 		case "AuthorsNote":
-			permutation.AuthorsNote = fmt.Sprintf("%s", value)
+			permutation.AuthorsNote = sanitizeString(fmt.Sprintf("%s",
+				value.Elem()))
 		case "PromptFilename":
-			permutation.PromptFilename = fmt.Sprintf("%v", value)
+			permutation.PromptFilename = fmt.Sprintf("%v", value.Elem())
 			if len(permutation.PromptFilename) > 0 {
 				permutation.PromptPath = filepath.Join(permutation.WorkingDir,
 					permutation.PromptFilename)
@@ -617,7 +367,7 @@ func resolvePermutation(origPermutation ContentTest,
 				permutation.loadPrompt(permutation.PromptPath)
 			}
 		case "ModuleFilename":
-			permutation.ModuleFilename = fmt.Sprintf("%v", value)
+			permutation.ModuleFilename = fmt.Sprintf("%v", value.Elem())
 			if len(permutation.ModuleFilename) > 0 {
 				permutation.ModulePath = filepath.Join(permutation.WorkingDir,
 					permutation.ModuleFilename)
@@ -628,17 +378,24 @@ func resolvePermutation(origPermutation ContentTest,
 				}
 				aiModule := aimodules.AIModuleFromFile(permutation.ModulePath)
 				permutation.AIModule = &aiModule
-				permutation.Scenario.Settings.Prefix = permutation.AIModule.ToPrefix()
-				permutation.Scenario.Settings.ScenarioAIModule = &scenario.ScenarioAIModule{
-					Name: aiModule.Name,
-					Id: permutation.Scenario.Settings.Prefix,
-					Description: aiModule.Description,
-				}
+				genPrefix := permutation.AIModule.ToPrefix()
+				permutation.Scenario.Settings.Prefix = &genPrefix
+				permutation.Scenario.Settings.ScenarioAIModule =
+					&scenario.ScenarioAIModule{
+						Name:        aiModule.Name,
+						Id:          *permutation.Scenario.Settings.Prefix,
+						Description: aiModule.Description,
+					}
 			}
 		case "Model":
-			permutation.Parameters.Model = value.String()
+			modelVal := value.String()
+			permutation.Parameters.Model = &modelVal
 		default:
-			reflect.ValueOf(&permutation.Parameters).Elem().Field(targetField.Index[0]).Set(value)
+			if value.Type() == stringType {
+				value.SetString(sanitizeString(value.String()))
+			}
+			reflect.ValueOf(&permutation.Parameters).Elem().Field(
+				targetField.Index[0]).Set(value)
 		}
 		newPermutations = append(newPermutations, permutation)
 	}
@@ -674,12 +431,13 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) Conten
 			permutations = newPermutations
 		}
 	}
-	ct.Parameters.Label = ct.MakeLabel(spec)
+	newLabel := ct.MakeLabel(spec)
+	ct.Parameters.Label = &newLabel
 	filteredPermutations := []ContentTest{ct}
 	for permutationIdx := range permutations {
 		permutation := permutations[permutationIdx]
-		if permutation.Parameters.Model != "6B-v3" &&
-			permutation.Parameters.Prefix != "vanilla" {
+		if *permutation.Parameters.Model != "6B-v4" &&
+			*permutation.Parameters.Prefix != "vanilla" {
 			continue
 		}
 		// Deduplicate based on fields we've permuted on.
@@ -692,8 +450,9 @@ func (ct ContentTest) GeneratePermutationsFromSpec(spec PermutationsSpec) Conten
 			}
 		}
 		if !same {
-			permutation.Scenario.Settings.Parameters = permutation.Parameters
-			permutation.Parameters.Label = permutation.MakeLabel(spec)
+			permutation.Scenario.Settings.Parameters = &permutation.Parameters
+			newLabel := permutation.MakeLabel(spec)
+			permutation.Parameters.Label = &newLabel
 			filteredPermutations = append(filteredPermutations, permutation)
 		}
 	}
@@ -707,15 +466,18 @@ func (ct ContentTest) GeneratePermutations() (tests []ContentTest) {
 				ct.GeneratePermutationsFromSpec(ct.Permutations[specIdx])...)
 		}
 	} else {
-		if ct.Parameters.Label == "" {
+		if ct.Parameters.Label == nil || *ct.Parameters.Label == "" {
 			if ct.ScenarioFilename != "" {
-				ct.Parameters.Label = strings.Replace(
+				newLabel := strings.Replace(
 					strings.Replace(
 						filepath.Base(fmt.Sprintf("%v",
-							ct.ScenarioFilename)), "-", "_", -1),
+							ct.ScenarioFilename)),
+						"-", "_", -1),
 					".", "_", -1)
+				ct.Parameters.Label = &newLabel
 			} else {
-				ct.Parameters.Label = "base"
+				baseLabel := "base"
+				ct.Parameters.Label = &baseLabel
 			}
 		}
 		tests = append(tests, ct)
@@ -732,7 +494,10 @@ func (ct *ContentTest) generateOutputPath() string {
 		(len(filepath.Join(ct.WorkingDir, ct.OutputPrefix)) +
 			len(tsString) + len(ct.WorkingDir) +
 			MaxFileExtensionLength + 1)
-	label := ct.Parameters.Label
+	label := ""
+	if ct.Parameters.Label != nil {
+		label = *ct.Parameters.Label
+	}
 	if budget < len(label) && runtime.GOOS == "windows" {
 		if budget < 30 {
 			log.Printf("nrt: your working path is too long: %v",
@@ -752,6 +517,16 @@ func (ct *ContentTest) loadPrompt(path string) {
 		os.Exit(1)
 	}
 	ct.Prompt = string(promptBytes)
+}
+
+func sanitizeString(s string) string {
+	return strings.Replace(s, "\r\n", "\n", -1)
+}
+
+func (ct ContentTest) sanitizeStrings() {
+	ct.Prompt = sanitizeString(ct.Prompt)
+	ct.AuthorsNote = sanitizeString(ct.AuthorsNote)
+	ct.Memory = sanitizeString(ct.Memory)
 }
 
 func (ct ContentTest) Perform() {
@@ -809,8 +584,8 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 			test.Scenario = &scenario
 		}
 		test.Prompt = test.Scenario.Prompt
-		test.Memory = test.Scenario.Context[0].Text
-		test.AuthorsNote = test.Scenario.Context[1].Text
+		test.Memory = *test.Scenario.Context[0].Text
+		test.AuthorsNote = *test.Scenario.Context[1].Text
 		test.Parameters.CoerceNullValues(test.Scenario.Settings.Parameters)
 	} else {
 		test.Parameters.CoerceDefaults()
@@ -825,7 +600,8 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 		}
 		aimodule := aimodules.AIModuleFromFile(test.ModulePath)
 		test.AIModule = &aimodule
-		test.Parameters.Prefix = test.AIModule.ToPrefix()
+		newPrefix := test.AIModule.ToPrefix()
+		test.Parameters.Prefix = &newPrefix
 	}
 	if test.PromptFilename != "" {
 		test.PromptPath = filepath.Join(test.WorkingDir, test.PromptFilename)
@@ -839,7 +615,8 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 		scenarioSpec := scenario.ScenarioFromSpec(test.Prompt, test.Memory,
 			test.AuthorsNote)
 		test.Scenario = &scenarioSpec
-		test.Scenario.Settings.Parameters.CoerceNullValues(test.Parameters)
+		test.Scenario.Settings.Parameters = &novelai_api.NaiGenerateParams{}
+		test.Scenario.Settings.Parameters.CoerceNullValues(&test.Parameters)
 	}
 	defaultTest := MakeDefaultContentTest()
 	test.CoerceContentTest(&defaultTest)
@@ -863,13 +640,13 @@ func MakeTestFromScenario(path string) (test ContentTest) {
 	test.WorkingDir = filepath.Dir(path)
 	test.OutputPrefix = strings.Replace(filepath.Base(path), ".scenario", "", -1)
 	test.Prompt = test.Scenario.Prompt
-	test.Memory = test.Scenario.Context[0].Text
-	test.AuthorsNote = test.Scenario.Context[1].Text
+	test.Memory = *test.Scenario.Context[0].Text
+	test.AuthorsNote = *test.Scenario.Context[1].Text
 	test.Scenario.Settings.Parameters.CoerceDefaults()
 	test.Parameters.CoerceNullValues(test.Scenario.Settings.Parameters)
 	test.Parameters.Prefix = test.Scenario.Settings.Prefix
-	*test.Parameters.BanBrackets = test.Scenario.Settings.BanBrackets
-	test.Parameters = test.Scenario.Settings.Parameters
+	test.Parameters.BanBrackets = test.Scenario.Settings.BanBrackets
+	test.Parameters = *test.Scenario.Settings.Parameters
 	return test
 }
 
