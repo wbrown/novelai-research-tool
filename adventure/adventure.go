@@ -4,13 +4,14 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	"strings"
+	"unicode"
+
 	"github.com/chzyer/readline"
 	"github.com/jdkato/prose/v2"
 	"github.com/wbrown/gpt_bpe"
 	novelai_api "github.com/wbrown/novelai-research-tool/novelai-api"
-	"log"
-	"strings"
-	"unicode"
 )
 
 //go:embed adventure.json
@@ -51,7 +52,9 @@ func (adventure Adventure) start() {
 	defer rl.Close()
 
 	var output string
+	log.SetOutput(rl.Stderr())
 	for {
+		rl.ResetHistory()
 		line, err := rl.Readline()
 		if err != nil { // io.EOF
 			break
@@ -66,6 +69,7 @@ func (adventure Adventure) start() {
 				break
 			}
 		}
+
 		resp := adventure.API.GenerateWithParams(&adventure.Context,
 			adventure.Parameters)
 		output = resp.Response
