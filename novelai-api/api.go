@@ -219,12 +219,14 @@ type NaiGenerateParams struct {
 	TopK                       *uint               `json:"top_k,omitempty"`
 	TopP                       *float64            `json:"top_p,omitempty"`
 	TopA                       *float64            `json:"top_a,omitempty"`
+	TypicalP                   *float64            `json:"typical_p,omitempty"`	
 	TailFreeSampling           *float64            `json:"tail_free_sampling,omitempty"`
 	RepetitionPenalty          *float64            `json:"repetition_penalty,omitempty"`
 	RepetitionPenaltyRange     *uint               `json:"repetition_penalty_range,omitempty"`
 	RepetitionPenaltySlope     *float64            `json:"repetition_penalty_slope,omitempty"`
 	RepetitionPenaltyFrequency *float64            `json:"repetition_penalty_frequency,omitempty"`
 	RepetitionPenaltyPresence  *float64            `json:"repetition_penalty_presence,omitempty"`
+	RepWhitelistIds            *[]uint16         `json:"repetition_penalty_whitelist,omitempty"`
 	BadWordsIds                *[][]uint16         `json:"bad_words_ids,omitempty"`
 	LogitBiasIds               *[][]float32        `json:"logit_bias,omitempty"`
 	LogitBiasGroups            *structs.BiasGroups `json:"logit_bias_groups,omitempty"`
@@ -246,6 +248,8 @@ type NaiGenerateResp struct {
 	EncodedRequest  string          `json:"encoded_request"`
 	EncodedResponse string          `json:"encoded_response"`
 	Logprobs        *[]LogprobEntry `json:"logprobs_response"`
+	NextWordArray	[256][2]string
+	NextWordReturned	int
 	Error           error           `json:"error"`
 }
 
@@ -276,6 +280,10 @@ func BannedBrackets() [][]uint16 {
 
 func LogitBias() [][]float32 {
 	return [][]float32{{0, 0.0}}
+}
+
+func RepWhitelistIds() []uint16 {
+	return []uint16{0}
 }
 
 func EndOfTextTokens() [][]uint16 {
@@ -314,6 +322,7 @@ func NewGenerateParams() NaiGenerateParams {
 	topK := uint(0)
 	topP := 0.725
 	topA := 1.0
+	typicalP := 1.0
 	tfs := 1.0
 	repPen := 3.5
 	repPenRange := uint(2048)
@@ -323,6 +332,7 @@ func NewGenerateParams() NaiGenerateParams {
 	banBrackets := true
 	badWordsIds := make([][]uint16, 0)
 	logitBiasIds := make([][]float32, 0)
+	repWhitelistIds := make([]uint16, 0)
 	useCache := true
 	useString := false
 	returnFullText := false
@@ -338,12 +348,14 @@ func NewGenerateParams() NaiGenerateParams {
 		TopA:                       &topA,
 		TopK:                       &topK,
 		TopP:                       &topP,
+		TypicalP:                   &typicalP,
 		TailFreeSampling:           &tfs,
 		RepetitionPenalty:          &repPen,
 		RepetitionPenaltyRange:     &repPenRange,
 		RepetitionPenaltySlope:     &repPenSlope,
 		RepetitionPenaltyPresence:  &repPenPresence,
 		RepetitionPenaltyFrequency: &repPenFrequency,
+		RepWhitelistIds:            &repWhitelistIds,
 		BadWordsIds:                &badWordsIds,
 		LogitBiasIds:               &logitBiasIds,
 		BanBrackets:                &banBrackets,
@@ -354,8 +366,8 @@ func NewGenerateParams() NaiGenerateParams {
 		TrimSpaces:                 &trimSpaces,
 		NumLogprobs:                &numLogprobs,
 	}
+	
 }
-
 type NaiGenerateMsg struct {
 	Input      string            `json:"input"`
 	Model      string            `json:"model"`
@@ -372,6 +384,7 @@ func NewGenerateMsg(input string) NaiGenerateMsg {
 }
 
 func generateGenRequest(encoded []byte, accessToken string, backendURI string) *http.Request {
+
 	req, _ := http.NewRequest("POST", backendURI+"/ai/generate",
 		bytes.NewBuffer(encoded))
 	req.Header.Set("User-Agent",
@@ -417,6 +430,7 @@ func (params *NaiGenerateParams) ResolveRepetitionParams() {
 
 func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (
 	respDecoded NaiGenerateHTTPResp) {
+	
 	params.Model = *params.Parameters.Model
 	if *params.Parameters.BanBrackets {
 		newBadWords := append(BannedBrackets(),
@@ -425,12 +439,17 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (
 	}
 	params.Parameters.ResolveRepetitionParams()
 	params.Parameters.ResolveSamplingParams()
+
 	if params.Parameters.BadWordsIds != nil && len(*params.Parameters.BadWordsIds) == 0 {
 		params.Parameters.BadWordsIds = nil
 	}
 	if params.Parameters.LogitBiasIds != nil && len(*params.Parameters.LogitBiasIds) == 0 {
 		params.Parameters.LogitBiasIds = nil
 	}
+  if params.Parameters.RepWhitelistIds != nil && len(*params.Parameters.RepWhitelistIds) == 0 {
+	  params.Parameters.RepWhitelistIds  = nil
+  }
+	
 	cl := http.DefaultClient
 	encoded, _ := json.Marshal(params)
 	req := generateGenRequest(encoded, keys.AccessToken, backend)
@@ -466,17 +485,19 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (
 		log.Printf("API: Error reading HTTP body: %s", err)
 		os.Exit(1)
 	}
-	if params.Parameters.NextWord == nil ||
-		*params.Parameters.NextWord == false {
+	if params.Parameters.NextWord == nil || *params.Parameters.NextWord == false {
 		err = json.Unmarshal(body, &respDecoded)
 		if err != nil {
 			log.Printf("API: Error unmarshaling JSON response: %s %s", err, string(body))
+			fmt.Scanln()
 			os.Exit(1)
 		}
 		if len(respDecoded.Error) > 0 {
-			log.Fatal(fmt.Sprintf("API: Server error [%d]: %s",
-				respDecoded.StatusCode, respDecoded.Error))
+			log.Printf((fmt.Sprintf("API: Server error [%d]: %s",
+				respDecoded.StatusCode, respDecoded.Error)))
+				fmt.Scanln()
 		}
+
 	} else {
 		respDecoded.Output = string(body)
 	}
@@ -530,8 +551,29 @@ func (api NovelAiAPI) GenerateWithParams(content *string,
 			os.Exit(1)
 		}
 
-		str := fmt.Sprintf("%v", val)
-		fmt.Println("\033[38;5;240m" + str)
+		//decode next_word array
+		next_array_decode := map[string]interface{}{}
+		
+		err = json.Unmarshal([]byte(apiResp.Output), &next_array_decode)
+		if err != nil{
+			fmt.Println(err)
+		}
+		get_keys := next_array_decode["output"]
+		get_array := reflect.ValueOf(get_keys)
+		//filter them into the NextWordArray
+		for i := 0; i < get_array.Len(); i++ {
+			get_entry := get_array.Index(i).Interface()
+			next_ := reflect.ValueOf(get_entry)
+			next_value_token := next_.Index(0).Interface()
+			next_value_weight := next_.Index(1).Interface()
+			
+			//add to array
+			(resp.NextWordArray)[i][0] = fmt.Sprintf("%v",next_value_token)
+			(resp.NextWordArray)[i][1] = fmt.Sprintf("%v",next_value_weight)
+			
+			resp.NextWordReturned ++
+		}
+		
 	}
 
 	return resp
