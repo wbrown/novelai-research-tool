@@ -6,9 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cenkalti/backoff/v4"
-	"github.com/wbrown/gpt_bpe"
-	"github.com/wbrown/novelai-research-tool/structs"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,6 +13,10 @@ import (
 	"reflect"
 	"runtime"
 	"strings"
+
+	"github.com/cenkalti/backoff/v4"
+	"github.com/wbrown/gpt_bpe"
+	"github.com/wbrown/novelai-research-tool/structs"
 )
 
 //
@@ -438,18 +439,16 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (
 	}
 	params.Parameters.ResolveRepetitionParams()
 	params.Parameters.ResolveSamplingParams()
-	
-	if len(*params.Parameters.BadWordsIds) == 0 {
-	params.Parameters.BadWordsIds = nil
+
+	if params.Parameters.BadWordsIds != nil && len(*params.Parameters.BadWordsIds) == 0 {
+		params.Parameters.BadWordsIds = nil
 	}
-	
-	if len(*params.Parameters.LogitBiasIds) == 0 {
-	params.Parameters.LogitBiasIds = nil
+	if params.Parameters.LogitBiasIds != nil && len(*params.Parameters.LogitBiasIds) == 0 {
+		params.Parameters.LogitBiasIds = nil
 	}
-	
-	if len(*params.Parameters.RepWhitelistIds) == 0 {
-	params.Parameters.RepWhitelistIds  = nil
-	}
+  if params.Parameters.RepWhitelistIds != nil && len(*params.Parameters.RepWhitelistIds) == 0 {
+	  params.Parameters.RepWhitelistIds  = nil
+  }
 	
 	cl := http.DefaultClient
 	encoded, _ := json.Marshal(params)
