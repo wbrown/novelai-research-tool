@@ -17,8 +17,8 @@ import (
 )
 
 type AuthConfig struct {
-	Username string `envconfig:"NAI_USERNAME"`
-	Password string `envconfig:"NAI_PASSWORD"`
+	Username   string `envconfig:"NAI_USERNAME"`
+	Password   string `envconfig:"NAI_PASSWORD"`
 	BackendURI string `envconfig:"NAI_BACKEND"`
 }
 
@@ -34,7 +34,7 @@ func getAccessToken(access_key string, backendURI string) (accessToken string) {
 	params := make(map[string]string)
 	params["key"] = access_key
 	encoded, _ := json.Marshal(params)
-	req, _ := http.NewRequest("POST", backendURI + "/user/login",
+	req, _ := http.NewRequest("POST", backendURI+"/user/login",
 		bytes.NewBuffer(encoded))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent",

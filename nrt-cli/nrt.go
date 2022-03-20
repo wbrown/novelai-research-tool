@@ -5,7 +5,18 @@ import (
 	nrt "github.com/wbrown/novelai-research-tool"
 	"os"
 	"path/filepath"
+	"sync"
 )
+
+func threadWorker(wg *sync.WaitGroup, tests *chan nrt.ContentTest, total int) {
+	defer wg.Done()
+	for test := range *tests {
+		testIdx := test.Index
+		fmt.Printf("== Performing test %v / %v ==\n", testIdx, total)
+		test.Perform()
+	}
+	wg.Done()
+}
 
 func main() {
 	binName := filepath.Base(os.Args[0])
@@ -21,8 +32,16 @@ func main() {
 	}
 	tests := nrt.GenerateTestsFromFile(inputPath)
 	fmt.Printf("== %v tests generated from %v ==\n", len(tests), inputPath)
-	for testIdx := range tests {
-		fmt.Printf("== Performing test %v / %v ==\n", testIdx+1, len(tests))
-		tests[testIdx].Perform()
+	workToDo := make(chan nrt.ContentTest, 1)
+	var wg sync.WaitGroup
+	for idx := 0; idx < 1; idx++ {
+		fmt.Println("nrt: Starting worker", idx)
+		wg.Add(1)
+		go threadWorker(&wg, &workToDo, len(tests))
 	}
+	for testIdx := range tests {
+		tests[testIdx].Index = testIdx
+		workToDo <- tests[testIdx]
+	}
+	wg.Wait()
 }
