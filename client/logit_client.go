@@ -34,7 +34,7 @@ func pause() {
 }
 
 func BoolPointer(b bool) *bool {
-    return &b
+	return &b
 }
 
 func writeText(path string, text string) {
@@ -124,7 +124,7 @@ func start() {
 		fulltext = ctx.Memory + "\n" + ctx.Context
 		if len(ctx.AuthorsNote) > 0 {
 			splittext := strings.Split(fulltext, "\n")
-			insertPos := len(splittext)-2
+			insertPos := len(splittext) - 2
 			if insertPos < 0 {
 				insertPos = 0
 			}
@@ -160,12 +160,12 @@ func start() {
 		}
 
 		if *ctx.Parameters.NextWord == true {
-		fmt.Println(colorWhite + "\nANTICIPATED TOKENS...")
-			
+			fmt.Println(colorWhite + "\nANTICIPATED TOKENS...")
+
 			for i := 0; i < resp.NextWordReturned; i++ {
-				fmt.Println(colorWhite+(resp.NextWordArray)[i][0] + colorGrey + " (" + (resp.NextWordArray)[i][1]+")")
+				fmt.Println(colorWhite + (resp.NextWordArray)[i][0] + colorGrey + " (" + (resp.NextWordArray)[i][1] + ")")
 			}
-			
+
 			fmt.Println(colorWhite + "\nPRESS ENTER TO CONTINUE...\n")
 			pause()
 		}

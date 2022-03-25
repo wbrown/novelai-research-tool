@@ -219,14 +219,14 @@ type NaiGenerateParams struct {
 	TopK                       *uint               `json:"top_k,omitempty"`
 	TopP                       *float64            `json:"top_p,omitempty"`
 	TopA                       *float64            `json:"top_a,omitempty"`
-	TypicalP                   *float64            `json:"typical_p,omitempty"`	
+	TypicalP                   *float64            `json:"typical_p,omitempty"`
 	TailFreeSampling           *float64            `json:"tail_free_sampling,omitempty"`
 	RepetitionPenalty          *float64            `json:"repetition_penalty,omitempty"`
 	RepetitionPenaltyRange     *uint               `json:"repetition_penalty_range,omitempty"`
 	RepetitionPenaltySlope     *float64            `json:"repetition_penalty_slope,omitempty"`
 	RepetitionPenaltyFrequency *float64            `json:"repetition_penalty_frequency,omitempty"`
 	RepetitionPenaltyPresence  *float64            `json:"repetition_penalty_presence,omitempty"`
-	RepWhitelistIds            *[]uint16         `json:"repetition_penalty_whitelist,omitempty"`
+	RepWhitelistIds            *[]uint16           `json:"repetition_penalty_whitelist,omitempty"`
 	BadWordsIds                *[][]uint16         `json:"bad_words_ids,omitempty"`
 	LogitBiasIds               *[][]float32        `json:"logit_bias,omitempty"`
 	LogitBiasGroups            *structs.BiasGroups `json:"logit_bias_groups,omitempty"`
@@ -243,14 +243,14 @@ type NaiGenerateParams struct {
 }
 
 type NaiGenerateResp struct {
-	Request         string          `json:"request"`
-	Response        string          `json:"response"`
-	EncodedRequest  string          `json:"encoded_request"`
-	EncodedResponse string          `json:"encoded_response"`
-	Logprobs        *[]LogprobEntry `json:"logprobs_response"`
-	NextWordArray	[256][2]string
-	NextWordReturned	int
-	Error           error           `json:"error"`
+	Request          string          `json:"request"`
+	Response         string          `json:"response"`
+	EncodedRequest   string          `json:"encoded_request"`
+	EncodedResponse  string          `json:"encoded_response"`
+	Logprobs         *[]LogprobEntry `json:"logprobs_response"`
+	NextWordArray    [256][2]string
+	NextWordReturned int
+	Error            error `json:"error"`
 }
 
 func BannedBrackets() [][]uint16 {
@@ -366,8 +366,9 @@ func NewGenerateParams() NaiGenerateParams {
 		TrimSpaces:                 &trimSpaces,
 		NumLogprobs:                &numLogprobs,
 	}
-	
+
 }
+
 type NaiGenerateMsg struct {
 	Input      string            `json:"input"`
 	Model      string            `json:"model"`
@@ -430,7 +431,7 @@ func (params *NaiGenerateParams) ResolveRepetitionParams() {
 
 func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (
 	respDecoded NaiGenerateHTTPResp) {
-	
+
 	params.Model = *params.Parameters.Model
 	if *params.Parameters.BanBrackets {
 		newBadWords := append(BannedBrackets(),
@@ -446,10 +447,10 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (
 	if params.Parameters.LogitBiasIds != nil && len(*params.Parameters.LogitBiasIds) == 0 {
 		params.Parameters.LogitBiasIds = nil
 	}
-  if params.Parameters.RepWhitelistIds != nil && len(*params.Parameters.RepWhitelistIds) == 0 {
-	  params.Parameters.RepWhitelistIds  = nil
-  }
-	
+	if params.Parameters.RepWhitelistIds != nil && len(*params.Parameters.RepWhitelistIds) == 0 {
+		params.Parameters.RepWhitelistIds = nil
+	}
+
 	cl := http.DefaultClient
 	encoded, _ := json.Marshal(params)
 	req := generateGenRequest(encoded, keys.AccessToken, backend)
@@ -495,7 +496,7 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (
 		if len(respDecoded.Error) > 0 {
 			log.Printf((fmt.Sprintf("API: Server error [%d]: %s",
 				respDecoded.StatusCode, respDecoded.Error)))
-				fmt.Scanln()
+			fmt.Scanln()
 		}
 
 	} else {
@@ -510,7 +511,7 @@ func NewNovelAiAPI() NovelAiAPI {
 		backend: auth.Backend,
 		keys:    auth,
 		client:  http.DefaultClient,
-		encoder: gpt_bpe.NewEncoder(),
+		encoder: gpt_bpe.NewGPT2Encoder(),
 	}
 }
 
@@ -553,9 +554,9 @@ func (api NovelAiAPI) GenerateWithParams(content *string,
 
 		//decode next_word array
 		next_array_decode := map[string]interface{}{}
-		
+
 		err = json.Unmarshal([]byte(apiResp.Output), &next_array_decode)
-		if err != nil{
+		if err != nil {
 			fmt.Println(err)
 		}
 		get_keys := next_array_decode["output"]
@@ -566,14 +567,14 @@ func (api NovelAiAPI) GenerateWithParams(content *string,
 			next_ := reflect.ValueOf(get_entry)
 			next_value_token := next_.Index(0).Interface()
 			next_value_weight := next_.Index(1).Interface()
-			
+
 			//add to array
-			(resp.NextWordArray)[i][0] = fmt.Sprintf("%v",next_value_token)
-			(resp.NextWordArray)[i][1] = fmt.Sprintf("%v",next_value_weight)
-			
-			resp.NextWordReturned ++
+			(resp.NextWordArray)[i][0] = fmt.Sprintf("%v", next_value_token)
+			(resp.NextWordArray)[i][1] = fmt.Sprintf("%v", next_value_weight)
+
+			resp.NextWordReturned++
 		}
-		
+
 	}
 
 	return resp

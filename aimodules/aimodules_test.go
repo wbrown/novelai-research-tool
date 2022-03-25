@@ -7,5 +7,3 @@ const modulePath = "/Users/wbrown/go/src/github.com/wbrown/novelai-research-tool
 func TestAIModuleFromFile(t *testing.T) {
 	AIModuleFromFile(modulePath)
 }
-
-

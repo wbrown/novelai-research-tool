@@ -721,7 +721,7 @@ func ScenarioFromSpec(prompt string, memory string, an string) (scenario Scenari
 func ScenarioFromFile(tokenizer *gpt_bpe.GPTEncoder, path string) (scenario Scenario,
 	err error) {
 	if tokenizer == nil {
-		encoder := gpt_bpe.NewEncoder()
+		encoder := gpt_bpe.NewGPT2Encoder()
 		tokenizer = &encoder
 	}
 	scenarioBytes, err := ioutil.ReadFile(path)
