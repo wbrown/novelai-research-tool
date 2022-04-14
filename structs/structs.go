@@ -41,7 +41,7 @@ func (biasGroups *BiasGroups) RealizeBiases() {
 					Type:      BiasLitString,
 				}
 				phraseString := (*biasGroup.YamlPhrases)[phraseIdx]
-				tokens := gpt_bpe.Encoder.Encode(&phraseString)
+				tokens := gpt_bpe.GPT2Encoder.Encode(&phraseString)
 				jsonifiedPhrase.Sequences = append(jsonifiedPhrase.Sequences,
 					*tokens)
 				*(*biasGroups)[biasIdx].Phrases = append(

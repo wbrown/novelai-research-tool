@@ -19,6 +19,14 @@ import (
 	"github.com/wbrown/novelai-research-tool/structs"
 )
 
+func GetEncoderByModel(id string) *gpt_bpe.GPTEncoder {
+	if strings.HasPrefix(id, "krake") {
+		return &gpt_bpe.PileEncoder
+	} else {
+		return &gpt_bpe.GPT2Encoder
+	}
+}
+
 //
 // Logprob structures
 //
@@ -192,7 +200,6 @@ type NovelAiAPI struct {
 	backend string
 	keys    NaiKeys
 	client  *http.Client
-	encoder gpt_bpe.GPTEncoder
 }
 
 type NaiGenerateHTTPResp struct {
@@ -296,6 +303,9 @@ func EndOfTextTokens() [][]uint16 {
 func (params *NaiGenerateParams) CoerceNullValues(other *NaiGenerateParams) {
 	if other == nil {
 		return
+	}
+	if params == nil {
+		*params = NaiGenerateParams{}
 	}
 	fields := reflect.TypeOf(*params)
 	for field := 0; field < fields.NumField(); field++ {
@@ -511,7 +521,6 @@ func NewNovelAiAPI() NovelAiAPI {
 		backend: auth.Backend,
 		keys:    auth,
 		client:  http.DefaultClient,
-		encoder: gpt_bpe.NewGPT2Encoder(),
 	}
 }
 
@@ -520,8 +529,9 @@ func (api NovelAiAPI) GenerateWithParams(content *string,
 	if params.TrimSpaces == nil || *params.TrimSpaces == true {
 		*content = strings.TrimRight(*content, " \t")
 	}
+	encoder := GetEncoderByModel(*params.Model)
 	var val NextArray
-	encoded := api.encoder.Encode(content)
+	encoded := encoder.Encode(content)
 	encodedBytes := encoded.ToBin()
 	encodedBytes64 := base64.StdEncoding.EncodeToString(*encodedBytes)
 	resp.Request = *content
@@ -540,7 +550,7 @@ func (api NovelAiAPI) GenerateWithParams(content *string,
 			} */
 			resp.Logprobs = apiResp.Logprobs
 			resp.EncodedResponse = apiResp.Output
-			resp.Response = api.encoder.Decode(tokens)
+			resp.Response = encoder.Decode(tokens)
 		}
 	}
 
@@ -553,24 +563,24 @@ func (api NovelAiAPI) GenerateWithParams(content *string,
 		}
 
 		//decode next_word array
-		next_array_decode := map[string]interface{}{}
+		nextArrayDecode := map[string]interface{}{}
 
-		err = json.Unmarshal([]byte(apiResp.Output), &next_array_decode)
+		err = json.Unmarshal([]byte(apiResp.Output), &nextArrayDecode)
 		if err != nil {
 			fmt.Println(err)
 		}
-		get_keys := next_array_decode["output"]
+		get_keys := nextArrayDecode["output"]
 		get_array := reflect.ValueOf(get_keys)
 		//filter them into the NextWordArray
 		for i := 0; i < get_array.Len(); i++ {
-			get_entry := get_array.Index(i).Interface()
-			next_ := reflect.ValueOf(get_entry)
-			next_value_token := next_.Index(0).Interface()
-			next_value_weight := next_.Index(1).Interface()
+			getEntry := get_array.Index(i).Interface()
+			next_ := reflect.ValueOf(getEntry)
+			nextValueToken := next_.Index(0).Interface()
+			nextValueWeight := next_.Index(1).Interface()
 
 			//add to array
-			(resp.NextWordArray)[i][0] = fmt.Sprintf("%v", next_value_token)
-			(resp.NextWordArray)[i][1] = fmt.Sprintf("%v", next_value_weight)
+			(resp.NextWordArray)[i][0] = fmt.Sprintf("%v", nextValueToken)
+			(resp.NextWordArray)[i][1] = fmt.Sprintf("%v", nextValueWeight)
 
 			resp.NextWordReturned++
 		}
