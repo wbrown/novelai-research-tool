@@ -14,7 +14,7 @@ require (
 	github.com/jdkato/prose/v2 v2.0.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mattn/go-colorable v0.1.12 // indirect
-	github.com/wbrown/gpt_bpe v0.0.0-20220209183333-91bb5abc3fed
+	github.com/wbrown/gpt_bpe v0.0.0-20220413190958-ee0155ca48f5
 	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064
 	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
 	gonum.org/v1/gonum v0.11.0 // indirect

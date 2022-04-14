@@ -388,6 +388,8 @@ func resolvePermutation(origPermutation ContentTest,
 		case "Model":
 			modelVal := value.String()
 			permutation.Parameters.Model = &modelVal
+			permutation.Scenario.Encoder = novelai_api.GetEncoderByModel(
+				modelVal)
 		default:
 			if value.Type() == stringType {
 				value.SetString(sanitizeString(value.String()))
@@ -575,7 +577,7 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 			os.Exit(1)
 		}
 		fmt.Printf("ScenarioPath: %v\n", test.ScenarioPath)
-		if scenario, err := scenario.ScenarioFromFile(nil, test.ScenarioPath); err != nil {
+		if scenario, err := scenario.ScenarioFromFile(test.ScenarioPath); err != nil {
 			log.Printf("nrt: Error loading scenario: %v\n", err)
 			os.Exit(1)
 		} else {
@@ -610,8 +612,12 @@ func LoadSpecFromFile(path string) (test ContentTest) {
 		test.loadPrompt(test.PromptPath)
 	}
 	if test.ScenarioFilename == "" {
+		model := "euterpe-v2"
+		if test.Parameters.Model != nil {
+			model = *test.Parameters.Model
+		}
 		scenarioSpec := scenario.ScenarioFromSpec(test.Prompt, test.Memory,
-			test.AuthorsNote)
+			test.AuthorsNote, model)
 		test.Scenario = &scenarioSpec
 		test.Scenario.Settings.Parameters = &novelai_api.NaiGenerateParams{}
 		test.Scenario.Settings.Parameters.CoerceNullValues(&test.Parameters)
@@ -629,7 +635,7 @@ func MakeTestFromScenario(path string) (test ContentTest) {
 		os.Exit(1)
 	}
 	fmt.Printf("ScenarioPath: %v\n", test.ScenarioPath)
-	if sc, err := scenario.ScenarioFromFile(nil, test.ScenarioPath); err != nil {
+	if sc, err := scenario.ScenarioFromFile(test.ScenarioPath); err != nil {
 		log.Printf("nrt: Error loading scenario: %v\n", err)
 		os.Exit(1)
 	} else {
