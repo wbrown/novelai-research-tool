@@ -253,31 +253,6 @@ type NaiGenerateResp struct {
 	Error            error `json:"error"`
 }
 
-func BannedBrackets() [][]uint16 {
-	return [][]uint16{{58}, {60}, {90}, {92}, {685}, {1391}, {1782},
-		{2361}, {3693}, {4083}, {4357}, {4895}, {5512}, {5974}, {7131},
-		{8183}, {8351}, {8762}, {8964}, {8973}, {9063}, {11208}, {11709},
-		{11907}, {11919}, {12878}, {12962}, {13018}, {13412}, {14631},
-		{14692}, {14980}, {15090}, {15437}, {16151}, {16410}, {16589},
-		{17241}, {17414}, {17635}, {17816}, {17912}, {18083}, {18161},
-		{18477}, {19629}, {19779}, {19953}, {20520}, {20598}, {20662},
-		{20740}, {21476}, {21737}, {22133}, {22241}, {22345}, {22935},
-		{23330}, {23785}, {23834}, {23884}, {25295}, {25597}, {25719},
-		{25787}, {25915}, {26076}, {26358}, {26398}, {26894}, {26933},
-		{27007}, {27422}, {28013}, {29164}, {29225}, {29342}, {29565},
-		{29795}, {30072}, {30109}, {30138}, {30866}, {31161}, {31478},
-		{32092}, {32239}, {32509}, {33116}, {33250}, {33761}, {34171},
-		{34758}, {34949}, {35944}, {36338}, {36463}, {36563}, {36786},
-		{36796}, {36937}, {37250}, {37913}, {37981}, {38165}, {38362},
-		{38381}, {38430}, {38892}, {39850}, {39893}, {41832}, {41888},
-		{42535}, {42669}, {42785}, {42924}, {43839}, {44438}, {44587},
-		{44926}, {45144}, {45297}, {46110}, {46570}, {46581}, {46956},
-		{47175}, {47182}, {47527}, {47715}, {48600}, {48683}, {48688},
-		{48874}, {48999}, {49074}, {49082}, {49146}, {49946}, {10221},
-		{4841}, {1427}, {2602, 834}, {29343}, {37405}, {35780}, {2602},
-		{17202}, {8162}}
-}
-
 func LogitBias() [][]float32 {
 	return [][]float32{{0, 0.0}}
 }
@@ -366,7 +341,6 @@ func NewGenerateParams() NaiGenerateParams {
 		TrimSpaces:                 &trimSpaces,
 		NumLogprobs:                &numLogprobs,
 	}
-
 }
 
 type NaiGenerateMsg struct {
@@ -384,8 +358,8 @@ func NewGenerateMsg(input string) NaiGenerateMsg {
 	}
 }
 
-func generateGenRequest(encoded []byte, accessToken string, backendURI string) *http.Request {
-
+func generateGenRequest(encoded []byte, accessToken string,
+	backendURI string) *http.Request {
 	req, _ := http.NewRequest("POST", backendURI+"/ai/generate",
 		bytes.NewBuffer(encoded))
 	req.Header.Set("User-Agent",
@@ -429,12 +403,12 @@ func (params *NaiGenerateParams) ResolveRepetitionParams() {
 	}
 }
 
-func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (
+func (api *NovelAiAPI) naiApiGenerate(params *NaiGenerateMsg) (
 	respDecoded NaiGenerateHTTPResp) {
 
 	params.Model = *params.Parameters.Model
 	if *params.Parameters.BanBrackets {
-		newBadWords := append(BannedBrackets(),
+		newBadWords := append(BannedBrackets(params.Model),
 			*params.Parameters.BadWordsIds...)
 		params.Parameters.BadWordsIds = &newBadWords
 	}
@@ -453,7 +427,7 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (
 
 	cl := http.DefaultClient
 	encoded, _ := json.Marshal(params)
-	req := generateGenRequest(encoded, keys.AccessToken, backend)
+	req := generateGenRequest(encoded, api.keys.AccessToken, api.backend)
 	// Retry up to 10 times.
 	var resp *http.Response
 	doGenerate := func() (err error) {
@@ -489,7 +463,8 @@ func naiApiGenerate(keys *NaiKeys, params NaiGenerateMsg, backend string) (
 	if params.Parameters.NextWord == nil || *params.Parameters.NextWord == false {
 		err = json.Unmarshal(body, &respDecoded)
 		if err != nil {
-			log.Printf("API: Error unmarshaling JSON response: %s %s", err, string(body))
+			log.Printf("API: Error unmarshaling JSON response: %s %s",
+				err, string(body))
 			fmt.Scanln()
 			os.Exit(1)
 		}
@@ -515,7 +490,7 @@ func NewNovelAiAPI() NovelAiAPI {
 	}
 }
 
-func (api NovelAiAPI) GenerateWithParams(content *string,
+func (api *NovelAiAPI) GenerateWithParams(content *string,
 	params NaiGenerateParams) (resp NaiGenerateResp) {
 	if params.TrimSpaces == nil || *params.TrimSpaces == true {
 		*content = strings.TrimRight(*content, " \t")
@@ -528,7 +503,7 @@ func (api NovelAiAPI) GenerateWithParams(content *string,
 	resp.EncodedRequest = encodedBytes64
 	msg := NewGenerateMsg(encodedBytes64)
 	msg.Parameters = params
-	apiResp := naiApiGenerate(&api.keys, msg, api.backend)
+	apiResp := api.naiApiGenerate(&msg)
 	if params.NextWord == nil || *params.NextWord == false {
 		if binTokens, err := base64.StdEncoding.DecodeString(apiResp.Output); err != nil {
 			log.Println("ERROR:", err)
@@ -547,7 +522,8 @@ func (api NovelAiAPI) GenerateWithParams(content *string,
 	if params.NextWord != nil && *params.NextWord == true {
 		err := json.Unmarshal([]byte(apiResp.Output), &val)
 		if err != nil {
-			log.Printf("API: Error unmarshaling JSON NextWord response: %s %s", err, apiResp.Output)
+			log.Printf("API: Error unmarshaling JSON NextWord response: %s %s",
+				err, apiResp.Output)
 			fmt.Scanln()
 			os.Exit(1)
 		}
@@ -574,13 +550,11 @@ func (api NovelAiAPI) GenerateWithParams(content *string,
 
 			resp.NextWordReturned++
 		}
-
 	}
-
 	return resp
 }
 
-func (api NovelAiAPI) Generate(content string) (decoded string) {
+func (api *NovelAiAPI) Generate(content string) (decoded string) {
 	defaultParams := NewGenerateParams()
 	return api.GenerateWithParams(&content, defaultParams).Response
 }

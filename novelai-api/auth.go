@@ -133,6 +133,8 @@ func AuthEnv() NaiKeys {
 	}
 	if len(authCfg.BackendURI) == 0 {
 		authCfg.BackendURI = "https://api.novelai.net"
+	} else {
+		authCfg.BackendURI = strings.TrimSuffix(authCfg.BackendURI, "/")
 	}
 	auth := Auth(authCfg.Username, authCfg.Password, authCfg.BackendURI)
 	auth.Backend = authCfg.BackendURI
