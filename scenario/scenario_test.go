@@ -2,7 +2,6 @@ package scenario
 
 import (
 	"encoding/json"
-	"github.com/wbrown/gpt_bpe"
 	"io/ioutil"
 	"log"
 	"os"
@@ -10,8 +9,6 @@ import (
 	"strings"
 	"testing"
 )
-
-var encoder gpt_bpe.GPTEncoder
 
 const scenarioPath = "../tests/a_laboratory_assistant.scenario"
 const frankensteinPath = "../tests/frankenstein.scenario"
@@ -41,12 +38,12 @@ func readJson(path string) (m jsonMap) {
 }
 
 func TestScenarioFromFile(t *testing.T) {
-	if _, err := ScenarioFromFile(&encoder, "nonexistent.scenario"); err == nil {
+	if _, err := ScenarioFromFile("nonexistent.scenario"); err == nil {
 		t.Errorf("Failed to handle nonexistent scenario files.")
 	}
 	var sc Scenario
 	var err error
-	if sc, err = ScenarioFromFile(&encoder, scenarioPath); err != nil {
+	if sc, err = ScenarioFromFile(scenarioPath); err != nil {
 		t.Errorf("Failed to load scenario file: %v", err)
 	}
 	jm := readJson(scenarioPath)
@@ -63,11 +60,12 @@ func TestScenarioFromFile(t *testing.T) {
 func TestScenario_ResolveLorebook(t *testing.T) {
 	var sc Scenario
 	var err error
-	if sc, err = ScenarioFromFile(&encoder, scenarioPath); err != nil {
+	if sc, err = ScenarioFromFile(scenarioPath); err != nil {
 		t.Errorf("Failed to load scenario file: %v", err)
 	}
 	storyContext := sc.createStoryContext(sc.Prompt)
-	lbEntries := sc.ResolveLorebook(ContextEntries{storyContext})
+	lbEntries := sc.Lorebook.ResolveContexts(&sc.PlaceholderMap,
+		&ContextEntries{storyContext})
 	for lbIdx := range lbEntries {
 		lbEntry := lbEntries[lbIdx]
 		for matchIdx := range lbEntry.MatchIndexes {
@@ -155,7 +153,7 @@ func TestScenario_DiscoverPlaceholders(t *testing.T) {
 func TestScenario_RealizePlaceholderDefs(t *testing.T) {
 	for testIdx := range placeholderTests {
 		test := placeholderTests[testIdx]
-		sc := ScenarioFromSpec(test.input, "", "")
+		sc := ScenarioFromSpec(test.input, "", "", "euterpe-v2")
 		sc.Settings.Parameters.CoerceDefaults()
 		ctx, _ := sc.GenerateContext(sc.Prompt, 1024)
 		AssertEqual(t, ctx, test.expected)
@@ -182,7 +180,7 @@ func TestScenario_GenerateContext(t *testing.T) {
 
 	for testIdx := range generateContextTests {
 		test := generateContextTests[testIdx]
-		if sc, err = ScenarioFromFile(&encoder, test.scenarioPath); err != nil {
+		if sc, err = ScenarioFromFile(test.scenarioPath); err != nil {
 			t.Errorf("Failed to load scenario file: %v", err)
 		} else {
 			_, report := sc.GenerateContext(sc.Prompt, test.budget)
@@ -196,6 +194,5 @@ func TestScenario_GenerateContext(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-	encoder = gpt_bpe.NewEncoder()
 	m.Run()
 }
