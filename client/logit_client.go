@@ -37,6 +37,8 @@ func BoolPointer(b bool) *bool {
 	return &b
 }
 
+
+
 func writeText(path string, text string) {
 	if f, err := os.Create(path); err != nil {
 		println("\n\n\n\nError saving file.")

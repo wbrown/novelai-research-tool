@@ -1,5 +1,5 @@
 {
-  "model": "6B-v4",
+  "model": "euterpe-v2",
   "memory": "[ I am standing on a castle.]\n[ I am alone in a guard post.]\n[ I am overlooking a lake.]",
   "prefix": "general_crossgenre",
   "authorsnote": "[ A/N: Descriptive: ]",
@@ -13,7 +13,7 @@
   "tail_free_sampling": 0.8,
   "repetition_penalty": 3.2,
   "repetition_penalty_range": 1024,
-  "repetition_penalty_frequency": 1,
+  "repetition_penalty_frequency": 0.05,
   "repetition_penalty_slope": 3.57,
   "bad_words_ids": [],
   "logit_bias":[[17522,1.000],[33727,1.000],[500,0.700],[33727,1.000],[27464,1.000],[629,1.000],[3400,0.700],[16252,1.000],[28761,1.000],[576,0.700],[28761,1.000],[35824,0.700],[42406,1.000],[3236,1.000],[6175,1.000],[1263,1.000],[4858,1.000],[2162,0.000],[837,0.000],[532,0.000],[764,-0.000],[9230,-3.000],[9230,-3.000],[445,-2.100],[40857,-3.000],[0,0]],
