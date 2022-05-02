@@ -5,15 +5,21 @@ on:
     branches: ['main']
 
 jobs:
-  release-windows-amd64:
+  releases-matrix:
     name: release windows/amd64
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [windows, darwin]
+        goarch: [amd64, arm64]
+
     steps:
     - uses: actions/checkout@v3
     - uses: wangyoucao577/go-release-action@v1.28
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        goos: windows
-        goarch: amd64
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }} 
         project_path: "./nrt-cli"
         binary_name: "nrt"
+        extra_files: LICENSE README.md
