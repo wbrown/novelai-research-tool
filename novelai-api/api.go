@@ -393,7 +393,8 @@ func (params *NaiGenerateParams) ResolveSamplingParams() {
 func (params NaiGenerateParams) GetScaledRepPen() float64 {
 	const oldRange = 1 - 8.0
 	const newRange = 1 - 1.525
-	if *params.Model != "2.7B" {
+	if strings.HasPrefix(*params.Model, "6B") ||
+		strings.HasPrefix(*params.Model, "euterpe") {
 		scaledRepPen := ((*params.RepetitionPenalty-1)*newRange)/oldRange + 1
 		return scaledRepPen
 	}
