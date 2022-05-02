@@ -15,4 +15,4 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: windows
         goarch: amd64
-        project_path: "./nrt-cli/nrt.go"
+        project_path: "./nrt-cli"
