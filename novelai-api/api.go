@@ -228,6 +228,7 @@ type NaiGenerateParams struct {
 	LogitAuthors               *string             `json:"authorsnote,omitempty"`
 	Temperature                *float64            `json:"temperature,omitempty"`
 	MaxLength                  *uint               `json:"max_length,omitempty"`
+	ContextLength              *uint               `json:"context_length,omitempty"`
 	MinLength                  *uint               `json:"min_length,omitempty"`
 	TopK                       *uint               `json:"top_k,omitempty"`
 	TopP                       *float64            `json:"top_p,omitempty"`
@@ -309,6 +310,7 @@ func NewGenerateParams() NaiGenerateParams {
 	prefix := "vanilla"
 	temperature := 0.72
 	maxLength := uint(40)
+	contextLength := uint(2048)
 	minLength := uint(1)
 	topK := uint(0)
 	topP := 0.725
@@ -335,6 +337,7 @@ func NewGenerateParams() NaiGenerateParams {
 		Prefix:                     &prefix,
 		Temperature:                &temperature,
 		MaxLength:                  &maxLength,
+		ContextLength:              &contextLength,
 		MinLength:                  &minLength,
 		TopA:                       &topA,
 		TopK:                       &topK,

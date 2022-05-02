@@ -34,9 +34,9 @@ func NewSimpleContext() (context SimpleContext) {
 	context.LastContext = string(contextBytes)
 	context.Parameters = parameters
 	context.API = novelai_api.NewNovelAiAPI()
-	context.Encoder = gpt_bpe.NewEncoder()
+	context.Encoder = *novelai_api.GetEncoderByModel(*parameters.Model)
 	context.FullReturn = *parameters.ReturnFullText
-	context.MaxTokens = 2048 - *parameters.MaxLength
+	context.MaxTokens = *parameters.ContextLength - *parameters.MaxLength
 	context.Memory = *parameters.LogitMemory
 	context.AuthorsNote = *parameters.LogitAuthors
 	if *context.Parameters.Prefix != "vanilla" {
