@@ -22,4 +22,6 @@ jobs:
         goarch: ${{ matrix.goarch }} 
         project_path: "./nrt-cli"
         binary_name: "nrt"
+        release_tag: "latest"
+        overwrite: TRUE
         extra_files: LICENSE README.md
