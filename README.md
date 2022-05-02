@@ -7,6 +7,15 @@ A `golang` based client with:
   - `/ai/generate` - to submit context and receive responses back from the AI
 * Iterative testing based on JSON configuration files.  
 
+Downloading
+-----------
+It is recommended that if you are a normal MacOS or Windows user that you download the latest release from https://github.com/wbrown/novelai-research-tool/releases.
+
+* If you are a MacOS user on an Intel machine, you will want the `darwin-amd64`, otherwise if you are on an Apple Silicon machine, you will want `darwin-arm64`.
+* The vast majority of Windows users will want the `windows-amd64` build.
+
+I have left Linux builds as an exercise for the user, as it is generally very easy to build on Linux.
+
 Building
 --------
 You will need the `golang` language tools on your machine.
@@ -164,7 +173,7 @@ You may find the current list of variables that may be permuted upon
 
 For example, a permutation spec that permutes on model `model` might look like:
 ```json
-{ "permutations": { "model": [ "2.7B", "6B-v3" ] } }
+{ "permutations": { "model": [ "2.7B", "6B-v4" ] } }
 ```
 This will cause the `nrt` tool to perform iterations across both models.
 
@@ -174,7 +183,7 @@ generate `62` combinations and tests to perform:
 ```json
 { "permutations": [ {
     "prompt_path": [ "need_help.txt", "need_help_an_memory.txt" ],
-    "model": [ "2.7B", "6B-v3" ],
+    "model": [ "2.7B", "6B-v4" ],
     "prefix": [ "vanilla", "style_arthurconandoyle", "style_edgarallanpoe",
       "style_hplovecraft", "style_shridanlefanu", "style_julesverne",
       "theme_19thcenturyromance", "theme_actionarcheology",
@@ -191,7 +200,7 @@ generate `62` combinations and tests to perform:
 
 The above permutation set will test all the combinations of:
 * prompts with and without author's note and memory.
-* models `2.7B`, `6B-v3`
+* models `2.7B`, `6B-v4`
 * all the current AI modules.
 
 Another example is if we wanted to permute on the `temperature` value:
@@ -243,43 +252,60 @@ Configuration Notes
 As of the writing of this section:
 
 The `prefix` takes the following values and requires the `model` attribute to
-have the `6B-v3` value:
+have the `6B-v4` or `euterpe-v2` value:
 * `vanilla`
-* `style_arthurconandoyle`
-* `style_edgarallanpoe`
-* `style_hplovecraft`
-* `style_shridanlefanu`
-* `style_julesverne`
-* `theme_19thcenturyromance`
-* `theme_actionarcheology`
-* `theme_airships`
-* `theme_ai`
-* `theme_darkfantasy`
-* `theme_dragons`
-* `theme_egypt`
-* `theme_generalfantasy`
-* `theme_huntergatherer`
-* `theme_magicacademy`
-* `theme_libraries`
-* `theme_mars`
-* `theme_medieval`
-* `theme_militaryscifi`
-* `theme_naval`
-* `theme_pirates`
-* `theme_postapocalyptic`
-* `theme_rats`
-* `theme_romanceofthreekingdoms`
-* `theme_superheroes`
+* `general_crossgenre`
 * `inspiration_crabsnailandmonkey`
 * `inspiration_mercantilewolfgirlromance`
 * `inspiration_nervegear`
 * `inspiration_thronewars`
 * `inspiration_witchatlevelcap`
+* `style_algernonblackwood`
+* `style_arthurconandoyle`
+* `style_edgarallanpoe`
+* `style_hplovecraft`
+* `style_julesverne`
+* `style_shridanlefanu`
+* `theme_19thcenturyromance`
+* `theme_actionarcheology`
+* `theme_ai`
+* `theme_airships`
+* `theme_childrens`
+* `theme_christmas`
+* `theme_darkfantasy`
+* `theme_dragons`
+* `theme_egypt`
+* `theme_generalfantasy`
+* `theme_history`
+* `theme_horror`
+* `theme_huntergatherer`
+* `theme_litrpg`
+* `theme_magicacademy`
+* `theme_magiclibrary`
+* `theme_mars`
+* `theme_medieval`
+* `theme_militaryscifi`
+* `theme_naval`
+* `theme_philosophy`
+* `theme_pirates`
+* `theme_poeticfantasy`
+* `theme_postapocalyptic`
+* `theme_rats`
+* `theme_romanceofthreekingdoms`
+* `theme_romanempire`
+* `theme_spaceopera`
+* `theme_superheroes`
+* `theme_textadventure`
+* `theme_valentines`
+* `theme_vikings`
+* `theme_westernromance`
+* `utility_lorebookgenerator`
 
-The `model` parameter takes the following values, but `6B` is not available as of this commit:
+The `model` parameter takes the following values:
 * `2.7B`
-* `6B`
-* `6B-v3`
+* `6B-v4`
+* `euterpe-v2`
+* `krake-v2`
 
 Client
 -----
@@ -333,8 +359,6 @@ Run it by invoking `./adventure` or `adventure.exe`, and you will be brought to 
 You are in a maze of twisty passages, all alike. There are exits to the north, east, south, and west.
 > 
 ```
-
-
 
 Enjoy!
 
