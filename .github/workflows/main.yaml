@@ -6,7 +6,7 @@ on:
 
 jobs:
   releases-matrix:
-    name: release windows/amd64
+    name: release binaries
     runs-on: ubuntu-latest
     strategy:
       matrix:
