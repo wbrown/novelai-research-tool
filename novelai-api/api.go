@@ -85,9 +85,11 @@ type LogitProcessorID uint16
 
 const (
 	Temperature LogitProcessorID = iota
-	Top_K
-	Top_P
+	TopK
+	TopP
 	TFS
+	TopA
+	TypicalP
 )
 
 type LogitProcessorIDs []LogitProcessorID
@@ -97,21 +99,25 @@ type LogitProcessorReprs []LogitProcessorRepr
 
 var LogitProcessorIdMap = LogitProcessorReprMap{
 	Temperature: "Temperature",
-	Top_K:       "Top_K",
-	Top_P:       "Top_P",
+	TopK:        "Top_K",
+	TopP:        "Top_P",
 	TFS:         "TFS",
+	TopA:        "Top_A",
+	TypicalP:    "Typical_P",
 }
 
 func (lpids *LogitProcessorIDs) check() error {
-	if len(*lpids) != len(LogitProcessorIdMap) {
-		return errors.New("Must have four logit IDs in `order`!")
+	if len(*lpids) > len(LogitProcessorIdMap) {
+		return errors.New(fmt.Sprintf(
+			"cannot have more than %d logit IDs in `order`",
+			len(LogitProcessorIdMap)))
 	}
 	seen := make(LogitProcessorIDs, 0)
 	for idIdx := range *lpids {
 		for seenIdx := range seen {
 			if seen[seenIdx] == (*lpids)[idIdx] {
 				return errors.New(
-					"Duplicate entry found in logit `order`!")
+					"duplicate entry found in logit `order`")
 			}
 		}
 		seen = append(seen, (*lpids)[idIdx])
