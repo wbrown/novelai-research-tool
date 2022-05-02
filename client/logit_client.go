@@ -37,6 +37,8 @@ func BoolPointer(b bool) *bool {
 	return &b
 }
 
+
+
 func writeText(path string, text string) {
 	if f, err := os.Create(path); err != nil {
 		println("\n\n\n\nError saving file.")
@@ -121,7 +123,27 @@ func start() {
 
 		line = strings.TrimSpace(line)
 		ctx.Context = ctx.Context + line
-		fulltext = ctx.Memory + "\n" + ctx.Context
+		fulltext_input := ctx.Context
+		fulltext_input = strings.TrimRight(fulltext_input, "\n")
+		fulltext_alwaysactive := ctx.AuthorsNote + ctx.Memory + "\n\n"
+		for {
+			tokens := ctx.Encoder.Encode(&fulltext_input)
+			tokens_split := *ctx.Encoder.Encode(&fulltext_input)
+			tokens_alwaysactive := ctx.Encoder.Encode(&fulltext_alwaysactive)
+			if uint(len(*tokens) + len(*tokens_alwaysactive)) > ctx.MaxTokens {
+				trim_length := ctx.MaxTokens - uint(len(*tokens_alwaysactive))
+				tokens_split = tokens_split[ctx.MaxTokens-trim_length:]
+				fulltext_input = ctx.Encoder.Decode(&tokens_split)
+				
+			} else {
+				break
+			}
+		}
+		
+
+		
+		fulltext = ctx.Memory + "\n" + fulltext_input
+		
 		if len(ctx.AuthorsNote) > 0 {
 			splittext := strings.Split(fulltext, "\n")
 			insertPos := len(splittext) - 2
@@ -134,15 +156,6 @@ func start() {
 		}
 		fulltext = strings.TrimRight(fulltext, "\n")
 		writeText("lastinput.txt", fulltext)
-		for {
-			tokens := ctx.Encoder.Encode(&fulltext)
-			if uint(len(*tokens)) > ctx.MaxTokens {
-				fulltext = strings.Join(
-					strings.Split(ctx.Context, "\n")[1:], "\n")
-			} else {
-				break
-			}
-		}
 		resp := ctx.API.GenerateWithParams(&fulltext, ctx.Parameters)
 		output = resp.Response
 
