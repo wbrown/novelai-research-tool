@@ -23,7 +23,7 @@ type Adventure struct {
 	Parameters novelai_api.NaiGenerateParams
 	Context    string
 	API        novelai_api.NovelAiAPI
-	Encoder    gpt_bpe.GPTEncoder
+	Encoder    *gpt_bpe.GPTEncoder
 	MaxTokens  uint
 }
 
@@ -37,7 +37,7 @@ func NewAdventure() (adventure Adventure) {
 	adventure.Context = string(contextBytes)
 	adventure.Parameters = parameters
 	adventure.API = novelai_api.NewNovelAiAPI()
-	adventure.Encoder = gpt_bpe.NewEncoder()
+	adventure.Encoder, _ = gpt_bpe.NewEncoder("gpt2")
 	adventure.MaxTokens = 1024 - *parameters.MaxLength
 	return adventure
 }
